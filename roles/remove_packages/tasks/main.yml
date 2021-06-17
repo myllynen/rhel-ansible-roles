@@ -1,0 +1,5 @@
+---
+- name: Remove unwanted packages
+  yum:
+    name: "{{ remove_packages }}"
+    state: absent

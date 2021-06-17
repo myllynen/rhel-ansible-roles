@@ -1,0 +1,39 @@
+---
+- name: Install SELinux packages
+  yum:
+    name: "{{ selinux_packages }}"
+    state: present
+  vars:
+    selinux_pkgs_rhel7:
+    - libselinux-python
+    - libsemanage-python
+    - policycoreutils-python
+    - selinux-policy-targeted
+    - setools-console
+    selinux_pkgs_rhel8:
+    - python3-libselinux
+    - python3-libsemanage
+    - policycoreutils-python-utils
+    - selinux-policy-targeted
+    - setools-console
+    selinux_packages: "{{ lookup('vars', 'selinux_pkgs_rhel' + ansible_facts.distribution_major_version) }}"
+
+- name: Set SELinux state
+  selinux:
+    policy: targeted
+    state: "{{ selinux }}"
+  register: selinux_config
+
+- name: Check current crypto policy
+  command: update-crypto-policies --show
+  register: current_crypto_policy
+  changed_when: false
+
+- name: Set crypto policy
+  command: update-crypto-policies --set {{ crypto_policy }}
+  register: crypto_policy_config
+  when: current_crypto_policy is not skipped and current_crypto_policy.stdout != crypto_policy
+
+- name: Reboot system
+  reboot:
+  when: selinux_config is changed or (current_crypto_policy is not skipped and crypto_policy_config is changed)

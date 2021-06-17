@@ -1,0 +1,5 @@
+---
+# Comma-separated list of ports (80/tcp,123/udp) or services (cockpit,https)
+firewall_open_ports: ""
+firewall_open_services: ""
+firewall_default_zone: public

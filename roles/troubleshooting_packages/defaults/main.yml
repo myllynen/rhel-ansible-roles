@@ -1,0 +1,13 @@
+---
+troubleshooting_packages:
+- iotop
+- lsof
+- mailx
+- pciutils
+- pcp-system-tools
+- perf
+- psmisc
+- sos
+- strace
+- tcpdump
+- telnet

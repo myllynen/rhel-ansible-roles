@@ -1,0 +1,12 @@
+---
+- name: Reset default motd message
+  copy:
+    content: ''
+    dest: /etc/motd
+    mode: '0644'
+
+- name: Copy motd file
+  template:
+    src: local.j2
+    dest: /etc/motd.d/local
+    mode: '0644'

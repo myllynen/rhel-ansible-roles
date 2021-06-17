@@ -1,0 +1,28 @@
+---
+- name: Set PermitRootLogin
+  replace:
+    dest: /etc/ssh/sshd_config
+    regexp: '^(|#)PermitRootLogin .*'
+    replace: 'PermitRootLogin prohibit-password'
+  register: login_config
+
+- name: Set ClientAliveInterval
+  replace:
+    dest: /etc/ssh/sshd_config
+    regexp: '^(|#)ClientAliveInterval .*'
+    replace: 'ClientAliveInterval 300'
+  register: alive_config
+
+- name: Set ClientAliveCountMax
+  replace:
+    dest: /etc/ssh/sshd_config
+    regexp: '^(|#)ClientAliveCountMax .*'
+    replace: 'ClientAliveCountMax 3'
+  register: count_config
+
+- name: Restart sshd service
+  service:
+    name: sshd
+    state: restarted
+    enabled: yes
+  when: login_config is changed or alive_config is changed or count_config is changed

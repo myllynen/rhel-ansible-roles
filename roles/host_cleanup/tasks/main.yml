@@ -1,0 +1,40 @@
+---
+- name: Locate installer leftover log files
+  find:
+    paths: /root
+    patterns: '*-ks.cfg,install.post*.log'
+  register: log_files
+
+- name: Locate installer leftover kickstart files
+  find:
+    paths: /tmp
+    patterns: 'ks-script-*'
+  register: kickstart_files
+
+- name: Create combined list of leftover files
+  set_fact:
+    leftover_files: "{{ (log_files.files + kickstart_files.files) | map(attribute='path') | list }}"
+
+- name: Store installer leftover files
+  copy:
+    remote_src: yes
+    src: "{{ item }}"
+    dest: /var/log/anaconda
+  loop: "{{ leftover_files }}"
+
+- name: Relabel stored installer files
+  sefcontext:
+    target: /var/log/anaconda/{{ item | basename }}
+    setype: var_log_t
+    state: present
+  loop: "{{ leftover_files }}"
+
+- name: Remove installer leftover files
+  file:
+    path: "{{ item }}"
+    state: absent
+  vars:
+    tmp_files:
+    - /tmp/.cache
+    - /tmp/foreman_built
+  loop: "{{ (leftover_files + tmp_files) | flatten(1) }}"

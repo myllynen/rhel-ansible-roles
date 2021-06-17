@@ -1,0 +1,21 @@
+---
+base_packages:
+- bash-completion
+- bind-utils
+- bzip2
+- lsof
+- mailx
+- man-pages
+- mlocate
+- openssh-clients
+- psmisc
+- "{{ 'python3' if ansible_facts.distribution_major_version|int >= 8 else 'python' }}"
+- "{{ 'python3-libselinux' if ansible_facts.distribution_major_version|int >= 8 else 'libselinux-utils' }}"
+- "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version|int >= 8 else 'policycoreutils-python' }}"
+- redhat-lsb-core
+- tar
+- "{{ 'tmux' if ansible_facts.distribution_major_version|int >= 8 else 'screen' }}"
+- unzip
+- vim-enhanced
+- wget
+- yum-utils

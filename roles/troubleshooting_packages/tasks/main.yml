@@ -1,0 +1,5 @@
+---
+- name: Install troubleshooting packages
+  yum:
+    name: "{{ troubleshooting_packages }}"
+    state: present

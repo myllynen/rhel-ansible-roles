@@ -1,0 +1,11 @@
+---
+- name: Install cockpit web console packages
+  yum:
+    name:
+    - cockpit
+
+- name: Enable cockpit web console
+  service:
+    name: cockpit.socket
+    state: started
+    enabled: yes
