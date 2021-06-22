@@ -1,13 +1,22 @@
 ---
 troubleshooting_packages:
+- bind-utils
+- curl
+- ethtool
 - iotop
+- iproute
+- iptstate
 - lsof
-- mailx
-- pciutils
+- ltrace
+- man-pages
+- numactl
 - pcp-system-tools
 - perf
+- "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version|int >= 8 else 'policycoreutils-python' }}"
+- procps-ng
 - psmisc
 - sos
 - strace
+- sysstat
 - tcpdump
-- telnet
+- time
