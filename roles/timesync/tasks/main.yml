@@ -8,5 +8,5 @@
   include_role:
     name: rhel-system-roles.timesync
 
-#- name: Run handlers
-#  meta: flush_handlers
+- name: Run handlers
+  meta: flush_handlers
