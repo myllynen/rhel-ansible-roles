@@ -1,4 +1,6 @@
 ---
+# TODO: Migrate using linux-system-role
+# https://www.redhat.com/en/blog/automating-and-managing-ssh-server-configuration-rhel-system-roles-part-1
 - name: Set PermitRootLogin
   replace:
     dest: /etc/ssh/sshd_config
