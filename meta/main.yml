@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2021 Marko Myllynen <myllynen@redhat.com>
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+---
+galaxy_info:
+  author: Marko Myllynen <myllynen@redhat.com>
+  description: Basic Ansible roles for RHEL configuration.
+  company: Red Hat, Inc.
+
+  issue_tracker_url: https://github.com/myllynen/rhel-ansible-roles/issues
+
+  license: GPLv2+
+
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: EL
+      versions:
+        - 8
+        - 9
+
+  galaxy_tags:
+    - configuration
+    - rhel
+    - centos
+
+dependencies: []
