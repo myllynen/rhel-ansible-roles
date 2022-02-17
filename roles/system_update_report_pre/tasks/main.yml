@@ -28,6 +28,7 @@
   register: command_output
   delegate_to: localhost
   run_once: true
+  become: false
   when: hostvars[item].package_updates is defined
   loop: "{{ ansible_play_batch }}"
 
