@@ -24,7 +24,7 @@
   when: package_updates is defined
 
 - name: Notify about upcoming package updates
-  script: send-notification '{{ hostvars[item].email }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
+  script: send-notification '{{ hostvars[item].email | default(default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
   register: command_output
   delegate_to: localhost
   run_once: true
