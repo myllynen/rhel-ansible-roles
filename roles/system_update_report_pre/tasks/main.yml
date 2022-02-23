@@ -35,5 +35,4 @@
 - name: Display notification command debug output
   debug:
     msg: "{{ command_output.results | selectattr('item', 'equalto', inventory_hostname) | map(attribute='stdout') | first }}"
-  when:
-    - hostvars[inventory_hostname].package_updates is defined
+  when: hostvars[inventory_hostname].package_updates is defined

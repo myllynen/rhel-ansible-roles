@@ -35,11 +35,11 @@ if "EMAIL_SUBJECT" in os.environ:
     EMAIL_SUBJECT = os.environ["EMAIL_SUBJECT"]
 
 message += "\n<p>"
-message += "Server to be updated:\t\t%s\n</p>\n" % server
+message += "Server to be updated:\t\t%s</p>\n" % server
 if len(sys.argv) == 4:
-    message += "<p>Pending updates:\n<br></p>\n<pre>\n%s\n</pre>\n" % str(sys.argv[3])
+    message += "<p>Pending updates:<br></p>\n<pre>\n%s\n</pre>\n" % str(sys.argv[3])
 else:
-    message += "<p>Pending updates:\n<br></p>\n<pre>\n"
+    message += "<p>Pending updates:<br></p>\n<pre>\n"
     for i in range(3, len(sys.argv)):
         if sys.argv[i][0] == '{':
             message += "\n"
