@@ -4,19 +4,22 @@
     name: "{{ selinux_packages }}"
     state: present
   vars:
-    selinux_pkgs_rhel7:
-    - libselinux-python
-    - libsemanage-python
-    - policycoreutils-python
-    - selinux-policy-targeted
-    - setools-console
-    selinux_pkgs_rhel8:
-    - python3-libselinux
-    - python3-libsemanage
-    - policycoreutils-python-utils
-    - selinux-policy-targeted
-    - setools-console
-    selinux_packages: "{{ lookup('vars', 'selinux_pkgs_rhel' + ansible_facts.distribution_major_version) }}"
+    selinux_package_lists:
+      RedHat_7:
+        - libselinux-python
+        - libsemanage-python
+        - policycoreutils-python
+        - selinux-policy-targeted
+        - setools-console
+      default:
+        - python3-libselinux
+        - python3-libsemanage
+        - policycoreutils-python-utils
+        - selinux-policy-targeted
+        - setools-console
+    distro_id: "{{ ansible_facts.distribution + '_' + ansible_facts.distribution_major_version }}"
+    package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
+    selinux_packages: "{{ selinux_package_lists[package_set] }}"
 
 - name: Set SELinux state
   selinux:
