@@ -39,4 +39,4 @@
 
 - name: Reboot system
   reboot:
-  when: selinux_config is changed or (current_crypto_policy is not skipped and crypto_policy_config is changed)
+  when: selinux_config.reboot_required or (current_crypto_policy is not skipped and crypto_policy_config is changed)
