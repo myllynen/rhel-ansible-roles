@@ -5,13 +5,13 @@ troubleshooting_packages:
 - ethtool
 - iotop
 - iproute
-- iptstate
+#- iptstate
 - lsof
-- ltrace
+#- ltrace
 - man-pages
-- numactl
+#- numactl
 - pcp-system-tools
-- perf
+#- perf
 - "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version|int >= 8 else 'policycoreutils-python' }}"
 - procps-ng
 - psmisc
