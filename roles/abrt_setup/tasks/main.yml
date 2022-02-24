@@ -17,11 +17,6 @@
     value: '2'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
-  register: sysctl_config
-
-- name: Regenerate initramfs
-  command: dracut -f --regenerate-all
-  when: sysctl_config is changed
 
 - name: Create list of abrt packages to install
   set_fact:
@@ -72,38 +67,26 @@
     line: 'CopyVMcore = {{ copy_core }}'
   register: vmcore_config
 
-- name: Create list of abrt services to configure
+- name: Create list of abrt services to enable/disable
   set_fact:
     abrt_services: "{{ abrt_services | default([]) + [item] }}"
   loop:
-    - { 'name': 'abrt-ccpp', 'enabled': true }
+    - { 'name': 'abrtd', 'enabled': true, 'state': 'started' }
+    - { 'name': 'abrt-ccpp', 'enabled': true, 'state': 'started' }
+    - { 'name': 'abrt-oops', 'enabled': true, 'state': 'started' }
     - { 'name': 'abrt-journal-core', 'enabled': false }
     - "{{ { 'name': 'abrt-xorg', 'enabled': false } if abrt_setup_enable_console_notification else '' }}"
 
-- name: Configure abrt services
+- name: Enable/disable abrt services
   service:
     name: "{{ item.name }}"
     enabled: "{{ item.enabled }}"
+    state: "{{ item.state | default(omit) }}"
+  register: service_start
   loop: "{{ abrt_services | select() | list }}"
 
 - name: Restart abrt service
   service:
     name: abrtd
     state: restarted
-    enabled: true
-  when: sysctl_config is not changed and (gpg_config is changed or vmcore_config is changed)
-
-- name: Check abrt ccpp hook
-  command: abrt-install-ccpp-hook is-installed
-  register: hook_check
-  failed_when: false
-  changed_when: false
-  when: sysctl_config is not changed
-
-- name: Enable abrt ccpp hook
-  command: abrt-install-ccpp-hook install
-  when: sysctl_config is not changed and hook_check.rc != 0
-
-- name: Reboot system
-  reboot:
-  when: sysctl_config is changed
+  when: service_start.results[0] is not changed and (gpg_config is changed or vmcore_config is changed)
