@@ -1,0 +1,109 @@
+---
+- name: Configure default coredump limit
+  lineinfile:
+    path: /etc/systemd/system.conf
+    regexp: '(#|)DefaultLimitCORE=.*'
+    line: 'DefaultLimitCORE=infinity'
+  register: core_config
+
+- name: Enable default coredump limit
+  systemd:
+    daemon_reload: true
+  when: core_config is changed
+
+- name: Restrict coredump contents
+  sysctl:
+    name: fs.suid_dumpable
+    value: '2'
+    sysctl_file: /etc/sysctl.d/50-coredump.conf
+    sysctl_set: true
+  register: sysctl_config
+
+- name: Regenerate initramfs
+  command: dracut -f --regenerate-all
+  when: sysctl_config is changed
+
+- name: Create list of abrt packages to install
+  set_fact:
+    abrt_packages_install: "{{ abrt_packages_install | default([]) + [item] }}"
+  loop:
+    - abrt
+    - abrt-addon-ccpp
+    - abrt-addon-vmcore
+    - abrt-cli-ng
+    - "{{ 'abrt-console-notification' if abrt_setup_enable_console_notification else '' }}"
+    - "{{ 'abrt-java-connector' if abrt_setup_enable_java_connector else '' }}"
+    - "{{ 'abrt-plugin-sosreport' if abrt_setup_enable_sosreport_plugin else '' }}"
+
+- name: Install abrt packages
+  yum:
+    name: "{{ abrt_packages_install | select() | list }}"
+    state: present
+
+- name: Create list of abrt packages to remove
+  set_fact:
+    abrt_packages_remove: "{{ abrt_packages_remove | default([]) + [item] }}"
+  loop:
+    - "{{ 'abrt-console-notification' if not abrt_setup_enable_console_notification else '' }}"
+    - "{{ 'abrt-java-connector' if not abrt_setup_enable_java_connector else '' }}"
+    - "{{ 'abrt-plugin-sosreport' if not abrt_setup_enable_sosreport_plugin else '' }}"
+
+- name: Remove abrt packages
+  yum:
+    name: "{{ abrt_packages_remove | select() | list }}"
+    state: absent
+    autoremove: true
+
+- name: Configure abrt (GPG check)
+  vars:
+    gpg_check: "{{ 'yes' if abrt_setup_enable_unsigned_reports else 'no' }}"
+  lineinfile:
+    path: /etc/abrt/abrt-action-save-package-data.conf
+    regexp: 'OpenGPGCheck = .*'
+    line: 'OpenGPGCheck = {{ gpg_check }}'
+  register: gpg_config
+
+- name: Configure abrt (vmcore plugin)
+  vars:
+    copy_core: "{{ 'yes' if abrt_setup_enable_vmcore_spooling else 'no' }}"
+  lineinfile:
+    path: /etc/abrt/plugins/vmcore.conf
+    regexp: 'CopyVMcore = .*'
+    line: 'CopyVMcore = {{ copy_core }}'
+  register: vmcore_config
+
+- name: Create list of abrt services to configure
+  set_fact:
+    abrt_services: "{{ abrt_services | default([]) + [item] }}"
+  loop:
+    - { 'name': 'abrt-ccpp', 'enabled': true }
+    - { 'name': 'abrt-journal-core', 'enabled': false }
+    - "{{ { 'name': 'abrt-xorg', 'enabled': false } if abrt_setup_enable_console_notification else '' }}"
+
+- name: Configure abrt services
+  service:
+    name: "{{ item.name }}"
+    enabled: "{{ item.enabled }}"
+  loop: "{{ abrt_services | select() | list }}"
+
+- name: Restart abrt service
+  service:
+    name: abrtd
+    state: restarted
+    enabled: true
+  when: sysctl_config is not changed and (gpg_config is changed or vmcore_config is changed)
+
+- name: Check abrt ccpp hook
+  command: abrt-install-ccpp-hook is-installed
+  register: hook_check
+  failed_when: false
+  changed_when: false
+  when: sysctl_config is not changed
+
+- name: Enable abrt ccpp hook
+  command: abrt-install-ccpp-hook install
+  when: sysctl_config is not changed and hook_check.rc != 0
+
+- name: Reboot system
+  reboot:
+  when: sysctl_config is changed
