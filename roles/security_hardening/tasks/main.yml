@@ -61,7 +61,7 @@
     src: rhel_default.conf
     dest: /etc/security/pwquality.conf
     mode: '0644'
-  when: ansible_facts.distribution_major_version >= 8
+  when: ansible_facts.distribution_major_version|int >= 8
 
 - name: Reboot system
   reboot:
