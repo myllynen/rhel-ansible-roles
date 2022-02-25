@@ -91,5 +91,5 @@
 
 - name: Log initialization message
   syslogger:
-    msg: "System initialized by system init."
+    msg: "System initialized by system_init."
   when: "'syslog' in system_init_final_actions.split(',')"
