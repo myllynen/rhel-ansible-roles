@@ -8,7 +8,7 @@
   service:
     name: tuned
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Check current tuned profile
   slurp:

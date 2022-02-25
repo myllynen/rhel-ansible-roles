@@ -3,7 +3,7 @@
   yum:
     name: '*'
     state: latest
-    update_cache: yes
+    update_cache: true
   register: system_state
 
 - name: Ensure yum-utils installed

@@ -15,7 +15,7 @@
   service:
     name: firewalld
     state: "{{ 'restarted' if firewalld_config is changed else 'started' }}"
-    enabled: yes
+    enabled: true
 
 - name: Set default zone
   command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
@@ -30,8 +30,8 @@
   firewalld:
     zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
     state: enabled
   loop: "{{ ports_to_open }}"
 
@@ -44,8 +44,8 @@
   firewalld:
     zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
     state: disabled
   loop: "{{ open_ports.stdout.split(' ') | select() }}"
   when: item not in ports_to_open
@@ -58,8 +58,8 @@
   firewalld:
     zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
     state: enabled
   loop: "{{ services_to_open }}"
 
@@ -72,8 +72,8 @@
   firewalld:
     zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
     state: disabled
   loop: "{{ open_services.stdout.split(' ') | select() }}"
   when: item != 'ssh' and item not in services_to_open

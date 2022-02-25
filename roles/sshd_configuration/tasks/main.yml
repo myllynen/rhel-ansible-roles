@@ -26,5 +26,5 @@
   service:
     name: sshd
     state: restarted
-    enabled: yes
+    enabled: true
   when: login_config is changed or alive_config is changed or count_config is changed

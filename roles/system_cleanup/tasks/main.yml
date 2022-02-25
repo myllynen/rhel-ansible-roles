@@ -17,7 +17,7 @@
 
 - name: Store installer leftover files
   copy:
-    remote_src: yes
+    remote_src: true
     src: "{{ item }}"
     dest: /var/log/anaconda
   loop: "{{ leftover_files }}"
