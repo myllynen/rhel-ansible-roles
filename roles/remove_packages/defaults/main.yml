@@ -1,6 +1,6 @@
 ---
 remove_packages:
-- gofer
-- katello-agent
-- puppet-agent
-- telnet-server
+  - gofer
+  - katello-agent
+  - puppet-agent
+  - telnet-server
