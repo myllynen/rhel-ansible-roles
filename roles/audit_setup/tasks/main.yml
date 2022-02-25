@@ -1,0 +1,37 @@
+---
+- name: Abort if audit disabled on kernel command line
+  fail:
+    msg: "Audit disabled on kernel command line."
+  when: "'audit' in ansible_facts.cmdline and ansible_facts.cmdline['audit'] == '0'"
+
+- name: Install audit package
+  yum:
+    name: audit
+    state: present
+
+- name: Start auditd service
+  service:
+    name: auditd
+    state: started
+    enabled: true
+
+- name: Copy audit rules configuration file
+  copy:
+    src: "{{ audit_setup_rules }}.rules"
+    dest: /etc/audit/rules.d/zz-local.rules
+    mode: '0600'
+  register: rules_config
+
+- name: Copy auditd configuration file
+  copy:
+    src: auditd.conf
+    dest: /etc/audit/auditd.conf
+    mode: '0600'
+  register: auditd_config
+
+# auditd is not compatible with the Ansible service module
+- name: Reconfigure auditd
+  command:
+    cmd: service auditd reload
+    warn: false
+  when: rules_config is changed or auditd_config is changed
