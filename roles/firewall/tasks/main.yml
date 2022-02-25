@@ -22,6 +22,10 @@
   register: cmd_result
   changed_when: "'ZONE_ALREADY_SET' not in cmd_result.stderr"
 
+- name: Set list of ports to open
+  set_fact:
+    ports_to_open: "{{ (firewall_always_open_ports.split(',') | select() + firewall_open_ports.split(',') | select()) | unique }}"
+
 - name: Open configured ports in firewall
   firewalld:
     zone: "{{ firewall_default_zone }}"
@@ -29,8 +33,7 @@
     permanent: yes
     immediate: yes
     state: enabled
-  loop: "{{ firewall_open_ports.split(',') }}"
-  when: firewall_open_ports != ""
+  loop: "{{ ports_to_open }}"
 
 - name: Check open ports in firewall
   command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
@@ -44,8 +47,12 @@
     permanent: yes
     immediate: yes
     state: disabled
-  loop: "{{ open_ports.stdout.split(' ') }}"
-  when: item not in firewall_open_ports.split(',')
+  loop: "{{ open_ports.stdout.split(' ') | select() }}"
+  when: item not in ports_to_open
+
+- name: Set list of services to open
+  set_fact:
+    services_to_open: "{{ (firewall_always_open_services.split(',') | select() + firewall_open_services.split(',') | select()) | unique }}"
 
 - name: Open configured services in firewall
   firewalld:
@@ -54,8 +61,7 @@
     permanent: yes
     immediate: yes
     state: enabled
-  loop: "{{ firewall_open_services.split(',') }}"
-  when: firewall_open_services != ""
+  loop: "{{ services_to_open }}"
 
 - name: Check open services in firewall
   command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
@@ -69,5 +75,5 @@
     permanent: yes
     immediate: yes
     state: disabled
-  loop: "{{ open_services.stdout.split(' ') }}"
-  when: item != "ssh" and item not in firewall_open_services.split(',')
+  loop: "{{ open_services.stdout.split(' ') | select() }}"
+  when: item != 'ssh' and item not in services_to_open
