@@ -18,7 +18,7 @@
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
 
-- name: Create list of abrt packages to install
+- name: Define list of abrt packages to install
   set_fact:
     abrt_packages_install: "{{ abrt_packages_install | default([]) + [item] }}"
   loop:
@@ -35,7 +35,7 @@
     name: "{{ abrt_packages_install | select() | list }}"
     state: present
 
-- name: Create list of abrt packages to remove
+- name: Define list of abrt packages to remove
   set_fact:
     abrt_packages_remove: "{{ abrt_packages_remove | default([]) + [item] }}"
   loop:
@@ -67,7 +67,7 @@
     line: 'CopyVMcore = {{ copy_core }}'
   register: vmcore_config
 
-- name: Create list of abrt services to enable/disable
+- name: Define list of abrt services to enable/disable
   set_fact:
     abrt_services: "{{ abrt_services | default([]) + [item] }}"
   loop:
