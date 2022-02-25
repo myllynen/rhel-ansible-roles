@@ -1,0 +1,10 @@
+---
+- name: Copy CA certificate bundle
+  copy:
+    src: "{{ certificates_ca_file }}"
+    dest: /etc/pki/ca-trust/source/anchors/{{ certificates_ca_file }}
+  register: ca_file
+
+- name: Update trusted certificates
+  command: update-ca-trust extract
+  when: ca_file is changed
