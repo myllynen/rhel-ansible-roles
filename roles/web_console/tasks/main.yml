@@ -2,7 +2,8 @@
 - name: Install cockpit web console packages
   yum:
     name:
-    - cockpit
+      - cockpit
+    state: present
 
 - name: Enable cockpit web console
   service:
