@@ -1,0 +1,33 @@
+# To opt out of the system crypto-policies configuration of krb5, remove the
+# symlink at /etc/krb5.conf.d/crypto-policies which will not be recreated.
+includedir /etc/krb5.conf.d/
+
+[logging]
+    default = FILE:/var/log/krb5libs.log
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+    default_realm = {{ domain_ad_domain | upper }}
+    dns_lookup_realm = false
+    dns_lookup_kdc = true
+    ticket_lifetime = 24h
+    renew_lifetime = 7d
+    forwardable = false
+    renewable = false
+    rdns = true
+    udp_preference_limit = 0
+    spake_preauth_groups = edwards25519
+    default_ccache_name = KEYRING:persistent:%{uid}
+    pkinit_anchors = FILE:/etc/pki/tls/certs/ca-bundle.crt
+
+[realms]
+    {{ domain_ad_domain | upper }} = {
+        #kdc =
+        #master_kdc =
+        #admin_server =
+    }
+
+[domain_realm]
+    .{{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}
+    {{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}

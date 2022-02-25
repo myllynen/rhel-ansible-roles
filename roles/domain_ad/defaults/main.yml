@@ -1,0 +1,5 @@
+---
+# Allowed actions: join, leave
+domain_ad_action: join
+domain_ad_domain: example.com
+#domain_ad_allow_groups: GROUP@example.com

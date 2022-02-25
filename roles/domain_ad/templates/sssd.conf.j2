@@ -1,0 +1,38 @@
+[sssd]
+debug_level = 0
+config_file_version = 2
+reconnection_retries = 1
+domains = {{ domain_ad_domain | lower }}
+services = nss, pam
+
+[nss]
+debug_level = 0
+entry_negative_timeout = 60
+entry_cache_nowait_percentage = 50
+
+[pam]
+debug_level = 0
+offline_credentials_expiration = 60
+
+[domain/{{ domain_ad_domain | lower }}]
+debug_level = 0
+id_provider = ad
+#auth_provider = krb5
+#chpass_provider = krb5
+access_provider = simple
+
+dyndns_update = False
+ldap_id_mapping = True
+
+ad_domain = {{ domain_ad_domain | lower }}
+krb5_realm = {{ domain_ad_domain | upper }}
+krb5_store_password_if_offline = True
+cache_credentials = True
+
+default_shell = /bin/bash
+fallback_homedir = /home/%u
+use_fully_qualified_names = False
+
+{% if defined domain_ad_allow_groups %}
+simple_allow_groups = {{ domain_ad_allow_groups }}
+{% endif %}
