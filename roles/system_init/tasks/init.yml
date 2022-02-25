@@ -1,0 +1,95 @@
+---
+- name: Gather package facts
+  package_facts:
+
+- name: Remove old kernel packages (dnf)
+  command:
+    cmd: dnf -C remove --oldinstallonly -y
+    warn: false
+  when:
+    - ansible_facts.pkg_mgr == 'dnf'
+    - ansible_facts.packages['kernel'] | length > 1
+
+- name: Remove old kernel packages (yum)
+  command: package-cleanup --oldkernels --count=1 -y
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - ansible_facts.packages['kernel'] | length > 1
+
+- name: Locate NIC ifcfg configuration files
+  find:
+    paths: /etc/sysconfig/network-scripts
+    patterns:
+      - 'ifcfg-ens*'
+      - 'ifcfg-net*'
+  register: nic_configs
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=2050704
+- name: Fix VMware NIC configuration
+  replace:
+    path: "{{ item }}"
+    regexp: '^\ncheck_link_down\(\) {\n return 1; \n}\n$'
+    replace: ''
+  loop: "{{ nic_configs.files | map(attribute='path') | list }}"
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=2056891
+- name: Ensure correct /etc/hostname
+  copy:
+    dest: /etc/hostname
+    content: "{{ ansible_facts.fqdn | lower }}\n"
+    mode: '0644'
+
+- name: Locate installer leftover log files
+  find:
+    paths: /root
+    patterns: '*-ks.cfg,install.post*.log'
+  register: log_files
+
+- name: Locate installer leftover kickstart files
+  find:
+    paths: /tmp
+    patterns: 'ks-script-*'
+  register: kickstart_files
+
+- name: Create combined list of leftover files
+  set_fact:
+    leftover_files: "{{ (log_files.files + kickstart_files.files) | map(attribute='path') | list }}"
+
+- name: Store installer leftover files
+  copy:
+    remote_src: true
+    src: "{{ item }}"
+    dest: /var/log/anaconda
+  loop: "{{ leftover_files }}"
+
+- name: Relabel stored installer files
+  sefcontext:
+    target: /var/log/anaconda/{{ item | basename }}
+    setype: var_log_t
+    state: present
+  loop: "{{ leftover_files }}"
+
+- name: Remove installer leftover files
+  file:
+    path: "{{ item }}"
+    state: absent
+  vars:
+    tmp_files:
+    - /tmp/.cache
+    - /tmp/foreman_built
+  loop: "{{ (leftover_files + tmp_files) | flatten(1) }}"
+
+- name: Mark system initialized
+  copy:
+    content: "This system was initialized on {{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ ansible_date_time.tz }}.\n"
+    dest: "{{ system_init_file }}"
+    mode: '0644'
+
+- name: Reboot system
+  reboot:
+  when: "'reboot' in system_init_final_actions.split(',')"
+
+- name: Log initialization message
+  syslogger:
+    msg: "System initialized by system init."
+  when: "'syslog' in system_init_final_actions.split(',')"
