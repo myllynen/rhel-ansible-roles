@@ -10,17 +10,17 @@
   yum:
     name: yum-utils
     state: present
-  when: reboot_policy == 'when_needed'
+  when: system_update_reboot_policy == 'when_needed'
 
 - name: Check need for rebooting
   command: needs-restarting -r
   register: needs_restarting
   failed_when: false
   changed_when: false
-  when: reboot_policy == 'when_needed'
+  when: system_update_reboot_policy == 'when_needed'
 
 - name: Reboot system
   reboot:
-  when: (reboot_policy == 'always') or
-        (reboot_policy == 'when_updated' and system_state is changed) or
-        (reboot_policy == 'when_needed' and needs_restarting.rc != 0)
+  when: (system_update_reboot_policy == 'always') or
+        (system_update_reboot_policy == 'when_updated' and system_state is changed) or
+        (system_update_reboot_policy == 'when_needed' and needs_restarting.rc != 0)

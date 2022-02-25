@@ -4,4 +4,4 @@
 # when_needed - reboot only when needed (using needs-restarting)
 # when_updated - reboot if updates were installed
 # always - always reboot even if no updates were installed
-reboot_policy: when_needed
+system_update_reboot_policy: when_needed
