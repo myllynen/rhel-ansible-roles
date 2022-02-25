@@ -25,10 +25,10 @@
     - abrt
     - abrt-addon-ccpp
     - abrt-addon-vmcore
-    - abrt-cli-ng
+    - "{{ 'abrt-cli-ng' if ansible_facts.distribution_major_version|int >= 8 else 'abrt-cli' }}"
     - "{{ 'abrt-console-notification' if abrt_setup_enable_console_notification else '' }}"
     - "{{ 'abrt-java-connector' if abrt_setup_enable_java_connector else '' }}"
-    - "{{ 'abrt-plugin-sosreport' if abrt_setup_enable_sosreport_plugin else '' }}"
+    - "{{ 'abrt-plugin-sosreport' if abrt_setup_enable_sosreport_plugin and ansible_facts.distribution_major_version|int >= 8 else '' }}"
 
 - name: Install abrt packages
   yum:
@@ -74,7 +74,7 @@
     - { 'name': 'abrtd', 'enabled': true, 'state': 'started' }
     - { 'name': 'abrt-ccpp', 'enabled': true, 'state': 'started' }
     - { 'name': 'abrt-oops', 'enabled': true, 'state': 'started' }
-    - { 'name': 'abrt-journal-core', 'enabled': false }
+    - "{{ { 'name': 'abrt-journal-core', 'enabled': false } if ansible_facts.distribution_major_version|int >= 8 else '' }}"
     - "{{ { 'name': 'abrt-xorg', 'enabled': false } if abrt_setup_enable_console_notification else '' }}"
 
 - name: Enable/disable abrt services
