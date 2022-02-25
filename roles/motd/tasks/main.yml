@@ -1,12 +1,17 @@
 ---
-- name: Reset default motd message
+- name: Reset default motd message file
   copy:
     content: ''
     dest: /etc/motd
     mode: '0644'
+  when: ansible_facts.distribution_major_version|int >= 8
+
+- name: Determine motd message file path
+  set_fact:
+    motd_file: "{{ '/etc/motd.d/local' if ansible_facts.distribution_major_version|int >= 8 else '/etc/motd' }}"
 
 - name: Create local motd file
   template:
     src: local.j2
-    dest: /etc/motd.d/local
+    dest: "{{ motd_file }}"
     mode: '0644'
