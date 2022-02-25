@@ -1,5 +1,5 @@
 ---
-- name: Copy CA certificate bundle
+- name: Copy CA certificate bundle file
   copy:
     src: "{{ certificates_ca_file }}"
     dest: /etc/pki/ca-trust/source/anchors/{{ certificates_ca_file }}
