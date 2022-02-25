@@ -31,11 +31,37 @@
   command: update-crypto-policies --show
   register: current_crypto_policy
   changed_when: false
+  when: ansible_facts.distribution_major_version|int >= 8
 
 - name: Set crypto policy
   command: update-crypto-policies --set {{ crypto_policy }}
   register: crypto_policy_config
-  when: current_crypto_policy is not skipped and current_crypto_policy.stdout != crypto_policy
+  when:
+    - ansible_facts.distribution_major_version|int >= 8
+    - current_crypto_policy is not skipped
+    - current_crypto_policy.stdout != crypto_policy
+
+- name: Configure system-local password quality requirements (RHEL 7)
+  copy:
+    src: "{{ password_quality_policy }}.conf"
+    dest: /etc/security/pwquality.conf
+    mode: '0644'
+  when: ansible_facts.distribution_major_version|int < 8
+
+- name: Configure system-local password quality requirements
+  copy:
+    src: "{{ password_quality_policy }}.conf"
+    dest: /etc/security/pwquality.conf.d/zz-local.conf
+    mode: '0644'
+  when: ansible_facts.distribution_major_version|int >= 8
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=2055604
+- name: Ensure system-local password quality requirements
+  copy:
+    src: rhel_default.conf
+    dest: /etc/security/pwquality.conf
+    mode: '0644'
+  when: ansible_facts.distribution_major_version >= 8
 
 - name: Reboot system
   reboot:

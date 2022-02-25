@@ -1,3 +1,4 @@
 ---
 selinux: enforcing
 crypto_policy: DEFAULT
+password_quality_policy: local_default
