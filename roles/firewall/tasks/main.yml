@@ -24,7 +24,7 @@
 
 - name: Set list of ports to open
   set_fact:
-    ports_to_open: "{{ (firewall_always_open_ports.split(',') | select() + firewall_open_ports.split(',') | select()) | unique }}"
+    ports_to_open: "{{ (firewall_always_open_ports.split(',') | select() | list + firewall_open_ports.split(',') | select() | list) | unique }}"
 
 - name: Open configured ports in firewall
   firewalld:
@@ -47,12 +47,12 @@
     permanent: true
     immediate: true
     state: disabled
-  loop: "{{ open_ports.stdout.split(' ') | select() }}"
+  loop: "{{ open_ports.stdout.split(' ') | select() | list }}"
   when: item not in ports_to_open
 
 - name: Set list of services to open
   set_fact:
-    services_to_open: "{{ (firewall_always_open_services.split(',') | select() + firewall_open_services.split(',') | select()) | unique }}"
+    services_to_open: "{{ (firewall_always_open_services.split(',') | select() | list + firewall_open_services.split(',') | select() | list) | unique }}"
 
 - name: Open configured services in firewall
   firewalld:
@@ -75,5 +75,5 @@
     permanent: true
     immediate: true
     state: disabled
-  loop: "{{ open_services.stdout.split(' ') | select() }}"
+  loop: "{{ open_services.stdout.split(' ') | select() | list }}"
   when: item != 'ssh' and item not in services_to_open
