@@ -1,0 +1,109 @@
+---
+- name: Check connection to deployment server
+  wait_for:
+    host: "{{ splunk_deployment_server }}"
+    port: "{{ splunk_deployment_server_port }}"
+    timeout: 5
+  when: splunk_deployment_server_check
+
+- name: Check deployment server state
+  uri:
+    url: https://{{ splunk_deployment_server }}:{{ splunk_deployment_server_port }}
+    timeout: 5
+    validate_certs: false
+    return_content: true
+  register: server_response
+  failed_when: "'splunkd' not in server_response.content"
+  when: splunk_deployment_server_check
+
+# Create user with the given UID only on fresh VMs,
+# otherwise user creation on old systems will fail.
+- name: Check Splunk user
+  getent:
+    database: passwd
+    key: splunk
+  failed_when: false
+  changed_when: false
+  register: user_status
+
+- name: Create Splunk user
+  user:
+    name: splunk
+    comment: splunk user
+    uid: "{{ splunk_user_uid | default(omit) }}"
+  when: "'could not be found' not in user_status"
+
+- name: Install Splunk Forwarder package
+  yum:
+    name: splunkforwarder
+    state: "{{ splunk_forwarder_package_state }}"
+  register: package_install
+
+- name: Create Splunk deployment configuration file
+  template:
+    src: deploymentclient.conf.j2
+    dest: /opt/splunkforwarder/etc/system/local/deploymentclient.conf
+    owner: splunk
+    group: splunk
+    mode: '0644'
+  register: client_config
+
+- name: Create Splunk user configuration file
+  template:
+    src: user-seed.conf.j2
+    dest: /opt/splunkforwarder/etc/system/local/user-seed.conf
+    owner: splunk
+    group: splunk
+    mode: '0600'
+  register: user_config
+
+- name: Check legacy Splunk init script
+  stat:
+    path: /etc/init.d/splunk
+  register: legacy_init
+
+- name: Stop legacy Splunk service
+  command: /opt/splunkforwarder/bin/splunk stop
+  when: legacy_init.stat.exists
+
+- name: Disable legacy Splunk service
+  command: /opt/splunkforwarder/bin/splunk disable boot-start
+  when: legacy_init.stat.exists
+
+- name: Check Splunk Forwarder systemd service file
+  stat:
+    path: /etc/systemd/system/SplunkForwarder.service
+  register: systemd_service
+
+- name: Create Splunk Forwarder systemd service file
+  command: >
+    /opt/splunkforwarder/bin/splunk enable boot-start
+    -systemd-managed 1 -user splunk -group splunk
+    --accept-license --no-prompt --answer-yes
+  when: not systemd_service.stat.exists
+
+- name: Request service restart when needed
+  set_fact:
+    service_restart: true
+  when:
+    - package_install is changed
+    - client_config is changed
+    - user_config is changed
+    - not systemd_service.stat.exists
+
+- name: Start Splunk Forwarder service
+  service:
+    name: SplunkForwarder
+    state: "{{ 'restarted' if service_restart is defined else 'started' }}"
+    enabled: true
+
+- name: Read Splunk Forwarder version
+  command: /opt/splunkforwarder/bin/splunk version
+  register: splunk_version
+  changed_when: false
+  when: package_install is changed
+
+- name: Log message on package install
+  syslogger:
+    msg: "{{ splunk_version.stdout }} installed on {{ ansible_facts.fqdn }}."
+  when: package_install is changed
