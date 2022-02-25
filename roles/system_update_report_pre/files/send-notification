@@ -60,6 +60,9 @@ if not debug:
     message += "\n\n<p><br><i>Do not reply to this email.</i></p>\n</html>\n"
 
 if debug:
+    sys.stdout.write("Recipient: " + email_to + "\n")
+    sys.stdout.write("Server: " + server + "\n")
+    sys.stdout.write("Message:")
     sys.stdout.write(message)
 else:
     if SMTP_PASSWORD:

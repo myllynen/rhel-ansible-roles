@@ -1,2 +1,2 @@
 ---
-default_recipient: root@localhost
+system_update_report_pre_default_recipient: root@localhost

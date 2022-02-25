@@ -4,19 +4,19 @@
     name: '*'
     state: latest
     update_cache: true
-  register: package_update
+  register: package_install
   changed_when: false
   check_mode: true
 
 - name: Save list of available package updates (dnf)
   set_fact:
-    package_updates: "{{ package_update.results | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_update.msg
+    package_updates: "{{ package_install.results | join('\n') }}"
+  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
 
 - name: Save list of available package updates (yum)
   set_fact:
-    package_updates: "{{ package_update.changes | dict2items | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_update.changes is defined
+    package_updates: "{{ package_install.changes | dict2items | join('\n') }}"
+  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
 
 - name: Display list of available package updates
   debug:
@@ -24,7 +24,7 @@
   when: package_updates is defined
 
 - name: Notify about upcoming package updates
-  script: send-notification '{{ hostvars[item].email | default(default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
+  script: send-notification '{{ hostvars[item].email | default(system_update_report_pre_default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
   register: command_output
   delegate_to: localhost
   run_once: true
