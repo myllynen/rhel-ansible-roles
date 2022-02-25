@@ -3,6 +3,7 @@
   copy:
     src: "{{ certificates_ca_file }}"
     dest: /etc/pki/ca-trust/source/anchors/{{ certificates_ca_file }}
+    mode: '0644'
   register: ca_file
 
 - name: Update trusted certificates
