@@ -5,7 +5,7 @@
     dest: /etc/motd
     mode: '0644'
 
-- name: Copy motd file
+- name: Create local motd file
   template:
     src: local.j2
     dest: /etc/motd.d/local
