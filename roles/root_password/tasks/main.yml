@@ -3,3 +3,4 @@
   user:
     name: root
     password: "{{ root_password }}"
+  when: root_password is defined
