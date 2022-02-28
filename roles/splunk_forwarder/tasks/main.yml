@@ -1,10 +1,10 @@
 ---
-- name: Check connection to deployment server
+- name: Check deployment server connection
   wait_for:
     host: "{{ splunk_deployment_server }}"
     port: "{{ splunk_deployment_server_port }}"
     timeout: 5
-  when: splunk_deployment_server_check
+  when: splunk_deployment_server_check | bool
 
 - name: Check deployment server state
   uri:
@@ -14,7 +14,7 @@
     return_content: true
   register: server_response
   failed_when: "'splunkd' not in server_response.content"
-  when: splunk_deployment_server_check
+  when: splunk_deployment_server_check | bool
 
 # Create user with the given UID only on fresh VMs,
 # otherwise user creation on old systems will fail.
@@ -57,16 +57,16 @@
     mode: '0600'
   register: user_config
 
-- name: Check legacy Splunk init script
+- name: Check Splunk legacy init script
   stat:
     path: /etc/init.d/splunk
   register: legacy_init
 
-- name: Stop legacy Splunk service
+- name: Stop Splunk legacy service
   command: /opt/splunkforwarder/bin/splunk stop
   when: legacy_init.stat.exists
 
-- name: Disable legacy Splunk service
+- name: Disable Splunk legacy service
   command: /opt/splunkforwarder/bin/splunk disable boot-start
   when: legacy_init.stat.exists
 
@@ -82,20 +82,20 @@
     --accept-license --no-prompt --answer-yes
   when: not systemd_service.stat.exists
 
-- name: Request service restart when needed
-  set_fact:
-    service_restart: true
-  when:
-    - package_install is changed
-    - client_config is changed
-    - user_config is changed
-    - not systemd_service.stat.exists
-
-- name: Start Splunk Forwarder service
+- name: Enable Splunk Forwarder service
   service:
     name: SplunkForwarder
-    state: "{{ 'restarted' if service_restart is defined else 'started' }}"
+    state: started
     enabled: true
+  register: service_start
+
+- name: Apply Splunk Forwarder configuration changes
+  service:
+    name: SplunkForwarder
+    state: restarted
+  when:
+    - service_start is not changed
+    - (client_config is changed or user_config is changed)
 
 - name: Read Splunk Forwarder version
   command: /opt/splunkforwarder/bin/splunk version

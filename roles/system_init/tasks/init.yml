@@ -51,7 +51,7 @@
     patterns: 'ks-script-*'
   register: kickstart_files
 
-- name: Create combined list of leftover files
+- name: Set combined list of leftover files
   set_fact:
     leftover_files: "{{ (log_files.files + kickstart_files.files) | map(attribute='path') | list }}"
 

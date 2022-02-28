@@ -15,6 +15,6 @@
     src: /etc/tuned/active_profile
   register: active_profile
 
-- name: Apply wanted tuned profile
+- name: Apply tuned profile
   command: tuned-adm profile {{ tuned_profile }}
   when: active_profile.content|b64decode|trim != tuned_profile

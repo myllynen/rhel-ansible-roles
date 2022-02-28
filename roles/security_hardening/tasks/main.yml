@@ -21,7 +21,7 @@
     package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
     selinux_packages: "{{ selinux_package_lists[package_set] }}"
 
-- name: Set SELinux state
+- name: Configure SELinux state
   selinux:
     policy: targeted
     state: "{{ selinux }}"
@@ -33,7 +33,7 @@
   changed_when: false
   when: ansible_facts.distribution_major_version|int >= 8
 
-- name: Set crypto policy
+- name: Configure crypto policy
   command: update-crypto-policies --set {{ crypto_policy }}
   register: crypto_policy_config
   when:

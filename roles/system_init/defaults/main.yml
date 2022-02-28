@@ -1,5 +1,6 @@
 ---
 # Actions to take after initialization
-# syslog - write message to system log
+# nothing - do not reboot or write log
 # reboot - reboot after initialization
-system_init_final_actions: "syslog,reboot"
+# syslog - write message to system log
+system_init_final_actions: reboot,syslog

@@ -1,5 +1,5 @@
 ---
-- name: Create timesync configuration
+- name: Set timesync configuration
   set_fact:
     timesync_ntp_servers: "{{ timesync_ntp_servers | default([]) + [{ 'hostname': item, 'iburst': true }] }}"
   loop: "{{ ntp_servers.split(',') }}"

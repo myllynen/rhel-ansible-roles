@@ -8,12 +8,12 @@
   changed_when: false
   check_mode: true
 
-- name: Save list of available package updates (dnf)
+- name: Set list of available package updates (dnf)
   set_fact:
     package_updates: "{{ package_install.results | join('\n') }}"
   when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
 
-- name: Save list of available package updates (yum)
+- name: Set list of available package updates (yum)
   set_fact:
     package_updates: "{{ package_install.changes | dict2items | join('\n') }}"
   when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined

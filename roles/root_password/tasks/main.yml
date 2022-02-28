@@ -1,5 +1,5 @@
 ---
-- name: Set root password
+- name: Configure root password
   user:
     name: root
     password: "{{ root_password }}"
