@@ -5,6 +5,14 @@
 
 Basic Ansible roles for RHEL configuration.
 
+# See Also
+
+See also
+[https://github.com/myllynen/rhel-image](https://github.com/myllynen/rhel-image).
+
+See also
+[https://github.com/myllynen/ansible-packer](https://github.com/myllynen/ansible-packer).
+
 ## License
 
 GPLv2+
