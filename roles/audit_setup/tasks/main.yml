@@ -37,7 +37,7 @@
   register: auditd_config
 
 # auditd is not compatible with the Ansible service module
-- name: Reconfigure auditd
+- name: Apply audit configuration changes
   command:
     cmd: service auditd reload
     warn: false
