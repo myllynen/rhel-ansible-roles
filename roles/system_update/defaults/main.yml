@@ -5,3 +5,6 @@
 # when_updated - reboot if updates were installed
 # always - always reboot even if no updates were installed
 system_update_reboot_policy: when_needed
+
+system_update_report: true
+system_update_report_default_recipient: root@localhost

@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+
+import smtplib
+import ssl
+import sys
+import os
+
+# Defaults
+SMTP_SERVER = "192.168.1.1"
+SMTP_PORT = 445
+SMTP_PASSWORD = None
+EMAIL_SENDER = "root@localhost"
+EMAIL_SUBJECT = "[INFO] Server Update"
+
+debug = True
+message = ""
+
+if len(sys.argv) < 4:
+    sys.stderr.write("Usage: %s <email_to> <server> <update_message>\n"
+                     % os.path.basename(sys.argv[0]))
+    sys.exit(1)
+
+email_to = sys.argv[1]
+server = sys.argv[2]
+
+if "SMTP_SERVER" in os.environ:
+    SMTP_SERVER = os.environ["SMTP_SERVER"]
+if "SMTP_PORT" in os.environ:
+    SMTP_PORT = os.environ["SMTP_PORT"]
+if "SMTP_PASSWORD" in os.environ:
+    SMTP_PASSWORD = os.environ["SMTP_PASSWORD"]
+if "EMAIL_SENDER" in os.environ:
+    EMAIL_SENDER = os.environ["EMAIL_SENDER"]
+if "EMAIL_SUBJECT" in os.environ:
+    EMAIL_SUBJECT = os.environ["EMAIL_SUBJECT"]
+
+message += "\n<p>"
+message += "Server updated:\t\t%s</p>\n" % server
+if len(sys.argv) == 4:
+    message += "<p>Updated packages:<br></p>\n<pre>\n%s\n</pre>\n" % str(sys.argv[3])
+else:
+    message += "<p>Updated packages:<br></p>\n<pre>\n"
+    for i in range(3, len(sys.argv)):
+        if sys.argv[i][0] == '{':
+            message += "\n"
+        else:
+            message += " "
+        message += "%s" % sys.argv[i]
+    message += "\n</pre>\n"
+
+if not debug:
+    header = ""
+    header += "From: " + EMAIL_SENDER + "\n"
+    header += "To: " + email_to + "\n"
+    header += "MIME-Version: 1.0\n"
+    header += "Content-Type: text/html; charset='UTF-8'\n"
+    header += "Subject: " + EMAIL_SUBJECT + ": " + server + "\n"
+    header += "\n<html>\n\n"
+    message = header + message
+    message += "\n\n<p><br><i>Do not reply to this email.</i></p>\n</html>\n"
+
+if debug:
+    sys.stdout.write("Recipient: " + email_to + "\n")
+    sys.stdout.write("Server: " + server + "\n")
+    sys.stdout.write("Message:")
+    sys.stdout.write(message)
+else:
+    if SMTP_PASSWORD:
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+            server.login(EMAIL_SENDER, SMTP_PASSWORD)
+            server.sendmail(EMAIL_SENDER, email_to.split(','), message)
+    elif SMTP_PORT == 445:
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+            server.sendmail(EMAIL_SENDER, email_to.split(','), message)
+    else:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.sendmail(EMAIL_SENDER, email_to.split(','), message)

@@ -4,7 +4,22 @@
     name: '*'
     state: latest
     update_cache: true
-  register: system_state
+  register: package_install
+
+- name: Set list of updated packages (dnf)
+  set_fact:
+    package_updates: "{{ package_install.results | join('\n') }}"
+  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
+
+- name: Set list of updated packages (yum)
+  set_fact:
+    package_updates: "{{ package_install.changes | dict2items | join('\n') }}"
+  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+
+- name: Display list of updated packages
+  debug:
+    var: package_updates
+  when: package_updates is defined
 
 - name: Ensure yum-utils installed
   yum:
@@ -22,5 +37,19 @@
 - name: Reboot system
   reboot:
   when: (system_update_reboot_policy == 'always') or
-        (system_update_reboot_policy == 'when_updated' and system_state is changed) or
+        (system_update_reboot_policy == 'when_updated' and package_install is changed) or
         (system_update_reboot_policy == 'when_needed' and needs_restarting.rc != 0)
+
+- name: Notify about updated packages
+  script: send-notification '{{ hostvars[item].email | default(system_update_report_default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
+  register: command_output
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: system_update_report | bool and hostvars[item].package_updates is defined
+  loop: "{{ ansible_play_batch }}"
+
+- name: Display notification command debug output
+  debug:
+    msg: "{{ command_output.results | selectattr('item', 'equalto', inventory_hostname) | map(attribute='stdout') | first }}"
+  when: system_update_report | bool and hostvars[inventory_hostname].package_updates is defined
