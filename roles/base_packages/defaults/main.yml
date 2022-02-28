@@ -5,7 +5,7 @@ base_packages:
   - bzip2
   - curl
   - man-pages
-  - mlocate
+  #- mlocate
   - nano
   - openssh-clients
   - psmisc
@@ -17,7 +17,7 @@ base_packages:
   #- sos
   - tar
   #- "{{ 'tmux' if ansible_facts.distribution_major_version|int >= 8 else 'screen' }}"
-  - unzip
+  #- unzip
   #- vim-enhanced
   #- wget
   - yum-utils
