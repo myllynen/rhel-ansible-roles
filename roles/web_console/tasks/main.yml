@@ -1,12 +1,44 @@
 ---
+- name: Set list of cockpit web console packages to install
+  set_fact:
+    cockpit_packages_install: "{{ cockpit_packages_install | default([]) + [item] }}"
+  loop:
+    - cockpit
+    - cockpit-bridge
+    - cockpit-system
+    - cockpit-ws
+    - "{{ 'cockpit-pcp' if web_console_enable_perf_metrics|bool else '' }}"
+
 - name: Install cockpit web console packages
   yum:
-    name:
-      - cockpit
+    name: "{{ cockpit_packages_install | select() | list }}"
     state: present
+    install_weak_deps: false
+
+- name: Set list of cockpit web console packages to remove
+  set_fact:
+    cockpit_packages_remove: "{{ cockpit_packages_remove | default([]) + [item] }}"
+  loop:
+    - "{{ 'cockpit-pcp' if not web_console_enable_perf_metrics|bool else '' }}"
+
+- name: Remove cockpit web console packages
+  yum:
+    name: "{{ cockpit_packages_remove | select() | list }}"
+    state: absent
+    autoremove: true
 
 - name: Enable cockpit web console
   service:
     name: cockpit.socket
     state: started
     enabled: true
+
+- name: Enable performance metrics archiving
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - pmcd
+    - pmlogger
+  when: web_console_enable_perf_metrics | bool
