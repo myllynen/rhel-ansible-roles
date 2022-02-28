@@ -18,7 +18,7 @@
     enabled: true
   register: firewalld_service
 
-- name: Apply firewalld service configuration changes
+- name: Apply firewalld configuration changes
   service:
     name: firewalld
     state: reloaded
