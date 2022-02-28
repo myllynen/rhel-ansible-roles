@@ -4,3 +4,4 @@ abrt_setup_enable_java_connector: true
 abrt_setup_enable_sosreport_plugin: true
 abrt_setup_enable_unsigned_reports: true
 abrt_setup_enable_vmcore_spooling: false
+abrt_setup_report_fatal_mce_only: true
