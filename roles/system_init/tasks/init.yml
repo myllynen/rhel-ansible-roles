@@ -81,7 +81,7 @@
 
 - name: Mark system initialized
   copy:
-    content: "This system was initialized on {{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ ansible_date_time.tz }}.\n"
+    content: "This system was initialized on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
     dest: "{{ system_init_file }}"
     mode: '0644'
 
