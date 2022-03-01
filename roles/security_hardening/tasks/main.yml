@@ -58,7 +58,7 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=2055604
 - name: Ensure system-local password quality requirements
   copy:
-    src: rhel_default.conf
+    src: rhel{{ ansible_facts.distribution_major_version }}_default.conf
     dest: /etc/security/pwquality.conf
     mode: '0644'
   when: ansible_facts.distribution_major_version|int >= 8
