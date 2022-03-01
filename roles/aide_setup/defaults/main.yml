@@ -1,0 +1,5 @@
+---
+# Enable periodic aide checks from cron,
+# either: hourly, daily, weekly, monthly
+# Use 'disabled' to disable cron checks.
+aide_setup_check_frequency: weekly

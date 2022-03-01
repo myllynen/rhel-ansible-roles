@@ -1,0 +1,30 @@
+---
+- name: Install aide packages
+  yum:
+    name: aide
+    state: present
+
+- name: Copy aide-check script
+  copy:
+    src: aide-check
+    dest: /usr/local/sbin/aide-check
+    mode: '0755'
+
+- name: Set cron frequency to be configured
+  set_fact:
+    cron_remove: "{{ ['hourly', 'daily', 'weekly', 'monthly'] | difference(aide_setup_check_frequency) }}"
+
+# Use loop to display the configuration
+- name: Enable periodic aide cron check
+  file:
+    src: /usr/local/sbin/aide-check
+    dest: /etc/cron.{{ item }}/aide-check
+    state: link
+  loop: "{{ [aide_setup_check_frequency] }}"
+  when: aide_setup_check_frequency in ['hourly', 'daily', 'weekly', 'monthly']
+
+- name: Remove unscheduled aide cron checks
+  file:
+    path: /etc/cron.{{ item }}/aide-check
+    state: absent
+  loop: "{{ cron_remove }}"
