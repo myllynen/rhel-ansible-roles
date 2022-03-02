@@ -1,0 +1,6 @@
+---
+# Space-separated lists
+boot_parameters_enable: "quiet"
+boot_parameters_disable: "debug rhgb"
+# Reboot system after changes
+boot_parameters_reboot: true
