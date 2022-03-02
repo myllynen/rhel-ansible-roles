@@ -1,0 +1,39 @@
+---
+- name: Check langpack support
+  set_fact:
+    langpacks: "{{ true if ansible_facts.distribution_major_version|int >= 8 else false }}"
+
+- name: Check C.UTF-8 support
+  set_fact:
+    c_utf_8: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
+
+- name: Set locale to be configured
+  set_fact:
+    locale: "{{ 'C.UTF-8' if (system_locale == 'auto' and c_utf_8) or system_locale == 'C.UTF-8' else 'en_US.UTF-8' }}"
+
+- name: Install minimal locale package
+  yum:
+    name: glibc-minimal-langpack
+    state: present
+  when: langpacks
+
+- name: Install locale package for en_US.UTF-8
+  yum:
+    name: glibc-langpack-en
+    state: present
+  when: langpacks and locale == 'en_US.UTF-8'
+
+- name: Configure system locale
+  replace:
+    path: /etc/locale.conf
+    regexp: '^LANG=.*'
+    replace: 'LANG="{{ locale }}"'
+  register: locale_config
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: locale_config is changed
+
+- name: Reboot system
+  reboot:
+  when: locale_config is changed and system_locale_reboot | bool
