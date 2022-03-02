@@ -1,5 +1,5 @@
 ---
-- name: Install aide packages
+- name: Install aide package
   yum:
     name: aide
     state: present
