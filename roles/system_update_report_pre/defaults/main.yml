@@ -1,2 +1,4 @@
 ---
+# Default recipient email address for the report if no
+# host-specific variable 'email' set in the inventory.
 system_update_report_pre_default_recipient: root@localhost
