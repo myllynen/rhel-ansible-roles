@@ -1,0 +1,45 @@
+---
+- name: Install fapolicyd packages
+  yum:
+    name:
+      - fapolicyd
+      - fapolicyd-selinux
+    state: present
+
+- name: Copy fapolicyd configuration file
+  copy:
+    src: fapolicyd.conf
+    dest: /etc/fapolicyd/fapolicyd.conf
+    mode: '0644'
+  register: config_file
+
+- name: Copy fapolicyd rules file
+  copy:
+    src: fapolicyd.rules
+    dest: /etc/fapolicyd/fapolicyd.rules
+    mode: '0644'
+  register: rules_file
+
+- name: Copy fapolicyd trust file
+  copy:
+    src: fapolicyd.trust
+    dest: /etc/fapolicyd/fapolicyd.trust
+    mode: '0644'
+  register: trust_file
+
+- name: Enable fapolicyd service
+  service:
+    name: fapolicyd
+    state: started
+    enabled: true
+  register: service_start
+  when: fapolicyd_setup_enable_service | bool
+
+- name: Apply fapolicyd configuration changes
+  service:
+    name: fapolicyd
+    state: restarted
+  when:
+    - fapolicyd_setup_enable_service | bool
+    - service_start is not changed
+    - (config_file is changed or rules_file is changed or trust_file is changed)

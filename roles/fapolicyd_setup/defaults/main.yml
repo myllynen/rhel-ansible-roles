@@ -1,0 +1,4 @@
+---
+# The configuration must be tested as mistakes
+# could prevent running anything on the system
+fapolicyd_setup_enable_service: false
