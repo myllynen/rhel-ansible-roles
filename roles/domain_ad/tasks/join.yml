@@ -1,0 +1,42 @@
+---
+- name: Create Kerberos configuration file
+  template:
+    src: krb5.conf.j2
+    dest: /etc/krb5.conf
+    mode: '0644'
+  register: krb5_config
+
+- name: Create SSSD configuration file
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    mode: '0600'
+  register: sssd_config
+
+- name: Join AD domain
+  shell: >
+    echo '{{ domain_ad_admin_password }}' |
+    adcli -v join
+    --domain={{ domain_ad_domain }}
+    --login-user={{ domain_ad_admin_username }}
+    --stdin-password
+  register: domain_join
+  when:
+    - domain_ad_action == 'join'
+    - not krb5_keytab.stat.exists
+
+- name: Enable sssd service
+  service:
+    name: sssd
+    state: started
+    enabled: true
+  register: service_start
+
+- name: Apply sssd configuration changes
+  service:
+    name: sssd
+    state: restarted
+  when:
+    - domain_ad_action == 'join'
+    - service_start is not changed
+    - (krb5_config is changed or sssd_config is changed)
