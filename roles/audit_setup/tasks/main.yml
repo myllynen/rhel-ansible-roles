@@ -25,9 +25,9 @@
 - name: Copy auditd configuration file
   vars:
     config_files:
-      RedHat_7: "RedHat_7_auditd.conf"
+      rhel7: "rhel7_auditd.conf"
       default: "default_auditd.conf"
-    distro_id: "{{ ansible_facts.distribution + '_' + ansible_facts.distribution_major_version }}"
+    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
     conf_file_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
     config_file: "{{ config_files[conf_file_id] }}"
   copy:

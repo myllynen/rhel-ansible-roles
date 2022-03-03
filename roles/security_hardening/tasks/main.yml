@@ -5,7 +5,7 @@
     state: present
   vars:
     selinux_package_lists:
-      RedHat_7:
+      rhel7:
         - libselinux-python
         - libsemanage-python
         - policycoreutils-python
@@ -17,7 +17,7 @@
         - policycoreutils-python-utils
         - selinux-policy-targeted
         - setools-console
-    distro_id: "{{ ansible_facts.distribution + '_' + ansible_facts.distribution_major_version }}"
+    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
     package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
     selinux_packages: "{{ selinux_package_lists[package_set] }}"
 
