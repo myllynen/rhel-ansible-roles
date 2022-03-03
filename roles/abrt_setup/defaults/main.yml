@@ -5,3 +5,8 @@ abrt_setup_enable_sosreport_plugin: true
 abrt_setup_enable_unsigned_reports: true
 abrt_setup_enable_vmcore_spooling: false
 abrt_setup_report_fatal_mce_only: true
+
+# Disable instead of enable
+abrt_setup_uninstall: false
+# Purge all related directories
+abrt_setup_uninstall_purge: true
