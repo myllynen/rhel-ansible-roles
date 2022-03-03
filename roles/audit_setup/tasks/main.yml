@@ -33,7 +33,7 @@
   copy:
     src: "{{ config_file }}"
     dest: /etc/audit/auditd.conf
-    mode: '0600'
+    mode: '0640'
   register: auditd_config
 
 # auditd is not compatible with the Ansible service module
