@@ -1,0 +1,29 @@
+---
+- name: Configure RHEL systems
+  hosts: all
+  become: true
+  roles:
+    - timesync
+    - remove_packages
+    - boot_parameters
+    - system_locale
+    - audit_setup
+    #- abrt_setup
+    #- aide_setup
+    - base_packages
+    - certificates
+    #- domain_ad
+    #- fapolicyd_setup
+    - firewall
+    #- motd
+    - performance_tuning
+    - root_password
+    - security_hardening
+    #- shell_profile
+    #- splunk_forwarder
+    - sshd_configuration
+    #- troubleshooting_packages
+    #- web_console
+    #- system_update_report_pre
+    #- system_update
+    - system_init
