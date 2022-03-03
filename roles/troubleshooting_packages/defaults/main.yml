@@ -21,3 +21,6 @@ troubleshooting_packages:
   - sysstat
   - tcpdump
   - time
+
+# Enable PCP performance metrics when needed
+troubleshooting_packages_enable_perf_metrics: true
