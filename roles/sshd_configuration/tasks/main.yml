@@ -1,30 +1,64 @@
 ---
-# TODO: Migrate using linux-system-role
-# https://www.redhat.com/en/blog/automating-and-managing-ssh-server-configuration-rhel-system-roles-part-1
-- name: Set PermitRootLogin
-  replace:
-    dest: /etc/ssh/sshd_config
-    regexp: '^(|#)PermitRootLogin .*'
-    replace: 'PermitRootLogin prohibit-password'
-  register: login_config
+- name: Read sshd options to enable
+  set_fact:
+    enable_list: "{{ enable_list | default({}) | combine(dict(item.split(':') | slice(1))) }}"
+  loop: "{{ [] if not sshd_options else sshd_options.split(',') | select() | list }}"
+  when: sshd_options is not mapping
 
-- name: Set ClientAliveInterval
-  replace:
-    dest: /etc/ssh/sshd_config
-    regexp: '^(|#)ClientAliveInterval .*'
-    replace: 'ClientAliveInterval 300'
-  register: alive_config
+- name: Set sshd options to enable
+  set_fact:
+    sshd: "{{ sshd_options if sshd_options is mapping else enable_list | default({}, true) }}"
 
-- name: Set ClientAliveCountMax
-  replace:
-    dest: /etc/ssh/sshd_config
-    regexp: '^(|#)ClientAliveCountMax .*'
-    replace: 'ClientAliveCountMax 3'
-  register: count_config
+- name: Abort if root trying to block root access completely
+  fail:
+    msg: "Refusing to configure 'PermitRootLogin no' when connected as root!"
+  when:
+    - "ansible_user == 'root'"
+    - "'PermitRootLogin' in sshd"
+    - "sshd.PermitRootLogin == 'no'"
 
-- name: Restart sshd service
+- name: Read sshd options to disable
+  set_fact:
+    disable_list: "{{ disable_list | default([]) + [item] }}"
+  loop: "{{ sshd_options_disable.split(',') | select() | list }}"
+  when: sshd_options_disable is string
+
+- name: Set sshd options to disable
+  set_fact:
+    sshd_disable: "{{ (disable_list if sshd_options_disable is string else sshd_options_disable) | default([], true) }}"
+
+- name: Check sshd_config.d directory
+  stat:
+    path: /etc/ssh/sshd_config.d
+  register: conf_dir
+
+- name: Set sshd configuration file
+  set_fact:
+    conf_file: "{{ '/etc/ssh/sshd_config' if not conf_dir.stat.exists else '/etc/ssh/sshd_config.d/zz-local.conf' }}"
+
+- name: Enable sshd configuration options
+  lineinfile:
+    path: "{{ conf_file }}"
+    regexp: '^(|#){{ item.key }} .*'
+    line: '{{ item.key + " " + item.value }}'
+    create: true
+    mode: '0600'
+    validate: sshd -tf %s
+  register: enable_options
+  loop: "{{ sshd | default({}) | dict2items | select() | list }}"
+  when: item.key not in sshd_disable
+
+- name: Disable sshd configuration options
+  replace:
+    path: "{{ item.0 }}"
+    regexp: '^({{ item.1 }} .*)'
+    replace: '#\1'
+    validate: sshd -tf %s
+  register: disable_options
+  loop: "{{ (['/etc/ssh/sshd_config'] + [conf_file]) | unique | product(sshd_disable) | list }}"
+
+- name: Apply sshd configuration changes
   service:
     name: sshd
-    state: restarted
-    enabled: true
-  when: login_config is changed or alive_config is changed or count_config is changed
+    state: reloaded
+  when: enable_options is changed or disable_options is changed

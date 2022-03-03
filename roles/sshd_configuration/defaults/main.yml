@@ -1,0 +1,7 @@
+---
+# Either comma-separated list or proper dict
+# These options will be enabled/updated in config
+sshd_options: PermitRootLogin:prohibit-password,X11Forwarding:no
+# Either comma-separated list or proper list
+# These options will be commented out from config
+sshd_options_disable: Banner
