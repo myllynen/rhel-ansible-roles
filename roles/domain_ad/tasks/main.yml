@@ -4,7 +4,7 @@
     name:
       - adcli
       - krb5-workstation
-      - oddjobd-mkhomedir
+      - oddjob-mkhomedir
       - sssd
     state: present
 
@@ -13,7 +13,7 @@
     path: /etc/krb5.keytab
   register: krb5_keytab
 
-- name: Discover AD domain configuration
+- name: Discover AD domain information
   shell: >
     adcli info -v {{ domain_ad_domain }}
   register: domain_info
@@ -26,7 +26,7 @@
 
 - name: Check computer status in AD domain
   shell: >
-    echo '{{ domain_ad_admin_password }}" |
+    echo '{{ domain_ad_admin_password }}' |
     adcli -v show-computer
     --domain={{ domain_ad_domain }}
     --login-user={{ domain_ad_admin_username }}

@@ -10,19 +10,15 @@
     --stdin-password
     {{ ansible_facts.fqdn }}
   register: domain_leave
-  when:
-    - domain_ad_action == 'leave'
-    - krb5_keytab.stat.exists
+  when: krb5_keytab.stat.exists
 
 - name: Disable sssd service
   service:
     name: sssd
     state: stopped
     enabled: false
-  when: domain_ad_action == 'leave'
 
 - name: Remove Kerberos keytab file
   file:
     path: /etc/krb5.keytab
-  state: absent
-  when: domain_ad_action == 'leave'
+    state: absent
