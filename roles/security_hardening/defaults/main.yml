@@ -1,4 +1,10 @@
 ---
 selinux: enforcing
+
 crypto_policy: DEFAULT
+
+# Available alternatives under files/
 password_quality_policy: local_default
+
+# One of: disabled, integrity, confidentiality
+kernel_lockdown: integrity

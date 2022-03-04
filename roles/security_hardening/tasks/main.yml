@@ -63,6 +63,35 @@
     mode: '0644'
   when: ansible_facts.distribution_major_version|int >= 8
 
+- name: Install grubby package
+  yum:
+    name: grubby
+    state: present
+  when: ansible_facts.distribution_major_version|int >= 9
+
+- name: Check kernel lockdown configuration
+  vars:
+    lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
+  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ lockdown_param }}(=| |")'
+  register: lockdown_check
+  failed_when: false
+  changed_when: false
+  when: ansible_facts.distribution_major_version|int >= 9
+
+- name: Configure kernel lockdown
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args=lockdown
+    "{{ '--args=lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else '' }}"
+  register: lockdown_config
+  when:
+    - ansible_facts.distribution_major_version|int >= 9
+    - (kernel_lockdown == 'disabled' and lockdown_check.rc == 0) or
+      (kernel_lockdown != 'disabled' and lockdown_check.rc != 0)
+
 - name: Reboot system
   reboot:
-  when: selinux_config.reboot_required or (current_crypto_policy is not skipped and crypto_policy_config is changed)
+  when: selinux_config.reboot_required or
+        (current_crypto_policy is not skipped and crypto_policy_config is changed) or
+        (lockdown_config is not skipped and lockdown_config is changed)
