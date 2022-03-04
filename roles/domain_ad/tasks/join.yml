@@ -20,7 +20,6 @@
     --domain={{ domain_ad_domain }}
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
-  register: domain_join
   when: not krb5_keytab.stat.exists
 
 - name: Enable sssd service
@@ -36,4 +35,4 @@
     state: restarted
   when:
     - service_start is not changed
-    - (krb5_config is changed or sssd_config is changed)
+    - (not krb5_keytab.stat.exists or krb5_config is changed or sssd_config is changed)
