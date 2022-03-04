@@ -13,14 +13,14 @@
     params_disable: "{{ [] if not boot_parameters_disable else boot_parameters_disable.split(' ') | select() | list }}"
 
 - name: Check enabled boot parameters
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}( |")'
+  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}(=| |")'
   register: enable_check
   loop: "{{ params_enable }}"
   failed_when: false
   changed_when: false
 
 - name: Check disabled boot parameters
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}( |")'
+  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}(=| |")'
   register: disable_check
   loop: "{{ params_disable }}"
   failed_when: false
