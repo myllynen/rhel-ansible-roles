@@ -13,9 +13,9 @@
     - base_packages
     - certificates
     #- domain_ad
+    #- ima_evm_setup
     #- fapolicyd_setup
     - firewall
-    #- ima_evm_setup
     #- motd
     - performance_tuning
     - root_password
