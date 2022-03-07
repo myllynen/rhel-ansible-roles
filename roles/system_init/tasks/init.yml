@@ -95,6 +95,7 @@
       - '.vmware-*'
       - 'foreman_*'
       - 'ks-script-*'
+      - 'tmp.*'
       - 'vmware-root_*'
   register: leftover_files
 
