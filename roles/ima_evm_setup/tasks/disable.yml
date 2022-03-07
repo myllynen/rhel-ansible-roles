@@ -1,0 +1,53 @@
+---
+- name: Check IMA/EVM boot parameters
+  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}='
+  register: boot_params_check
+  failed_when: false
+  changed_when: false
+  loop: "{{ ima_boot_params }}"
+
+- name: Disable IMA/EVM boot parameters
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args="{{ ima_boot_params | join(' ') }}"
+  register: boot_config
+  when: 0 in boot_params_check.results | map(attribute='rc') | list
+
+- name: Reboot system
+  reboot:
+  when: boot_config is changed
+
+- name: Gather package facts
+  package_facts:
+
+- name: Disable tpm2-abrmd service
+  service:
+    name: tpm2-abrmd
+    state: stopped
+    enabled: false
+  when: "'tpm2-abrmd' in ansible_facts.packages"
+
+- name: Check current IMA/EVM file attributes
+  command: getfattr -m - -d /usr/bin/getfattr
+  register: fattr_info
+  changed_when: false
+
+- name: Remove EVM file security attributes
+  shell: |
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
+  register: evm_attrs
+  failed_when: false
+  when: ima_evm_setup_sign_files | bool or 'security.evm' in fattr_info.stdout
+
+- name: Remove IMA file security attributes
+  shell: |
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
+  register: ima_attrs
+  failed_when: false
+  when: ima_evm_setup_sign_files | bool or 'security.ima' in fattr_info.stdout
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: (evm_attrs is not skipped and evm_attrs is changed) or
+        (ima_attrs is not skipped and ima_attrs is changed)

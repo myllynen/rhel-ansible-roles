@@ -1,0 +1,52 @@
+---
+# Enable or disable IMA/EVM
+ima_evm_setup_enable: true
+
+# Enable or disable TPM with IMA/EVM
+# A TPM2 device is required for this
+ima_evm_setup_enable_tpm: false
+
+# IMA appraisal mode
+# log - permissive mode with logging
+# enforce - enforcing mode with denials
+ima_evm_setup_ima_appraise: enforce
+
+# IMA policies to apply
+# List enables union of policies
+# appraise_tcb - appraise (verify) files
+# secure_boot - appraise kernel+firmware using MOK
+# critical_data - measure kernel critical data
+# fail_securely - fail verification on unsupported
+#                 or untrusted (FUSE) file systems
+ima_evm_setup_ima_policy: appraise_tcb,critical_data
+
+# IMA/EVM protection method
+# ima_hash - IMA appraisal using hashes
+#            works on RHEL, least coverage
+# ima_sig  - IMA appraisal using signatures
+#            not supported on RHEL (?), do not use
+# evm_hmac - IMA/EVM appraisal using HMAC
+#            NB. EVM not activated on boot on RHEL
+# evm_sig  - IMA/EVM appraisal using signatures
+#            not supported on RHEL (?), do not use
+# ima_mok  - IMA/EVM appraisal using MOK
+#            not implemented yet, do not use
+ima_evm_setup_method: ima_hash
+
+# IMA/EVM signing certificate private key password
+# This should come from vault. Uncomment if unused
+#ima_evm_setup_key_password: 's3cr3tp4ss'
+
+
+# Enable or disable additional audit messages
+ima_evm_setup_audit_log_all: false
+
+# Always measure/sign files on the system
+# Enabled if a check finds unsigned files
+# NB. Time-consuming but safe choice: true
+ima_evm_setup_sign_files: false
+
+
+# IMA hash function to use
+# sha256, sha384, or sha512
+ima_evm_setup_ima_hash: sha256

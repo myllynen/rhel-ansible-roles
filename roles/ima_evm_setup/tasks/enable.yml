@@ -1,0 +1,310 @@
+---
+- name: Gather service facts
+  service_facts:
+
+- name: Abort if fapolicyd enabled
+  fail:
+    msg: "IMA/EVM should be setup before fapolicyd, aborting!"
+  when:
+    - "'fapolicyd.service' in ansible_facts.services"
+    - ansible_facts.services['fapolicyd.service'].state == 'running' or
+      ansible_facts.services['fapolicyd.service'].status == 'enabled'
+
+- name: Install IMA/EVM packages
+  yum:
+    name: "{{ ima_packages }}"
+    state: present
+
+- name: Check TPM device
+  stat:
+    path: /dev/tpm0
+  register: tpm_device
+
+- name: Abort if unable to enable TPM
+  fail:
+    msg: "Unable to enable TPM, no TPM device present!"
+  when:
+    - ima_evm_setup_enable_tpm | bool
+    - not tpm_device.stat.exists
+
+- name: Install TPM packages
+  yum:
+    name: "{{ tpm_packages }}"
+    state: present
+  when: ima_evm_setup_enable_tpm | bool
+
+- name: Check platform type
+  stat:
+    path: /sys/firmware/efi
+  register: efi_platform
+
+- name: Abort if Secure Boot not supported
+  fail:
+    msg: "Unable to enable Secure Boot, not UEFI platform!"
+  when:
+    - "'secure_boot' in ima_evm_setup_ima_policy"
+    - not efi_platform.stat.exists
+
+- name: Install MOK packages
+  yum:
+    name: "{{ mok_packages }}"
+    state: present
+  when: "'secure_boot' in ima_evm_setup_ima_policy"
+
+- name: Set IMA/EVM boot parameters to configure (policies)
+  set_fact:
+    ima_policies: "{{ ima_policies | default([]) + ['ima_policy=' + item] }}"
+  loop: "{{ ima_evm_setup_ima_policy.split(',') }}"
+
+- name: Set IMA/EVM boot parameters to configure (other)
+  set_fact:
+    ima_params: "{{ ima_params | default([]) + [item] }}"
+  loop:
+    - ima_appraise={{ ima_evm_setup_ima_appraise }}
+    - ima_hash={{ ima_evm_setup_ima_hash }}
+
+- name: Check current integrity audit configuration
+  shell: |
+    grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| )integrity_audit={{ ima_evm_setup_audit_log_all | bool | int }}( |")'
+  register: boot_check_audit
+  failed_when: false
+  changed_when: false
+
+- name: Check current IMA/EVM boot parameters (hash)
+  shell: |
+    grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| )ima_hash={{ ima_evm_setup_ima_hash }}( |")'
+  register: boot_check_ima_hash
+  failed_when: false
+  changed_when: false
+
+- name: Check current IMA/EVM boot parameters (policies)
+  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}( |")'
+  register: boot_check_ima_policies
+  failed_when: false
+  changed_when: false
+  loop: "{{ ima_policies }}"
+
+# Assume IMA/EVM attributes if newest executable has them
+- name: Check current file IMA/EVM attributes
+  shell: getfattr -m - -d $(ls -1rt /usr/bin/* | tail -n 1)
+  register: fattr_info
+  changed_when: false
+
+- name: Check need for measure/sign files
+  set_fact:
+    ima_evm_setup_sign_files: true
+  when: boot_check_ima_hash.rc != 0 or
+        (1 in boot_check_ima_policies.results | map(attribute='rc') | list) or
+        'security.ima' not in fattr_info.stdout or
+        ('evm' in ima_evm_setup_method and 'security.evm' not in fattr_info.stdout)
+
+- name: Configure IMA/EVM measurement boot parameters
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
+    --args="evm=fix ima_appraise=fix ima_policy=appraise_tcb ima_hash={{ ima_evm_setup_ima_hash }}"
+  when:
+    - "'sig' not in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+
+- name: Configure IMA/EVM file signing boot parameters
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
+    --args="ima_hash={{ ima_evm_setup_ima_hash }}"
+  when:
+    - "'sig' in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+
+- name: Reboot system
+  reboot:
+  when: ima_evm_setup_sign_files | bool
+
+- name: Enable tpm2-abrmd service
+  service:
+    name: tpm2-abrmd
+    state: started
+    enabled: true
+  when: ima_evm_setup_enable_tpm | bool
+
+- name: Check existing EVM key
+  stat:
+    path: /etc/keys/evm-key
+  register: evm_key
+
+- name: Load existing Kernel Master Key and EVM key
+  shell: |
+    set -e
+    modprobe trusted
+    modprobe encrypted-keys
+    keyctl padd user kmk @u < /etc/keys/kmk
+    keyctl add encrypted evm-key "load $(cat /etc/keys/evm-key)" @u
+  when:
+    - "'evm' in ima_evm_setup_method"
+    - "'sig' not in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+    - evm_key.stat.exists
+
+# Assume TPM2 SRK has been created by using commands:
+# tpm2_createprimary --hierarchy o -G rsa2048 -c key.ctxt
+# tpm2_evictcontrol -c key.ctxt 0x81000001
+- name: Create trusted Kernel Master Key and EVM key
+  shell: |
+    set -e
+    modprobe trusted
+    mkdir -m 0700 -p /etc/keys
+    keyctl add trusted kmk "new 32 keyhandle=0x81000001" @u
+    keyctl pipe $(keyctl search @u trusted kmk) > /etc/keys/kmk
+    keyctl add encrypted evm-key "new trusted:kmk 32" @u
+    keyctl pipe $(keyctl search @u encrypted evm-key) > /etc/keys/evm-key
+    chmod 0400 /etc/keys/kmk /etc/keys/evm-key
+  when:
+    - ima_evm_setup_enable_tpm | bool
+    - "'evm' in ima_evm_setup_method"
+    - "'sig' not in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+    - not evm_key.stat.exists
+
+- name: Create encrypted Kernel Master Key and EVM key
+  shell: |
+    set -e
+    modprobe encrypted-keys
+    mkdir -m 0700 -p /etc/keys
+    keyctl add user kmk "$(dd if=/dev/urandom bs=1 count=32 2>/dev/null)" @u
+    keyctl pipe $(keyctl search @u user kmk) > /etc/keys/kmk
+    keyctl add encrypted evm-key "new user:kmk 32" @u
+    keyctl pipe $(keyctl search @u encrypted evm-key) > /etc/keys/evm-key
+    chmod 0400 /etc/keys/kmk /etc/keys/evm-key
+  when:
+    - not ima_evm_setup_enable_tpm | bool
+    - "'evm' in ima_evm_setup_method"
+    - "'sig' not in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+    - not evm_key.stat.exists
+
+- name: Check EVM status
+  slurp:
+    src: /sys/kernel/security/evm
+  register: evm_status
+
+- name: Enable EVM
+  shell: |
+    echo 1 > /sys/kernel/security/evm
+    sync ; echo 3 > /proc/sys/vm/drop_caches ;
+  when:
+    - "'evm' in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+    - evm_status.content|b64decode|trim == '0'
+
+- name: Perform IMA/EVM measurement of files (this will take a while)
+  shell: |
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -exec dd if='{}' of=/dev/null count=0 status=none \;
+  when:
+    - "'sig' not in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+
+- name: Check existing IMA/EVM signing certificate
+  stat:
+    path: /etc/keys/x509_evm.der
+  register: evm_cert
+
+- name: Generate IMA/EVM signing certificate and private key
+  shell: |
+    set -e
+    mkdir -m 0700 -p /etc/keys
+    openssl req -new -nodes -utf8 -{{ ima_evm_setup_ima_hash }} -days 36500 -batch \
+      -x509 -config /etc/keys/x509_gen.conf -outform DER -out /etc/keys/x509_evm.der \
+      -keyout /etc/keys/privkey_evm.pem
+    openssl rsa -pubout -in /etc/keys/privkey_evm.pem -out /etc/keys/pubkey_evm.pem
+    chmod 0400 /etc/keys/x509_evm.der /etc/keys/privkey_evm.pem /etc/keys/pubkey_evm.pem
+  when:
+    - "'sig' in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+    - not evm_cert.stat.exists
+
+- name: Add IMA/EVM cert signature to files (this will take a while)
+  environment:
+    EVMCTL_KEY_PASSWORD: "{{ ima_evm_setup_key_password | default('', true) }}"
+  vars:
+    q: "'"
+    env_pw: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
+    key_opt: "{{ '' if env_pw or ima_evm_setup_key_password is not defined else '-p' + q + ima_evm_setup_key_password + q }}"
+    sign_opt: "{{ 'ima_sign' if 'evm' not in ima_evm_setup_method else 'sign --imasig' }}"
+  shell: |
+    set -e
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm  > /dev/null 2>&1 || :
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima  > /dev/null 2>&1 || :
+    echo Sign everything
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    exit 0
+    echo Sign kernel modules
+    find /lib/modules -type f -uid 0 -name '*.ko.xz' -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    echo Sign firmware files
+    find /lib/firmware -type f -uid 0 -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    echo Sign executable files
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -executable -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    echo Sign non-executable libraries
+    find /usr/lib /usr/lib64 -type f -uid 0 -\! -executable -name '*.so*' -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+  when:
+    - "'sig' in ima_evm_setup_method"
+    - ima_evm_setup_sign_files | bool
+
+- name: Verify IMA file attributes
+  command: getfattr -m - -d /usr/bin/getfattr
+  register: fattr_info
+  changed_when: false
+  failed_when: "'security.ima' not in fattr_info.stdout"
+
+- name: Verify EVM file attributes
+  command: getfattr -m - -d /usr/bin/getfattr
+  register: fattr_info
+  changed_when: false
+  failed_when: "'security.evm' not in fattr_info.stdout"
+  when: "'evm' in ima_evm_setup_method"
+
+- name: Check current IMA/EVM boot parameters (other)
+  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}( |")'
+  register: boot_check_ima_params
+  failed_when: false
+  changed_when: false
+  loop: "{{ ima_params }}"
+
+- name: Check current IMA/EVM boot paramaters (unwanted)
+  shell: |
+    for p in $(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep -Eo 'ima_policy=[a-z_]*'); do
+      echo $p | grep -q {{ '-e ' + ' -e '.join(ima_policies) }}
+    done
+  register: boot_check_unwanted_policies
+  failed_when: false
+  changed_when: false
+
+- name: Configure integrity audit boot parameter
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args="integrity_audit"
+    --args="integrity_audit={{ ima_evm_setup_audit_log_all | bool | int }}"
+  when: boot_check_audit.rc != 0
+
+- name: Configure IMA/EVM boot parameters
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
+    --args="{{ ima_params | join(' ') + ' ' + ima_policies | join(' ') }}"
+  register: boot_config
+  when: (1 in boot_check_ima_policies.results | map(attribute='rc') | list) or
+        (1 in boot_check_ima_params.results | map(attribute='rc') | list) or
+        boot_check_unwanted_policies.rc == 1
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: ima_evm_setup_sign_files | bool
+
+- name: Reboot system
+  reboot:
+  when: boot_config is changed or boot_check_audit.rc != 0
