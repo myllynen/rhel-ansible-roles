@@ -15,6 +15,7 @@
     #- domain_ad
     #- fapolicyd_setup
     - firewall
+    #- ima_evm_setup
     #- motd
     - performance_tuning
     - root_password

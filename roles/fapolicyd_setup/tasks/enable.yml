@@ -42,4 +42,4 @@
   when:
     - fapolicyd_setup_enable_service | bool
     - service_start is not changed
-    - (config_file is changed or rules_file is changed or trust_file is changed)
+    - config_file is changed or rules_file is changed or trust_file is changed

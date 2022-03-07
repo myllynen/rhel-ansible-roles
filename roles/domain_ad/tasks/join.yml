@@ -35,4 +35,4 @@
     state: restarted
   when:
     - service_start is not changed
-    - (not krb5_keytab.stat.exists or krb5_config is changed or sssd_config is changed)
+    - not krb5_keytab.stat.exists or krb5_config is changed or sssd_config is changed

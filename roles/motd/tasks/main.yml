@@ -12,7 +12,7 @@
     state: directory
   when: ansible_facts.distribution_major_version|int >= 8
 
-- name: Determine motd message file path
+- name: Check motd message file path
   set_fact:
     motd_file: "{{ '/etc/motd.d/local' if ansible_facts.distribution_major_version|int >= 8 else '/etc/motd' }}"
 

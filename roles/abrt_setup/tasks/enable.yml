@@ -100,4 +100,4 @@
     state: restarted
   when:
     - service_start.results[0] is not changed
-    - (gpg_config is changed or mce_config is changed or vmcore_config is changed)
+    - gpg_config is changed or mce_config is changed or vmcore_config is changed

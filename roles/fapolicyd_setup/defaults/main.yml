@@ -1,4 +1,5 @@
 ---
-# The configuration must be tested as mistakes
-# could prevent running anything on the system
+# Enable or disable service after configuration
+# to allow testing and verification before use.
+# NB. See ima_evm_setup if planning to use IMA.
 fapolicyd_setup_enable_service: false
