@@ -7,4 +7,5 @@ crypto_policy: DEFAULT
 password_quality_policy: local_default
 
 # One of: disabled, integrity, confidentiality
-kernel_lockdown: integrity
+# NB. Enabling lockdown will prevent using kdump
+kernel_lockdown: disabled
