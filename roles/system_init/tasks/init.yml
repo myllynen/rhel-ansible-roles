@@ -20,7 +20,7 @@
   find:
     paths: /etc/sysconfig/network-scripts
     patterns:
-      - 'ifcfg-ens*'
+      - 'ifcfg-e*'
       - 'ifcfg-net*'
   register: nic_configs
 
@@ -35,49 +35,74 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=2056891
 - name: Ensure correct /etc/hostname
   copy:
-    dest: /etc/hostname
     content: "{{ ansible_facts.fqdn | lower }}\n"
+    dest: /etc/hostname
     mode: '0644'
 
-- name: Locate installer leftover log files
+- name: Check installer log directory
+  stat:
+    path: /var/log/anaconda
+  register: installer_logdir
+
+- name: Locate installer leftover root files
   find:
     paths: /root
-    patterns: '*-ks.cfg,install.post*.log'
-  register: log_files
+    patterns:
+      - '*-ks.cfg'
+      - 'install.post*.log'
+  register: root_files
 
 - name: Locate installer leftover kickstart files
   find:
     paths: /tmp
-    patterns: 'ks-script-*'
+    patterns:
+      - 'ks-script-*'
   register: kickstart_files
+  when: installer_logdir.stat.exists
 
-- name: Set combined list of leftover files
+- name: Set list of installer leftover files
   set_fact:
-    leftover_files: "{{ (log_files.files + kickstart_files.files) | map(attribute='path') | list }}"
+    installer_files: "{{ (root_files.files + kickstart_files.files) | map(attribute='path') | list }}"
+  when: installer_logdir.stat.exists
 
 - name: Store installer leftover files
   copy:
     remote_src: true
     src: "{{ item }}"
     dest: /var/log/anaconda
-  loop: "{{ leftover_files }}"
+  loop: "{{ installer_files }}"
+  loop_control:
+    label: "{{ item }} -> /var/log/anaconda/{{ item | basename }}"
+  when: installer_logdir.stat.exists
 
 - name: Relabel stored installer files
   sefcontext:
     target: /var/log/anaconda/{{ item | basename }}
     setype: var_log_t
     state: present
-  loop: "{{ leftover_files }}"
+  loop: "{{ installer_files }}"
+  loop_control:
+    label: /var/log/anaconda/{{ item | basename }}
+  when: installer_logdir.stat.exists
 
-- name: Remove installer leftover files
+- name: Locate leftover files
+  find:
+    paths: /tmp
+    hidden: true
+    file_type: any
+    patterns:
+      - '.cache'
+      - '.vmware-*'
+      - 'foreman_*'
+      - 'ks-script-*'
+      - 'vmware-root_*'
+  register: leftover_files
+
+- name: Remove leftover files
   file:
     path: "{{ item }}"
     state: absent
-  vars:
-    tmp_files:
-    - /tmp/.cache
-    - /tmp/foreman_built
-  loop: "{{ (leftover_files + tmp_files) | flatten(1) }}"
+  loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') | list }}"
 
 - name: Mark system initialized
   copy:
