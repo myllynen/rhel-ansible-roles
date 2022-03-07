@@ -20,6 +20,7 @@
     --domain={{ domain_ad_domain }}
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
+  no_log: true
   when: not krb5_keytab.stat.exists
 
 - name: Enable sssd service

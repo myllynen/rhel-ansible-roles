@@ -32,6 +32,7 @@
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
     {{ ansible_facts.fqdn }}
+  no_log: true
   register: computer_info
   failed_when: computer_info.rc != 0 and computer_info.rc != 5
   changed_when: false

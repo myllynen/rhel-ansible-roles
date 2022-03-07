@@ -9,6 +9,7 @@
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
     {{ ansible_facts.fqdn }}
+  no_log: true
   when: krb5_keytab.stat.exists
 
 - name: Disable sssd service
