@@ -1,4 +1,13 @@
 ---
+- name: Check system authentication configuration
+  lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: '^auth.*pam_sss.so.*'
+    state: absent
+  check_mode: true
+  register: auth_config
+  changed_when: false
+
 - name: Create Kerberos configuration file
   template:
     src: krb5.conf.j2
@@ -23,6 +32,12 @@
   no_log: true
   when: not krb5_keytab.stat.exists
 
+- name: Enable oddjobd service
+  service:
+    name: oddjobd
+    state: started
+    enabled: true
+
 - name: Enable sssd service
   service:
     name: sssd
@@ -37,3 +52,17 @@
   when:
     - service_start is not changed
     - not krb5_keytab.stat.exists or krb5_config is changed or sssd_config is changed
+
+- name: Configure system-wide authentication (RHEL 7)
+  command: authconfig --enablemkhomedir --enablesssd --enablesssdauth --update
+  when:
+    - auth_config.found == 0
+    - domain_ad_auth_conf_update | bool
+    - ansible_facts.distribution_major_version|int < 8
+
+- name: Configure system-wide authentication
+  command: authselect select -f sssd with-mkhomedir
+  when:
+    - auth_config.found == 0
+    - domain_ad_auth_conf_update | bool
+    - ansible_facts.distribution_major_version|int >= 8

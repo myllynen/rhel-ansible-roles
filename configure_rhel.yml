@@ -62,6 +62,10 @@
     domain_ad_delete_on_leave: true
     #domain_ad_allow_groups: GROUP@example.com
 
+    # Enable or disable running authconfig/authselect
+    # If false then setup by this role is not complete
+    domain_ad_auth_conf_update: true
+
     #
     # fapolicyd_setup
     #

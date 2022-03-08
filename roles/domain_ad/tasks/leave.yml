@@ -12,6 +12,12 @@
   no_log: true
   when: krb5_keytab.stat.exists
 
+- name: Disable oddjobd service
+  service:
+    name: oddjobd
+    state: stopped
+    enabled: false
+
 - name: Disable sssd service
   service:
     name: sssd

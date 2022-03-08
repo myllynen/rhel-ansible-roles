@@ -3,6 +3,7 @@
   yum:
     name:
       - adcli
+      - "{{ 'authselect' if ansible_facts.distribution_major_version|int >= 8 else 'authconfig' }}"
       - krb5-workstation
       - oddjob-mkhomedir
       - sssd
