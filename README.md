@@ -11,7 +11,7 @@ See the example playbook [configure_rhel.yml](configure_rhel.yml) for
 all the configuration options these roles support and how they could be
 used together. For additional roles to configure RHEL (such as network
 and storage), see https://github.com/linux-system-roles (available as
-_rhel-system-roles_ on RHEL.
+_rhel-system-roles_ on RHEL).
 
 ## See Also
 
