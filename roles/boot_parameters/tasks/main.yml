@@ -13,17 +13,23 @@
     params_disable: "{{ [] if not boot_parameters_disable else boot_parameters_disable.split(' ') | select() | list }}"
 
 - name: Check enabled boot parameters
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}(=| |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
+    state: absent
+  check_mode: true
   register: enable_check
   loop: "{{ params_enable }}"
-  failed_when: false
   changed_when: false
 
 - name: Check disabled boot parameters
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}(=| |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
+    state: absent
+  check_mode: true
   register: disable_check
   loop: "{{ params_disable }}"
-  failed_when: false
   changed_when: false
 
 - name: Configure boot parameters
@@ -33,10 +39,10 @@
     --args="{{ boot_parameters_enable }}"
     --remove-args="{{ boot_parameters_disable }}"
   register: boot_config
-  when: (1 in enable_check.results | map(attribute='rc') | list) or
-        (0 in disable_check.results | map(attribute='rc') | list)
+  when: (0 in enable_check.results | map(attribute='found') | list) or
+        (1 in disable_check.results | map(attribute='found') | list)
 
-- name: Fix default kernel parameters on RHEL 7
+- name: Fix default kernel parameters (RHEL 7)
   shell: |
     eval $(grubby --info=DEFAULT | awk '/^args/ {print $0}')
     sed -i -e "s,^GRUB_CMDLINE_LINUX=.*,GRUB_CMDLINE_LINUX=\"$args\"," /etc/default/grub

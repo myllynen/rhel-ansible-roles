@@ -64,23 +64,30 @@
     - ima_hash={{ ima_evm_setup_ima_hash }}
 
 - name: Check current integrity audit configuration
-  shell: |
-    grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| )integrity_audit={{ ima_evm_setup_audit_log_all | bool | int }}( |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| )integrity_audit={{ ima_evm_setup_audit_log_all | bool | int }}( |")'
+    state: absent
+  check_mode: true
   register: boot_check_audit
-  failed_when: false
   changed_when: false
 
 - name: Check current IMA/EVM boot parameters (hash)
-  shell: |
-    grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| )ima_hash={{ ima_evm_setup_ima_hash }}( |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| )ima_hash={{ ima_evm_setup_ima_hash }}( |")'
+    state: absent
+  check_mode: true
   register: boot_check_ima_hash
-  failed_when: false
   changed_when: false
 
 - name: Check current IMA/EVM boot parameters (policies)
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}( |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}( |")'
+    state: absent
+  check_mode: true
   register: boot_check_ima_policies
-  failed_when: false
   changed_when: false
   loop: "{{ ima_policies }}"
 
@@ -93,8 +100,8 @@
 - name: Check need for measure/sign files
   set_fact:
     ima_evm_setup_sign_files: true
-  when: boot_check_ima_hash.rc != 0 or
-        (1 in boot_check_ima_policies.results | map(attribute='rc') | list) or
+  when: boot_check_ima_hash.found == 0 or
+        (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
         'security.ima' not in fattr_info.stdout or
         ('evm' in ima_evm_setup_method and 'security.evm' not in fattr_info.stdout)
 
@@ -227,13 +234,13 @@
     - not evm_cert.stat.exists
 
 - name: Add IMA/EVM cert signature to files (this will take a while)
-  environment:
-    EVMCTL_KEY_PASSWORD: "{{ ima_evm_setup_key_password | default('', true) }}"
   vars:
     q: "'"
     env_pw: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
     key_opt: "{{ '' if env_pw or ima_evm_setup_key_password is not defined else '-p' + q + ima_evm_setup_key_password + q }}"
     sign_opt: "{{ 'ima_sign' if 'evm' not in ima_evm_setup_method else 'sign --imasig' }}"
+  environment:
+    EVMCTL_KEY_PASSWORD: "{{ ima_evm_setup_key_password | default('', true) }}"
   shell: |
     set -e
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm  > /dev/null 2>&1 || :
@@ -267,9 +274,12 @@
   when: "'evm' in ima_evm_setup_method"
 
 - name: Check current IMA/EVM boot parameters (other)
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}( |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}( |")'
+    state: absent
+  check_mode: true
   register: boot_check_ima_params
-  failed_when: false
   changed_when: false
   loop: "{{ ima_params }}"
 
@@ -288,7 +298,7 @@
     --update-kernel=ALL
     --remove-args="integrity_audit"
     --args="integrity_audit={{ ima_evm_setup_audit_log_all | bool | int }}"
-  when: boot_check_audit.rc != 0
+  when: boot_check_audit.found == 0
 
 - name: Configure IMA/EVM boot parameters
   command: >
@@ -297,8 +307,8 @@
     --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="{{ ima_params | join(' ') + ' ' + ima_policies | join(' ') }}"
   register: boot_config
-  when: (1 in boot_check_ima_policies.results | map(attribute='rc') | list) or
-        (1 in boot_check_ima_params.results | map(attribute='rc') | list) or
+  when: (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
+        (0 in boot_check_ima_params.results | map(attribute='found') | list) or
         boot_check_unwanted_policies.rc == 1
 
 - name: Rebuild initramfs
@@ -307,4 +317,4 @@
 
 - name: Reboot system
   reboot:
-  when: boot_config is changed or boot_check_audit.rc != 0
+  when: boot_config is changed or boot_check_audit.found == 0

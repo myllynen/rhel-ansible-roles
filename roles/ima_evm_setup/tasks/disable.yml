@@ -1,8 +1,11 @@
 ---
 - name: Check IMA/EVM boot parameters
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ item }}='
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}='
+    state: absent
+  check_mode: true
   register: boot_params_check
-  failed_when: false
   changed_when: false
   loop: "{{ ima_boot_params }}"
 
@@ -12,7 +15,7 @@
     --update-kernel=ALL
     --remove-args="{{ ima_boot_params | join(' ') }}"
   register: boot_config
-  when: 0 in boot_params_check.results | map(attribute='rc') | list
+  when: 1 in boot_params_check.results | map(attribute='found') | list
 
 - name: Reboot system
   reboot:

@@ -1,8 +1,5 @@
 ---
 - name: Install SELinux packages
-  yum:
-    name: "{{ selinux_packages }}"
-    state: present
   vars:
     selinux_package_lists:
       rhel7:
@@ -20,6 +17,9 @@
     distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
     package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
     selinux_packages: "{{ selinux_package_lists[package_set] }}"
+  yum:
+    name: "{{ selinux_packages }}"
+    state: present
 
 - name: Configure SELinux state
   selinux:
@@ -72,9 +72,12 @@
 - name: Check kernel lockdown configuration
   vars:
     lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
-  shell: grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -Eq '("| ){{ lockdown_param }}(=| |")'
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ lockdown_param }}(=| |")'
+    state: absent
+  check_mode: true
   register: lockdown_check
-  failed_when: false
   changed_when: false
   when: ansible_facts.distribution_major_version|int >= 9
 
@@ -87,8 +90,8 @@
   register: lockdown_config
   when:
     - ansible_facts.distribution_major_version|int >= 9
-    - (kernel_lockdown == 'disabled' and lockdown_check.rc == 0) or
-      (kernel_lockdown != 'disabled' and lockdown_check.rc != 0)
+    - (kernel_lockdown == 'disabled' and lockdown_check.found != 0) or
+      (kernel_lockdown != 'disabled' and lockdown_check.found == 0)
 
 - name: Reboot system
   reboot:
