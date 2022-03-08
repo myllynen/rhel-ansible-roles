@@ -194,9 +194,9 @@
     - remove_packages
     - boot_parameters
     - system_locale
-    - audit_setup
     #- abrt_setup
     #- aide_setup
+    - audit_setup
     - base_packages
     - certificates
     #- domain_ad
@@ -208,10 +208,10 @@
     - root_password
     - security_hardening
     #- shell_profile
-    #- splunk_forwarder
     - sshd_configuration
     #- troubleshooting_packages
     #- web_console
+    #- splunk_forwarder
     #- system_update_report_pre
     #- system_update
     - system_init
