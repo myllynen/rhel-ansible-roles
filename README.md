@@ -5,7 +5,13 @@
 
 Ansible roles for RHEL configuration.
 
-# See Also
+## Quick Intro
+
+See the example playbook [configure_rhel.yml](configure_rhel.yml) for
+all the configuration options these roles support and how they could be
+used together.
+
+## See Also
 
 See also
 [https://github.com/myllynen/rhel-image](https://github.com/myllynen/rhel-image).
