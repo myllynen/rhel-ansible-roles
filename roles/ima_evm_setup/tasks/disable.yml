@@ -1,4 +1,10 @@
 ---
+- name: Disable IMA custom policy configuration
+  file:
+    path: /etc/ima/ima-policy
+    state: absent
+  register: custom_policy
+
 - name: Check IMA/EVM boot parameters
   lineinfile:
     path: /etc/default/grub
@@ -19,7 +25,7 @@
 
 - name: Reboot system
   reboot:
-  when: boot_config is changed
+  when: boot_config is changed or custom_policy is changed
 
 - name: Gather package facts
   package_facts:
