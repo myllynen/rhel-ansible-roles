@@ -194,6 +194,8 @@
     - remove_packages
     - boot_parameters
     - system_locale
+    #- system_update_report_pre
+    #- system_update
     #- abrt_setup
     #- aide_setup
     - audit_setup
@@ -212,6 +214,4 @@
     #- troubleshooting_packages
     #- web_console
     #- splunk_forwarder
-    #- system_update_report_pre
-    #- system_update
     - system_init
