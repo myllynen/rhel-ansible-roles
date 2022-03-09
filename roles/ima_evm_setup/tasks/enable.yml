@@ -256,6 +256,7 @@
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -executable -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
     echo Sign non-executable libraries
     find /usr/lib /usr/lib64 -type f -uid 0 -\! -executable -name '*.so*' -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+  no_log: true
   when:
     - "'sig' in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -286,7 +287,7 @@
 - name: Check current IMA/EVM boot paramaters (unwanted)
   shell: |
     for p in $(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep -Eo 'ima_policy=[a-z_]*'); do
-      echo $p | grep -q {{ '-e ' + ' -e '.join(ima_policies) }}
+      echo $p | grep -q {{ '-e ' + ' -e '.join(ima_policies) }} || exit 1
     done
   register: boot_check_unwanted_policies
   failed_when: false
