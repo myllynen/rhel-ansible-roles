@@ -38,7 +38,6 @@
   register: crypto_policy_config
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - current_crypto_policy is not skipped
     - current_crypto_policy.stdout != crypto_policy
 
 - name: Configure system-local password quality requirements (RHEL 7)
@@ -96,5 +95,5 @@
 - name: Reboot system
   reboot:
   when: selinux_config.reboot_required or
-        (current_crypto_policy is not skipped and crypto_policy_config is changed) or
-        (lockdown_config is not skipped and lockdown_config is changed)
+        crypto_policy_config is changed or
+        lockdown_config is changed

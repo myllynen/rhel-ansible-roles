@@ -52,5 +52,4 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
-  when: (evm_attrs is not skipped and evm_attrs is changed) or
-        (ima_attrs is not skipped and ima_attrs is changed)
+  when: evm_attrs is changed or ima_attrs is changed
