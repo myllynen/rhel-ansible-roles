@@ -6,7 +6,7 @@ domain_ad_domain: example.com
 #domain_ad_admin_username:
 #domain_ad_admin_password:
 domain_ad_computer_precreated: false
-domain_ad_delete_on_leave: true
+domain_ad_computer_delete_on_leave: true
 #domain_ad_allow_groups: GROUP@example.com
 
 # Enable or disable running authconfig/authselect

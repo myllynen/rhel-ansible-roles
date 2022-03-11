@@ -1,7 +1,7 @@
 ---
 - name: Leave AD domain
   vars:
-    leave_action: "{{ 'delete-computer' if domain_ad_delete_on_leave else 'reset-computer' }}"
+    leave_action: "{{ 'delete-computer' if domain_ad_computer_delete_on_leave else 'reset-computer' }}"
   shell: >
     echo '{{ domain_ad_admin_password }}' |
     adcli -v {{ leave_action }}
@@ -12,17 +12,25 @@
   no_log: true
   when: krb5_keytab.stat.exists
 
-- name: Disable oddjobd service
-  service:
-    name: oddjobd
-    state: stopped
-    enabled: false
-
 - name: Disable sssd service
   service:
     name: sssd
-    state: stopped
     enabled: false
+
+- name: Stop sssd service
+  service:
+    name: sssd
+    state: stopped
+
+- name: Disable oddjobd service
+  service:
+    name: oddjobd
+    enabled: false
+
+- name: Stop oddjobd service
+  service:
+    name: oddjobd
+    state: stopped
 
 - name: Remove Kerberos keytab file
   file:
