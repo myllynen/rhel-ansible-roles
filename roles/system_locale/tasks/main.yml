@@ -7,25 +7,23 @@
   set_fact:
     c_utf_8: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
 
-- name: Set locale to be configured
-  set_fact:
-    locale: "{{ 'C.UTF-8' if (system_locale == 'auto' and c_utf_8) or system_locale == 'C.UTF-8' else 'en_US.UTF-8' }}"
-
 - name: Install locale packages
   vars:
     locale_packages:
       - glibc-minimal-langpack
-      - "{{ 'glibc-langpack-en' if locale == 'en_US.UTF-8' else '' }}"
+      - "{{ 'glibc-langpack-en' if system_locale == 'en_US.UTF-8' else '' }}"
   yum:
     name: "{{ locale_packages | select() | list }}"
     state: present
   when: langpacks
 
 - name: Configure system locale
+  vars:
+    lang: "{{ 'C.UTF-8' if (system_locale == 'auto' and c_utf_8) or system_locale == 'C.UTF-8' else 'en_US.UTF-8' }}"
   replace:
     path: /etc/locale.conf
     regexp: '^LANG=.*'
-    replace: 'LANG="{{ locale }}"'
+    replace: 'LANG="{{ lang }}"'
   register: locale_config
 
 - name: Rebuild initramfs

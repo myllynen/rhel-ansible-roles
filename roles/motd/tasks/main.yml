@@ -6,17 +6,15 @@
     mode: '0644'
   when: ansible_facts.distribution_major_version|int >= 8
 
-- name: Create motd.d configuration directory
+- name: Create motd configuration directory
   file:
     path: /etc/motd.d
     state: directory
   when: ansible_facts.distribution_major_version|int >= 8
 
-- name: Check motd message file path
-  set_fact:
-    motd_file: "{{ '/etc/motd.d/local' if ansible_facts.distribution_major_version|int >= 8 else '/etc/motd' }}"
-
-- name: Create local motd file
+- name: Create motd message file
+  vars:
+    motd_file: "{{ '/etc/motd.d/zz-local' if ansible_facts.distribution_major_version|int >= 8 else '/etc/motd' }}"
   template:
     src: local.j2
     dest: "{{ motd_file }}"

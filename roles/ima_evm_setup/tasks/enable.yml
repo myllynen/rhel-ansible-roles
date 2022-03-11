@@ -4,7 +4,7 @@
 
 - name: Abort if fapolicyd enabled
   fail:
-    msg: "IMA/EVM should be setup before fapolicyd, aborting!"
+    msg: "IMA/EVM should be setup before fapolicyd."
   when:
     - "'fapolicyd.service' in ansible_facts.services"
     - ansible_facts.services['fapolicyd.service'].state == 'running' or

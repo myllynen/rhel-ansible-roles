@@ -4,19 +4,19 @@
     name: '*'
     state: latest
     update_cache: true
+  check_mode: true
   register: package_install
   changed_when: false
-  check_mode: true
 
-- name: Set list of available package updates (dnf)
-  set_fact:
-    package_updates: "{{ package_install.results | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
-
-- name: Set list of available package updates (yum)
+- name: Set list of available package updates (RHEL 7)
   set_fact:
     package_updates: "{{ package_install.changes | dict2items | join('\n') }}"
   when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+
+- name: Set list of available package updates
+  set_fact:
+    package_updates: "{{ package_install.results | join('\n') }}"
+  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
 
 - name: Display list of available package updates
   debug:
@@ -29,8 +29,8 @@
   delegate_to: localhost
   run_once: true
   become: false
-  when: hostvars[item].package_updates is defined
   loop: "{{ ansible_play_batch }}"
+  when: hostvars[item].package_updates is defined
 
 - name: Display notification command debug output
   debug:

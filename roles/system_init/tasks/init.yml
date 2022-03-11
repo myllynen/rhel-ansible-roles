@@ -22,7 +22,7 @@
     patterns:
       - 'ifcfg-e*'
       - 'ifcfg-net*'
-  register: nic_configs
+  register: ifcfg_files
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2050704
 - name: Fix VMware NIC configuration
@@ -30,7 +30,8 @@
     path: "{{ item }}"
     regexp: '^\ncheck_link_down\(\) {\n return 1; \n}\n$'
     replace: ''
-  loop: "{{ nic_configs.files | map(attribute='path') | list }}"
+  register: nic_config
+  loop: "{{ ifcfg_files.files | map(attribute='path') | list }}"
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2056891
 - name: Ensure correct /etc/hostname
@@ -38,6 +39,11 @@
     content: "{{ ansible_facts.fqdn | lower }}\n"
     dest: /etc/hostname
     mode: '0644'
+  register: hostname_config
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: nic_config is changed or hostname_config is changed
 
 - name: Check installer log directory
   stat:

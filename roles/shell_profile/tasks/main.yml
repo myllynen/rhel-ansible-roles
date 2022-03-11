@@ -1,6 +1,6 @@
 ---
-- name: Copy local login profile file
+- name: Copy login profile file
   copy:
     src: local-login.sh
-    dest: /etc/profile.d/local-login.sh
+    dest: /etc/profile.d/zz-local-login.sh
     mode: '0644'

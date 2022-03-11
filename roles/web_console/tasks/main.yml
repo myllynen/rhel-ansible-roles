@@ -1,29 +1,23 @@
 ---
-- name: Set list of cockpit web console packages to install
-  set_fact:
-    cockpit_packages_install: "{{ cockpit_packages_install | default([]) + [item] }}"
-  loop:
-    - cockpit
-    - cockpit-bridge
-    - cockpit-system
-    - cockpit-ws
-    - "{{ 'cockpit-pcp' if web_console_enable_perf_metrics|bool else '' }}"
-
 - name: Install cockpit web console packages
+  vars:
+    cockpit_install:
+      - cockpit
+      - cockpit-bridge
+      - cockpit-system
+      - cockpit-ws
+      - "{{ 'cockpit-pcp' if web_console_enable_perf_metrics|bool else '' }}"
   yum:
-    name: "{{ cockpit_packages_install | select() | list }}"
+    name: "{{ cockpit_install | select() | list }}"
     state: present
     install_weak_deps: false
 
-- name: Set list of cockpit web console packages to remove
-  set_fact:
-    cockpit_packages_remove: "{{ cockpit_packages_remove | default([]) + [item] }}"
-  loop:
-    - "{{ 'cockpit-pcp' if not web_console_enable_perf_metrics|bool else '' }}"
-
 - name: Remove cockpit web console packages
+  vars:
+    cockpit_remove:
+      - "{{ 'cockpit-pcp' if not web_console_enable_perf_metrics|bool else '' }}"
   yum:
-    name: "{{ cockpit_packages_remove | select() | list }}"
+    name: "{{ cockpit_remove | select() | list }}"
     state: absent
     autoremove: true
 
@@ -33,12 +27,16 @@
     state: started
     enabled: true
 
-- name: Enable performance metrics archiving
+- name: Enable performance metrics monitoring
   service:
-    name: "{{ item }}"
+    name: pmcd
     state: started
     enabled: true
-  loop:
-    - pmcd
-    - pmlogger
+  when: web_console_enable_perf_metrics | bool
+
+- name: Enable performance metrics archiving
+  service:
+    name: pmlogger
+    state: started
+    enabled: true
   when: web_console_enable_perf_metrics | bool

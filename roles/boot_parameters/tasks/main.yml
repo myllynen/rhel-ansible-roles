@@ -4,15 +4,9 @@
     name: grubby
     state: present
 
-- name: Set list of boot parameters to enable
-  set_fact:
-    params_enable: "{{ [] if not boot_parameters_enable else boot_parameters_enable.split(' ') | select() | list }}"
-
-- name: Set list of boot parameters to disable
-  set_fact:
-    params_disable: "{{ [] if not boot_parameters_disable else boot_parameters_disable.split(' ') | select() | list }}"
-
 - name: Check enabled boot parameters
+  vars:
+    params_enable: "{{ [] if not boot_parameters_enable else boot_parameters_enable.split(' ') | select() | list }}"
   lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
@@ -23,6 +17,8 @@
   changed_when: false
 
 - name: Check disabled boot parameters
+  vars:
+    params_disable: "{{ [] if not boot_parameters_disable else boot_parameters_disable.split(' ') | select() | list }}"
   lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
@@ -42,7 +38,7 @@
   when: (0 in enable_check.results | map(attribute='found') | list) or
         (1 in disable_check.results | map(attribute='found') | list)
 
-- name: Fix default kernel parameters (RHEL 7)
+- name: Fix default kernel boot parameters (RHEL 7)
   shell: |
     eval $(grubby --info=DEFAULT | awk '/^args/ {print $0}')
     sed -i -e "s,^GRUB_CMDLINE_LINUX=.*,GRUB_CMDLINE_LINUX=\"$args\"," /etc/default/grub
