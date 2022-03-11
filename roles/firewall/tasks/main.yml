@@ -11,18 +11,24 @@
     replace: 'AllowZoneDrifting=no'
   register: firewalld_config
 
+- name: Enable firewalld service
+  service:
+    name: firewalld
+    enabled: true
+
 - name: Start firewalld service
   service:
     name: firewalld
     state: started
-    enabled: true
-  register: firewalld_service
+  register: service_start
 
 - name: Apply firewalld configuration changes
   service:
     name: firewalld
     state: reloaded
-  when: firewalld_config is changed and firewalld_service is not changed
+  when:
+    - service_start is not changed
+    - firewalld_config is changed
 
 - name: Configure default zone
   command: firewall-cmd --set-default-zone={{ firewall_default_zone }}

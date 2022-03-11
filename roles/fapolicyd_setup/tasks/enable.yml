@@ -30,8 +30,13 @@
 - name: Enable fapolicyd service
   service:
     name: fapolicyd
-    state: started
     enabled: true
+  when: fapolicyd_setup_enable_service | bool
+
+- name: Start fapolicyd service
+  service:
+    name: fapolicyd
+    state: started
   register: service_start
   when: fapolicyd_setup_enable_service | bool
 

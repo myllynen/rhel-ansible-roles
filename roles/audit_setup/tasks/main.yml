@@ -9,12 +9,6 @@
     name: audit
     state: present
 
-- name: Start auditd service
-  service:
-    name: auditd
-    state: started
-    enabled: true
-
 - name: Copy audit rules configuration file
   copy:
     src: "{{ audit_setup_rules }}.rules"
@@ -36,9 +30,22 @@
     mode: '0640'
   register: auditd_config
 
+- name: Enable auditd service
+  service:
+    name: auditd
+    enabled: true
+
+- name: Start auditd service
+  service:
+    name: auditd
+    state: started
+  register: service_start
+
 # auditd is not compatible with the Ansible service module
 - name: Apply audit configuration changes
   command:
     cmd: service auditd reload
     warn: false
-  when: rules_config is changed or auditd_config is changed
+  when:
+    - service_start is not changed
+    - rules_config is changed or auditd_config is changed

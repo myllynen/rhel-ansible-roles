@@ -4,11 +4,15 @@
     name: tuned
     state: present
 
+- name: Enable tuned service
+  service:
+    name: tuned
+    enabled: true
+
 - name: Start tuned service
   service:
     name: tuned
     state: started
-    enabled: true
 
 - name: Check current tuned profile
   slurp:
