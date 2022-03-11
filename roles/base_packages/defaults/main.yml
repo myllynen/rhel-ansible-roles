@@ -2,7 +2,7 @@
 base_packages:
   - bash-completion
   - bind-utils
-  - bzip2
+  #- bzip2
   - curl
   - man-pages
   #- mlocate
