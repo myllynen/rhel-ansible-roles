@@ -3,10 +3,10 @@
   include_tasks: enable.yml
   when:
     - ansible_facts.distribution_major_version|int < 9
-    - not abrt_setup_uninstall | bool
+    - abrt_setup_enable | bool
 
 - name: Disable abrt
   include_tasks: disable.yml
   when:
     - ansible_facts.distribution_major_version|int < 9
-    - abrt_setup_uninstall | bool
+    - not abrt_setup_enable | bool

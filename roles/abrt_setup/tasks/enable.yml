@@ -18,47 +18,50 @@
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
 
-- name: Set list of abrt packages to install
-  set_fact:
-    abrt_packages_install: "{{ abrt_packages_install | default([]) + [item] }}"
-  loop:
-    - abrt
-    - abrt-addon-ccpp
-    - abrt-addon-vmcore
-    - "{{ 'abrt-cli-ng' if ansible_facts.distribution_major_version|int >= 8 else 'abrt-cli' }}"
-    - "{{ 'abrt-console-notification' if abrt_setup_enable_console_notification|bool else '' }}"
-    - "{{ 'abrt-java-connector' if abrt_setup_enable_java_connector|bool else '' }}"
-    - "{{ 'abrt-plugin-sosreport' if abrt_setup_enable_sosreport_plugin|bool and ansible_facts.distribution_major_version|int >= 8 else '' }}"
-
 - name: Install abrt packages
+  vars:
+    abrt_install:
+      - abrt
+      - abrt-addon-ccpp
+      - abrt-addon-vmcore
+      - "{{ 'abrt-cli-ng' if ansible_facts.distribution_major_version|int >= 8 else 'abrt-cli' }}"
+      - "{{ 'abrt-console-notification' if abrt_setup_console_notification|bool else '' }}"
+      - "{{ 'abrt-java-connector' if abrt_setup_java_connector|bool else '' }}"
+      - "{{ 'abrt-plugin-sosreport' if abrt_setup_sosreport_plugin|bool and ansible_facts.distribution_major_version|int >= 8 else '' }}"
   yum:
-    name: "{{ abrt_packages_install | select() | list }}"
+    name: "{{ abrt_install | select() | list }}"
     state: present
 
-- name: Set list of abrt packages to remove
-  set_fact:
-    abrt_packages_remove: "{{ abrt_packages_remove | default([]) + [item] }}"
-  loop:
-    - "{{ 'abrt-console-notification' if not abrt_setup_enable_console_notification|bool else '' }}"
-    - "{{ 'abrt-java-connector' if not abrt_setup_enable_java_connector|bool else '' }}"
-    - "{{ 'abrt-plugin-sosreport' if not abrt_setup_enable_sosreport_plugin|bool else '' }}"
-
 - name: Remove abrt packages
+  vars:
+    abrt_remove:
+      - "{{ 'abrt-console-notification' if not abrt_setup_console_notification|bool else '' }}"
+      - "{{ 'abrt-java-connector' if not abrt_setup_java_connector|bool else '' }}"
+      - "{{ 'abrt-plugin-sosreport' if not abrt_setup_sosreport_plugin|bool else '' }}"
   yum:
-    name: "{{ abrt_packages_remove | select() | list }}"
+    name: "{{ abrt_remove | select() | list }}"
     state: absent
     autoremove: true
 
-- name: Configure abrt (GPG check)
+- name: Configure abrt (unsigned reports)
   vars:
-    gpg_check: "{{ 'yes' if abrt_setup_enable_unsigned_reports|bool else 'no' }}"
+    gpg_check: "{{ 'yes' if not abrt_setup_unsigned_reports|bool else 'no' }}"
   lineinfile:
     path: /etc/abrt/abrt-action-save-package-data.conf
     regexp: '^OpenGPGCheck = .*'
     line: 'OpenGPGCheck = {{ gpg_check }}'
   register: gpg_config
 
-- name: Configure abrt (oops plugin)
+- name: Configure abrt (unpackaged reports)
+  vars:
+    rpm_check: "{{ 'yes' if not abrt_setup_unpackaged_reports|bool else 'no' }}"
+  lineinfile:
+    path: /etc/abrt/abrt-action-save-package-data.conf
+    regexp: '^ProcessUnpackaged = .*'
+    line: 'ProcessUnpackaged = {{ rpm_check }}'
+  register: rpm_config
+
+- name: Configure abrt (MCE reports)
   vars:
     fatal_mce: "{{ 'yes' if abrt_setup_report_fatal_mce_only|bool else 'no' }}"
   lineinfile:
@@ -67,37 +70,48 @@
     line: 'OnlyFatalMCE = {{ fatal_mce }}'
   register: mce_config
 
-- name: Configure abrt (vmcore plugin)
+- name: Configure abrt (vmcore copying)
   vars:
-    copy_core: "{{ 'yes' if abrt_setup_enable_vmcore_spooling|bool else 'no' }}"
+    copy_core: "{{ 'yes' if not abrt_setup_vmcore_move_not_copy|bool else 'no' }}"
   lineinfile:
     path: /etc/abrt/plugins/vmcore.conf
     regexp: '^CopyVMcore = .*'
     line: 'CopyVMcore = {{ copy_core }}'
-  register: vmcore_config
 
-- name: Set list of abrt services to enable/disable
-  set_fact:
-    abrt_services: "{{ abrt_services | default([]) + [item] }}"
-  loop:
-    - { 'name': 'abrtd', 'enabled': true, 'state': 'started' }
-    - { 'name': 'abrt-ccpp', 'enabled': true, 'state': 'started' }
-    - { 'name': 'abrt-oops', 'enabled': true, 'state': 'started' }
-    - "{{ { 'name': 'abrt-journal-core', 'enabled': false } if ansible_facts.distribution_major_version|int >= 8 else '' }}"
-    - "{{ { 'name': 'abrt-xorg', 'enabled': false } if abrt_setup_enable_console_notification|bool else '' }}"
-
-- name: Configure abrt services
+- name: Enable abrt services
+  vars:
+    abrt_enable:
+      - { 'name': 'abrtd', 'enabled': true }
+      - { 'name': 'abrt-ccpp', 'enabled': true }
+      - { 'name': 'abrt-oops', 'enabled': true }
+      - { 'name': 'abrt-vmcore', 'enabled': true }
+      - "{{ { 'name': 'abrt-journal-core', 'enabled': false } if ansible_facts.distribution_major_version|int >= 8 else '' }}"
+      - "{{ { 'name': 'abrt-xorg', 'enabled': false } if abrt_setup_console_notification|bool else '' }}"
   service:
     name: "{{ item.name }}"
     enabled: "{{ item.enabled }}"
-    state: "{{ item.state | default(omit) }}"
-  register: service_start
-  loop: "{{ abrt_services | select() | list }}"
+  loop: "{{ abrt_enable | select() | list }}"
 
-- name: Apply abrtd configuration changes
+# abrt-vmcore is a one-shot service started on boot
+- name: Start abrt services
+  vars:
+    abrt_start:
+      - abrtd
+      - abrt-oops
   service:
-    name: abrtd
-    state: restarted
-  when:
-    - service_start.results[0] is not changed
-    - gpg_config is changed or mce_config is changed or vmcore_config is changed
+    name: "{{ item }}"
+    state: started
+  register: service_start
+  loop: "{{ abrt_start | select() | list }}"
+
+- name: Apply abrt configuration changes
+  vars:
+    restart_abrtd: "{{ true if (gpg_config is changed or rpm_config is changed) and service_start.results[0] is not changed else false }}"
+    restart_oops: "{{ true if mce_config is changed and not restart_abrtd and service_start.results[1] is not changed else false }}"
+    abrt_restart:
+      - "{{ { 'name': 'abrtd', 'state': 'restarted' } if restart_abrtd else '' }}"
+      - "{{ { 'name': 'abrt-oops', 'state': 'restarted' } if restart_oops else '' }}"
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  loop: "{{ abrt_restart | select() | list }}"
