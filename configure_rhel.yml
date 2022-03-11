@@ -6,16 +6,19 @@
     #
     # abrt_setup
     #
-    abrt_setup_enable_console_notification: true
-    abrt_setup_enable_java_connector: true
-    abrt_setup_enable_sosreport_plugin: true
-    abrt_setup_enable_unsigned_reports: true
-    abrt_setup_enable_vmcore_spooling: false
-    abrt_setup_report_fatal_mce_only: true
+    # Enable or disable abrt
+    # NB. abrt not available on RHEL 9+
+    abrt_setup_enable: true
 
-    # Disable instead of enable
-    abrt_setup_uninstall: false
-    # Purge all related directories
+    abrt_setup_report_fatal_mce_only: true
+    abrt_setup_vmcore_move_not_copy: true
+    abrt_setup_console_notification: true
+    abrt_setup_unpackaged_reports: true
+    abrt_setup_sosreport_plugin: true
+    abrt_setup_unsigned_reports: true
+    abrt_setup_java_connector: true
+
+    # Purge abrt directories on uninstall
     abrt_setup_uninstall_purge: true
 
     #
@@ -29,6 +32,7 @@
     #
     # audit_setup
     #
+    # Available alternatives in files/
     audit_setup_rules: local_default
 
     #
@@ -47,6 +51,7 @@
     #
     # certificates
     #
+    # CA bundle file in PEM format
     certificates_ca_file: local-ca-bundle.pem
 
     #
@@ -59,7 +64,7 @@
     #domain_ad_admin_username:
     #domain_ad_admin_password:
     domain_ad_computer_precreated: false
-    domain_ad_delete_on_leave: true
+    domain_ad_computer_delete_on_leave: true
     #domain_ad_allow_groups: GROUP@example.com
 
     # Enable or disable running authconfig/authselect
@@ -105,7 +110,7 @@
 
     crypto_policy: DEFAULT
 
-    # Available alternatives under files/
+    # Available alternatives in files/
     password_quality_policy: local_default
 
     # One of: disabled, integrity, confidentiality
@@ -116,6 +121,8 @@
     # splunk_forwarder
     #
     splunk_user_uid: 4445
+    # This should come from vault
+    #splunk_user_password_hash:
     splunk_deployment_server: splunk.example.com
     splunk_deployment_server_port: 8089
     splunk_deployment_server_check: true
