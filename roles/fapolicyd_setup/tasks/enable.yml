@@ -6,26 +6,51 @@
       - fapolicyd-selinux
     state: present
 
+- name: Check rules.d directory
+  stat:
+    path: /etc/fapolicyd/rules.d
+  register: rules_dir
+
 - name: Copy fapolicyd configuration file
   copy:
     src: fapolicyd.conf
     dest: /etc/fapolicyd/fapolicyd.conf
+    owner: root
+    group: fapolicyd
     mode: '0644'
-  register: config_file
+  register: daemon_conf
 
 - name: Copy fapolicyd rules file
+  vars:
+    rules_file: "{{ '/etc/fapolicyd/fapolicyd.rules' if not rules_dir.stat.exists else '/etc/fapolicyd/rules.d/zz-local.rules' }}"
   copy:
     src: fapolicyd.rules
-    dest: /etc/fapolicyd/fapolicyd.rules
+    dest: "{{ rules_file }}"
+    owner: root
+    group: fapolicyd
     mode: '0644'
-  register: rules_file
+  register: rules_conf
+
+- name: Remove old fapolicyd rules file
+  file:
+    path: /etc/fapolicyd/fapolicyd.rules
+    state: absent
+  when: rules_dir.stat.exists
 
 - name: Copy fapolicyd trust file
+  vars:
+    trust_file: "{{ '/etc/fapolicyd/fapolicyd.trust' if not rules_dir.stat.exists else '/etc/fapolicyd/trust.d/zz-local.trust' }}"
   copy:
     src: fapolicyd.trust
-    dest: /etc/fapolicyd/fapolicyd.trust
+    dest: "{{ trust_file }}"
+    owner: root
+    group: fapolicyd
     mode: '0644'
-  register: trust_file
+  register: trust_conf
+
+#- name: Verify fapolicyd configuration
+#  command: fapolicyd-cli --check-config
+#  changed_when: false
 
 - name: Enable fapolicyd service
   service:
@@ -47,4 +72,4 @@
   when:
     - fapolicyd_setup_enable_service | bool
     - service_start is not changed
-    - config_file is changed or rules_file is changed or trust_file is changed
+    - daemon_conf is changed or rules_conf is changed or trust_conf is changed
