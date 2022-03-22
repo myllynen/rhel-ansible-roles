@@ -65,12 +65,12 @@
   command: authconfig --enablemkhomedir --enablesssd --enablesssdauth --update
   when:
     - auth_config.found == 0
-    - domain_ad_auth_conf_update | bool
+    - domain_ad_auth_config_update | bool
     - ansible_facts.distribution_major_version|int < 8
 
 - name: Configure system-wide authentication
   command: authselect select -f sssd with-mkhomedir
   when:
     - auth_config.found == 0
-    - domain_ad_auth_conf_update | bool
+    - domain_ad_auth_config_update | bool
     - ansible_facts.distribution_major_version|int >= 8
