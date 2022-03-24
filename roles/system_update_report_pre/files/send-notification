@@ -82,7 +82,7 @@ if SMTP_PASSWORD:
     with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
         server.login(EMAIL_SENDER, SMTP_PASSWORD)
         server.send_message(report)
-elif SMTP_PORT == 445 or SMTP_PORT == 465 or SMTP_PORT == 587:
+elif SMTP_PORT in (445, 465, 587):
     with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
         server.send_message(report)
 else:
