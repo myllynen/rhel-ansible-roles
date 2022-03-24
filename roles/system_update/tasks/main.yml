@@ -21,7 +21,7 @@
     var: package_updates
   when: package_updates is defined
 
-- name: Ensure yum-utils installed
+- name: Install yum-utils package
   yum:
     name: yum-utils
     state: present
@@ -40,7 +40,16 @@
         (system_update_reboot_policy == 'when_updated' and package_install is changed) or
         (system_update_reboot_policy == 'when_needed' and needs_restarting.rc != 0)
 
+- name: Create PDF report
+  include_tasks: pdf.yml
+  when:
+    - system_update_report | bool
+    - system_update_report_pdf | bool
+    - package_updates is defined
+
 - name: Notify about updated packages
+  environment:
+    EMAIL_PDF: "{{ system_update_report_pdf }}"
   script: send-notification '{{ hostvars[item].email | default(system_update_report_default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
   register: command_output
   delegate_to: localhost
@@ -53,3 +62,13 @@
   debug:
     msg: "{{ command_output.results | selectattr('item', 'equalto', inventory_hostname) | map(attribute='stdout') | first }}"
   when: system_update_report | bool and hostvars[inventory_hostname].package_updates is defined
+
+- name: Remove local PDF directory
+  file:
+    path: /tmp/.ansible.pdf
+    state: absent
+  register: command_output
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: system_update_report_pdf | bool
