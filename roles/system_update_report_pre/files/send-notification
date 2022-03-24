@@ -1,27 +1,35 @@
 #!/usr/bin/env python3
+""" Send system update notification email """
+# pylint: disable=invalid-name,consider-using-f-string
 
+import email.utils
 import smtplib
 import ssl
 import sys
 import os
 
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 # Defaults
 SMTP_SERVER = "192.168.1.1"
-SMTP_PORT = 445
+SMTP_PORT = 587
 SMTP_PASSWORD = None
-EMAIL_SENDER = "root@localhost"
-EMAIL_SUBJECT = "[INFO] Upcoming Server Update"
+EMAIL_SENDER = "no-reply@localhost.localdomain"
+EMAIL_SUBJECT = "[INFO] Upcoming System Update"
+EMAIL_PDF = False
 
 debug = True
 message = ""
 
 if len(sys.argv) < 4:
-    sys.stderr.write("Usage: %s <email_to> <server> <update_message>\n"
+    sys.stderr.write("Usage: %s <email_to> <system> <update_message>\n"
                      % os.path.basename(sys.argv[0]))
     sys.exit(1)
 
 email_to = sys.argv[1]
-server = sys.argv[2]
+system = sys.argv[2]
 
 if "SMTP_SERVER" in os.environ:
     SMTP_SERVER = os.environ["SMTP_SERVER"]
@@ -33,46 +41,50 @@ if "EMAIL_SENDER" in os.environ:
     EMAIL_SENDER = os.environ["EMAIL_SENDER"]
 if "EMAIL_SUBJECT" in os.environ:
     EMAIL_SUBJECT = os.environ["EMAIL_SUBJECT"]
+if "EMAIL_PDF" in os.environ:
+    EMAIL_PDF = os.environ["EMAIL_PDF"] in ("True", "true")
 
-message += "\n<p>"
-message += "Server to be updated:\t\t%s</p>\n" % server
+message += "\n<p>System to be updated:\t\t%s</p>\n" % system
 if len(sys.argv) == 4:
     message += "<p>Pending updates:<br></p>\n<pre>\n%s\n</pre>\n" % str(sys.argv[3])
 else:
     message += "<p>Pending updates:<br></p>\n<pre>\n"
     for i in range(3, len(sys.argv)):
-        if sys.argv[i][0] == '{':
+        if sys.argv[i][0] == "{":
             message += "\n"
         else:
             message += " "
         message += "%s" % sys.argv[i]
     message += "\n</pre>\n"
+message += "\n\n<p><br><i>Do not reply to this email.</i></p>\n</html>\n"
 
-if not debug:
-    header = ""
-    header += "From: " + EMAIL_SENDER + "\n"
-    header += "To: " + email_to + "\n"
-    header += "MIME-Version: 1.0\n"
-    header += "Content-Type: text/html; charset='UTF-8'\n"
-    header += "Subject: " + EMAIL_SUBJECT + ": " + server + "\n"
-    header += "\n<html>\n\n"
-    message = header + message
-    message += "\n\n<p><br><i>Do not reply to this email.</i></p>\n</html>\n"
+report = MIMEMultipart()
+report["Message-ID"] = email.utils.make_msgid()
+report["Subject"] = EMAIL_SUBJECT + ": " + system
+report["Date"] = email.utils.formatdate(localtime=True)
+report["From"] = EMAIL_SENDER
+report["To"] = email_to
+report.attach(MIMEText(message, "html"))
+
+if EMAIL_PDF:
+    system_pdf = system.replace(".", "_") + ".pdf"
+    with open("/tmp/.ansible.pdf/" + system_pdf, "rb") as pdf:
+        attachment = MIMEApplication(pdf.read(), _subtype="pdf")
+    attachment.add_header("Content-Disposition", "attachment", filename=system_pdf)
+    report.attach(attachment)
 
 if debug:
-    sys.stdout.write("Recipient: " + email_to + "\n")
-    sys.stdout.write("Server: " + server + "\n")
-    sys.stdout.write("Message:")
-    sys.stdout.write(message)
+    sys.stdout.write(report.as_string())
+    sys.exit(0)
+
+if SMTP_PASSWORD:
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+        server.login(EMAIL_SENDER, SMTP_PASSWORD)
+        server.send_message(report)
+elif SMTP_PORT == 445 or SMTP_PORT == 465 or SMTP_PORT == 587:
+    with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+        server.send_message(report)
 else:
-    if SMTP_PASSWORD:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-            server.login(EMAIL_SENDER, SMTP_PASSWORD)
-            server.sendmail(EMAIL_SENDER, email_to.split(','), message)
-    elif SMTP_PORT == 445:
-        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
-            server.sendmail(EMAIL_SENDER, email_to.split(','), message)
-    else:
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.sendmail(EMAIL_SENDER, email_to.split(','), message)
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.send_message(report)

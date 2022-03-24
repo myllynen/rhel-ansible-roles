@@ -1,0 +1,54 @@
+---
+- name: Remove local PDF directory
+  file:
+    path: /tmp/.ansible.pdf
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  become: false
+
+- name: Create local PDF directory
+  file:
+    path: /tmp/.ansible.pdf
+    state: directory
+  delegate_to: localhost
+  run_once: true
+  become: false
+
+- name: Set report timestamp
+  set_fact:
+    pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
+
+- name: Set report PDF/PS/TXT file names
+  set_fact:
+    server_pdf: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
+    server_ps: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.ps' }}"
+    server_txt: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.txt' }}"
+
+- name: Write report to TXT file
+  shell: |
+    printf "{{ system_update_report_pre_pdf_preamble | replace('<HOST>', item) }}\n" > {{ hostvars[item].server_txt }}
+    printf "{{ hostvars[item].package_updates }}" >> {{ hostvars[item].server_txt }}
+    printf "\n\nThis report was automatically generated on {{ pdf_timestamp }}." >> {{ hostvars[item].server_txt }}
+  register: command_output
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: hostvars[item].package_updates is defined
+  loop: "{{ ansible_play_batch }}"
+
+- name: Convert TXT file to PS file
+  command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ item }} -T 4 -o {{ hostvars[item].server_ps }} {{ hostvars[item].server_txt }}
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: hostvars[item].package_updates is defined
+  loop: "{{ ansible_play_batch }}"
+
+- name: Convert PS file to PDF file
+  command: ps2pdf {{ hostvars[item].server_ps }} {{ hostvars[item].server_pdf }}
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: hostvars[item].package_updates is defined
+  loop: "{{ ansible_play_batch }}"

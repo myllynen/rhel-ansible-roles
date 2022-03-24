@@ -2,3 +2,15 @@
 # Default recipient email address for the report if no
 # host-specific variable 'email' set in the inventory.
 system_update_report_pre_default_recipient: root@localhost
+
+# Attach PDF version of the report
+# PDFs will be generated on the control host using
+# utilities from enscript and ghostscript packages
+system_update_report_pre_pdf: true
+
+# Preamble text to include in all generated PDFs,
+# <HOST> will be replaced with inventory hostname.
+system_update_report_pre_pdf_preamble: |
+    Pending System Updates Report for <HOST>
+    
+    The following package updates are pending:
