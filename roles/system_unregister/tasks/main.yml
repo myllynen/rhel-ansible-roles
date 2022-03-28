@@ -1,0 +1,9 @@
+---
+- name: Unregister from Red Hat Insights
+  command:
+    cmd: insights-client --unregister
+    removes: /etc/insights-client/.registered
+
+- name: Unregister from Red Hat Satellite
+  redhat_subscription:
+    state: absent
