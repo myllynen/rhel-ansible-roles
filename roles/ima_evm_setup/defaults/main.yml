@@ -15,10 +15,9 @@ ima_evm_setup_ima_appraise: enforce
 # List enables union of policies
 # appraise_tcb - appraise (verify) files
 # secure_boot - appraise kernel+firmware using MOK
-# critical_data - measure kernel critical data
 # fail_securely - fail verification on unsupported
 #                 or untrusted (FUSE) file systems
-ima_evm_setup_ima_policy: appraise_tcb,critical_data
+ima_evm_setup_ima_policy: appraise_tcb
 
 # IMA/EVM protection method
 # ima_hash - IMA appraisal using hashes
