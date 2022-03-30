@@ -1,4 +1,6 @@
 ---
+# NB. This role is experimental!
+
 # Enable or disable IMA/EVM
 ima_evm_setup_enable: true
 
