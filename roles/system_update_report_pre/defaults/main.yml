@@ -8,9 +8,15 @@ system_update_report_pre_default_recipient: root@localhost
 # utilities from enscript and ghostscript packages
 system_update_report_pre_pdf: true
 
-# Preamble text to include in all generated PDFs,
-# <HOST> will be replaced with inventory hostname.
+# Preamble text to include in all generated PDFs
+# <HOST> will be replaced with inventory hostname
+# <OSREL> will be replaced with OS release name
 system_update_report_pre_pdf_preamble: |
-    Pending System Updates Report for <HOST>
+    Pending System Update Report
+    
+    
+    Server: <HOST>
+    OS version: <OSREL>
+    
     
     The following package updates are pending:

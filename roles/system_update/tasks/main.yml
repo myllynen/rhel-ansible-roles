@@ -6,6 +6,10 @@
     update_cache: true
   register: package_install
 
+- name: Set package update timestamp
+  set_fact:
+    patch_time: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
+
 - name: Set list of updated packages (RHEL 7)
   set_fact:
     package_updates: "{{ package_install.changes | dict2items | join('\n') }}"
@@ -39,6 +43,7 @@
   when: (system_update_reboot_policy == 'always') or
         (system_update_reboot_policy == 'when_updated' and package_install is changed) or
         (system_update_reboot_policy == 'when_needed' and needs_restarting.rc != 0)
+  register: system_reboot
 
 - name: Create PDF report
   include_tasks: pdf.yml

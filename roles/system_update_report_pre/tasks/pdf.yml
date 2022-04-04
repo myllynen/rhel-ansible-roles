@@ -19,6 +19,11 @@
   set_fact:
     pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
 
+- name: Set OS release info
+  slurp:
+    src: /etc/redhat-release
+  register: os_release
+
 - name: Set report PDF/PS/TXT file names
   set_fact:
     server_pdf: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
@@ -27,9 +32,11 @@
 
 - name: Write report to TXT file
   shell: |
-    printf "{{ system_update_report_pre_pdf_preamble | replace('<HOST>', item) }}\n" > {{ hostvars[item].server_txt }}
-    printf "{{ hostvars[item].package_updates }}" >> {{ hostvars[item].server_txt }}
-    printf "\n\nThis report was automatically generated on {{ pdf_timestamp }}." >> {{ hostvars[item].server_txt }}
+    printf "{{ system_update_report_pre_pdf_preamble }}\n" > {{ hostvars[item].server_txt }}
+    sed -i -e 's,<HOST>,{{ item }},g' {{ hostvars[item].server_txt }}
+    sed -i -e 's,<OSREL>,{{ hostvars[item].os_release.content|b64decode|trim }},g' {{ hostvars[item].server_txt }}
+    printf "\n{{ hostvars[item].package_updates }}" >> {{ hostvars[item].server_txt }}
+    printf "\n\n\nThis report was automatically generated on {{ pdf_timestamp }}.\n" >> {{ hostvars[item].server_txt }}
   register: command_output
   delegate_to: localhost
   run_once: true

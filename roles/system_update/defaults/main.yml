@@ -19,9 +19,19 @@ system_update_report_default_recipient: root@localhost
 # utilities from enscript and ghostscript packages
 system_update_report_pdf: true
 
-# Preamble text to include in all generated PDFs,
-# <HOST> will be replaced with inventory hostname.
+# Preamble text to include in all generated PDFs
+# <HOST> will be replaced with inventory hostname
+# <OSREL> will be replaced with OS release name
+# <DATE> will be replaced with patching date/time
+# <REBOOT> will be indicate reboot, true or false
 system_update_report_pdf_preamble: |
-    System Update Report for <HOST>
+    System Update Report
+    
+    
+    Server: <HOST>
+    Patch date: <DATE>
+    OS version: <OSREL>
+    Server rebooted: <REBOOT>
+    
     
     The following packages were updated:
