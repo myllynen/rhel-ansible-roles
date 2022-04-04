@@ -239,9 +239,8 @@
     env_pw: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
     key_opt: "{{ '' if env_pw or ima_evm_setup_key_password is not defined else '-p' + q + ima_evm_setup_key_password + q }}"
     sign_opt: "{{ 'ima_sign' if 'evm' not in ima_evm_setup_method else 'sign --imasig' }}"
-  environment:
-    EVMCTL_KEY_PASSWORD: "{{ ima_evm_setup_key_password | default('', true) }}"
   shell: |
+    export EVMCTL_KEY_PASSWORD="{{ ima_evm_setup_key_password | default('', true) }}"
     set -e
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm  > /dev/null 2>&1 || :
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima  > /dev/null 2>&1 || :
