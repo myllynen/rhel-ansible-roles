@@ -21,6 +21,9 @@ See also
 See also
 [https://github.com/myllynen/ansible-packer](https://github.com/myllynen/ansible-packer).
 
+See also
+[https://github.com/myllynen/windows-ansible-roles](https://github.com/myllynen/windows-ansible-roles).
+
 ## License
 
 GPLv2+
