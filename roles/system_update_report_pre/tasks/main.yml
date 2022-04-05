@@ -31,7 +31,7 @@
 
 - name: Set list of available package updates
   set_fact:
-    package_updates: "{{ package_install.results | join('\n') }}"
+    package_updates: "{{ package_install.results | sort | join('\n') }}"
   when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
 
 - name: Display list of available package updates
