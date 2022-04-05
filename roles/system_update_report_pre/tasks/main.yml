@@ -26,7 +26,7 @@
 
 - name: Set list of available package updates (RHEL 7)
   set_fact:
-    package_updates: "{{ (el7_updates + el7_installs | default([])) | join('\n') }}"
+    package_updates: "{{ (el7_updates + el7_installs | default([])) | sort | join('\n') }}"
   when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
 
 - name: Set list of available package updates
