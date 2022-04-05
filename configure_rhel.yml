@@ -180,7 +180,7 @@
     # Attach PDF version of the report
     # PDFs will be generated on the control host using
     # utilities from enscript and ghostscript packages
-    system_update_report_pdf: true
+    system_update_report_pdf: false
 
     # Preamble text to include in all generated PDFs,
     # <HOST> will be replaced with inventory hostname.
@@ -199,7 +199,7 @@
     # Attach PDF version of the report
     # PDFs will be generated on the control host using
     # utilities from enscript and ghostscript packages
-    system_update_report_pre_pdf: true
+    system_update_report_pre_pdf: false
 
     # Preamble text to include in all generated PDFs,
     # <HOST> will be replaced with inventory hostname.
