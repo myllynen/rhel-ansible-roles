@@ -8,9 +8,25 @@
   register: package_install
   changed_when: false
 
+- name: Read list of available package updates (RHEL 7, part I)
+  set_fact:
+    el7_updates: "{{ el7_updates | default([]) + ['Updated: ' + item[0] + ' ' + item[1] | regex_replace(' from.*', '')] }}"
+  loop: "{{ package_install.changes.updated }}"
+  loop_control:
+    label: "{{ item[0] }}"
+  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+
+- name: Read list of available package updates (RHEL 7, part II)
+  set_fact:
+    el7_installs: "{{ el7_installs | default([]) + ['Installed: ' + item[0] + ' ' + item[1] | regex_replace(' from.*', '')] }}"
+  loop: "{{ package_install.changes.installed }}"
+  loop_control:
+    label: "{{ item[0] }}"
+  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+
 - name: Set list of available package updates (RHEL 7)
   set_fact:
-    package_updates: "{{ package_install.changes | dict2items | join('\n') }}"
+    package_updates: "{{ (el7_updates + el7_installs | default([])) | join('\n') }}"
   when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
 
 - name: Set list of available package updates
