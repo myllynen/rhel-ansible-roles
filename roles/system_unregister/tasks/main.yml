@@ -7,3 +7,25 @@
 - name: Unregister from Red Hat Satellite
   redhat_subscription:
     state: absent
+  register: registration
+
+- name: Remove Katello CA package
+  yum:
+    name: katello-ca-consumer-*
+    state: absent
+  when: registration is changed
+
+- name: Remove Katello CA certificates
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/rhsm/ca/katello-default-ca.pem
+    - /etc/rhsm/ca/katello-server-ca.pem
+  when: registration is changed
+
+- name: Clean package manager caches
+  command:
+    cmd: yum -C clean all
+    warn: false
+  when: registration is changed
