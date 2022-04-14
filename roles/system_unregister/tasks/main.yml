@@ -4,6 +4,14 @@
     cmd: insights-client --unregister
     removes: /etc/insights-client/.registered
 
+# Use removes: to only run on registered systems
+- name: Clean package manager caches (RHEL 7)
+  command:
+    cmd: yum -C clean all
+    warn: false
+    removes: /etc/rhsm/ca/katello-server-ca.pem
+  when: ansible_facts.distribution_major_version|int < 8
+
 - name: Unregister from Red Hat Satellite
   redhat_subscription:
     state: absent
@@ -26,6 +34,8 @@
 
 - name: Clean package manager caches
   command:
-    cmd: yum -C clean all
+    cmd: dnf -C clean all
     warn: false
-  when: registration is changed
+  when:
+    - registration is changed
+    - ansible_facts.distribution_major_version|int >= 8
