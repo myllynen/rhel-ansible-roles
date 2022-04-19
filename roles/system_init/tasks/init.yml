@@ -119,9 +119,9 @@
 
 - name: Reboot system
   reboot:
-  when: "'reboot' in system_init_final_actions.split(',')"
+  when: "'reboot' in system_init_final_actions"
 
 - name: Log initialization message
   syslogger:
     msg: "System initialized by system_init."
-  when: "'syslog' in system_init_final_actions.split(',')"
+  when: "'syslog' in system_init_final_actions"

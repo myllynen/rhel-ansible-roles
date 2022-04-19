@@ -5,35 +5,31 @@
     state: present
 
 - name: Check enabled boot parameters
-  vars:
-    params_enable: "{{ [] if not boot_parameters_enable else boot_parameters_enable.split(' ') | select() | list }}"
   lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
     state: absent
   check_mode: true
   register: enable_check
-  loop: "{{ params_enable }}"
+  loop: "{{ boot_parameters_enable | select() | list }}"
   changed_when: false
 
 - name: Check disabled boot parameters
-  vars:
-    params_disable: "{{ [] if not boot_parameters_disable else boot_parameters_disable.split(' ') | select() | list }}"
   lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
     state: absent
   check_mode: true
   register: disable_check
-  loop: "{{ params_disable }}"
+  loop: "{{ boot_parameters_disable | select() | list }}"
   changed_when: false
 
 - name: Configure boot parameters
   command: >
     grubby
     --update-kernel=ALL
-    --args="{{ boot_parameters_enable }}"
-    --remove-args="{{ boot_parameters_disable }}"
+    --args="{{ boot_parameters_enable | join(' ') }}"
+    --remove-args="{{ boot_parameters_disable | join(' ') }}"
   register: boot_config
   when: (0 in enable_check.results | map(attribute='found') | list) or
         (1 in disable_check.results | map(attribute='found') | list)

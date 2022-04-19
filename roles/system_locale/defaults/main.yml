@@ -4,5 +4,6 @@
 # en_US.UTF-8 - supported on all RHEL versions
 # auto - use C.UTF-8 if RHEL 9+ else en_US.UTF-8
 system_locale: auto
+
 # Reboot system after changes
 system_locale_reboot: true

@@ -1,6 +1,10 @@
 ---
-# Comma-separated list of ports (80/tcp,123/udp) or services (cockpit,https)
+# List of ports (80/tcp, 123/udp, ...) or services (cockpit, https, ...)
 # vars/main.yml lists always open ports/services. ssh is always kept open.
-firewall_open_ports: ""
-firewall_open_services: ""
+firewall_open_ports:
+#  - 321/udp
+
+firewall_open_services:
+#  - samba
+
 firewall_default_zone: public

@@ -1,13 +1,7 @@
 ---
-- name: Read sshd options to enable
-  set_fact:
-    enable_list: "{{ enable_list | default({}) | combine(dict(item.split(':') | slice(1))) }}"
-  loop: "{{ [] if not sshd_options else sshd_options.split(',') | select() | list }}"
-  when: sshd_options is not mapping
-
 - name: Set sshd options to enable
   set_fact:
-    sshd: "{{ sshd_options if sshd_options is mapping else enable_list | default({}, true) }}"
+    sshd: "{{ sshd_options | default({}, true) }}"
 
 - name: Abort if root trying to block root access completely
   fail:
@@ -17,15 +11,9 @@
     - "'PermitRootLogin' in sshd"
     - "sshd.PermitRootLogin == 'no'"
 
-- name: Read sshd options to disable
-  set_fact:
-    disable_list: "{{ disable_list | default([]) + [item] }}"
-  loop: "{{ sshd_options_disable.split(',') | select() | list }}"
-  when: sshd_options_disable is string
-
 - name: Set sshd options to disable
   set_fact:
-    sshd_disable: "{{ (disable_list if sshd_options_disable is string else sshd_options_disable) | default([], true) }}"
+    sshd_disable: "{{ sshd_options_disable | default([], true) }}"
 
 - name: Check sshd_config.d directory
   stat:
@@ -45,7 +33,7 @@
     mode: '0600'
     validate: sshd -tf %s
   register: enable_options
-  loop: "{{ sshd | default({}) | dict2items | select() | list }}"
+  loop: "{{ sshd | dict2items | select() | list }}"
   when: item.key not in sshd_disable
 
 - name: Disable sshd configuration options

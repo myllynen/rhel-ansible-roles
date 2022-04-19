@@ -54,7 +54,7 @@
 - name: Set IMA/EVM boot parameters to configure (policies)
   set_fact:
     ima_policies: "{{ ima_policies | default([]) + ['ima_policy=' + item] }}"
-  loop: "{{ ima_evm_setup_ima_policy.split(',') }}"
+  loop: "{{ ima_evm_setup_ima_policy }}"
 
 - name: Set IMA/EVM boot parameters to configure (other)
   set_fact:

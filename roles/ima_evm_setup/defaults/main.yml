@@ -4,6 +4,7 @@
 # Enable or disable IMA/EVM
 ima_evm_setup_enable: true
 
+
 # Enable or disable TPM with IMA/EVM
 # A TPM2 device is required for this
 ima_evm_setup_enable_tpm: false
@@ -14,12 +15,12 @@ ima_evm_setup_enable_tpm: false
 ima_evm_setup_ima_appraise: enforce
 
 # IMA policies to apply
-# List enables union of policies
 # appraise_tcb - appraise (verify) files
 # secure_boot - appraise kernel+firmware using MOK
 # fail_securely - fail verification on unsupported
 #                 or untrusted (FUSE) file systems
-ima_evm_setup_ima_policy: appraise_tcb
+ima_evm_setup_ima_policy:
+  - appraise_tcb
 
 # IMA/EVM protection method
 # ima_hash - IMA appraisal using hashes
