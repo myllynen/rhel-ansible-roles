@@ -3,6 +3,7 @@ ima_packages:
   - attr
   - ima-evm-utils
   - keyutils
+  - rpm-plugin-ima
 
 mok_packages:
   - mokutil

@@ -37,6 +37,11 @@
     enabled: false
   when: "'tpm2-abrmd' in ansible_facts.packages"
 
+- name: Remove RPM IMA plugin package
+  yum:
+    name: rpm-plugin-ima
+    state: absent
+
 - name: Check current IMA/EVM file attributes
   command: getfattr -m - -d /usr/bin/getfattr
   register: fattr_info
