@@ -42,9 +42,13 @@
     #
     # boot_parameters
     #
-    # Space-separated lists
-    boot_parameters_enable: "quiet"
-    boot_parameters_disable: "debug rhgb"
+    boot_parameters_enable:
+      - quiet
+
+    boot_parameters_disable:
+      - debug
+      - rhgb
+
     # Reboot system after changes
     boot_parameters_reboot: true
 
@@ -60,11 +64,14 @@
     # Allowed actions: join, leave
     domain_ad_action: join
     domain_ad_domain: example.com
+
     # These should come from vault
     #domain_ad_admin_username:
     #domain_ad_admin_password:
+
     domain_ad_computer_precreated: false
     domain_ad_computer_delete_on_leave: true
+
     #domain_ad_allow_groups: GROUP@example.com
 
     # Enable or disable running authconfig/authselect
@@ -82,10 +89,14 @@
     #
     # firewall
     #
-    # Comma-separated list of ports (80/tcp,123/udp) or services (cockpit,https)
+    # List of ports (80/tcp, 123/udp, ...) or services (cockpit, https, ...)
     # vars/main.yml lists always open ports/services. ssh is always kept open.
-    firewall_open_ports: ""
-    firewall_open_services: ""
+    firewall_open_ports:
+    #  - 321/udp
+
+    firewall_open_services:
+    #  - samba
+
     firewall_default_zone: public
 
     #
@@ -132,21 +143,24 @@
     #
     # sshd_configuration
     #
-    # Either comma-separated list or proper dict
     # These options will be enabled/updated in config
-    sshd_options: PermitRootLogin:prohibit-password,X11Forwarding:no
-    # Either comma-separated list or proper list
+    sshd_options:
+      PermitRootLogin: prohibit-password
+      X11Forwarding: "no"
+
     # These options will be commented out from config
-    sshd_options_disable: Banner
+    sshd_options_disable:
+      - Banner
 
     #
     # system_init
     #
     # Actions to take after initialization
-    # nothing - do not reboot or write log
     # reboot - reboot after initialization
     # syslog - write message to system log
-    system_init_final_actions: reboot,syslog
+    system_init_final_actions:
+      - reboot
+      - syslog
 
     #
     # system_locale
@@ -156,6 +170,7 @@
     # en_US.UTF-8 - supported on all RHEL versions
     # auto - use C.UTF-8 if RHEL 9+ else en_US.UTF-8
     system_locale: auto
+
     # Reboot system after changes
     system_locale_reboot: true
 
@@ -211,7 +226,12 @@
     #
     # timesync
     #
-    ntp_servers: 0.rhel.pool.ntp.org,1.rhel.pool.ntp.org,2.rhel.pool.ntp.org,3.rhel.pool.ntp.org
+    ntp_servers:
+      - 0.rhel.pool.ntp.org
+      - 1.rhel.pool.ntp.org
+      - 2.rhel.pool.ntp.org
+      - 3.rhel.pool.ntp.org
+      - time.cloudflare.com
 
     #
     # troubleshooting_packages - list omitted here for brevity
