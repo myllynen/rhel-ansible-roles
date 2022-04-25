@@ -7,26 +7,26 @@
 
 - name: Create issue file
   vars:
-    issue_content: "{{ lookup('template', 'issue.j2') }}"
+    issue_content: "{{ lookup('template', 'issue.j2') | trim }}"
     issue_file: "{{ '/etc/issue.d/zz-local.issue' if ansible_facts.distribution_major_version|int >= 8 else '/etc/issue' }}"
   template:
     src: issue.j2
     dest: "{{ issue_file }}"
     mode: '0644'
-  when: issue_content != 'Placeholder\n'
+  when: issue_content != 'Placeholder'
 
 - name: Create motd directory
   file:
     path: /etc/motd.d
     state: directory
-  when: ansible_facts.distribution_major_version|int >= 8
+  when: ansible_facts.distribution_major_version|int > 8
 
 - name: Create motd file
   vars:
-    motd_content: "{{ lookup('template', 'motd.j2') }}"
-    motd_file: "{{ '/etc/motd.d/zz-local' if ansible_facts.distribution_major_version|int >= 8 else '/etc/motd' }}"
+    motd_content: "{{ lookup('template', 'motd.j2') | trim }}"
+    motd_file: "{{ '/etc/motd.d/zz-local.motd' if ansible_facts.distribution_major_version|int > 8 else '/etc/motd' }}"
   template:
     src: motd.j2
     dest: "{{ motd_file }}"
     mode: '0644'
-  when: motd_content != 'Placeholder\n'
+  when: motd_content != 'Placeholder'

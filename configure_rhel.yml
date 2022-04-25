@@ -258,7 +258,7 @@
     ##- ima_evm_setup
     #- fapolicyd_setup
     - firewall
-    #- motd-issue
+    #- motd_issue
     - performance_tuning
     - root_password
     - security_hardening
