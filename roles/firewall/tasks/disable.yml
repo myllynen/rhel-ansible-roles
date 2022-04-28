@@ -1,0 +1,10 @@
+---
+- name: Stop firewalld service
+  service:
+    name: firewalld
+    state: stopped
+
+- name: Disable firewalld service
+  service:
+    name: firewalld
+    enabled: false

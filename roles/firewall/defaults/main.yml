@@ -1,4 +1,7 @@
 ---
+# Enable or disable firewall
+firewall_enable: true
+
 # List of ports (80/tcp, 123/udp, ...) or services (cockpit, https, ...)
 # vars/main.yml lists always open ports/services. ssh is always kept open.
 firewall_open_ports:
