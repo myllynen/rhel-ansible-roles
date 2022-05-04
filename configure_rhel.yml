@@ -317,6 +317,7 @@
     - performance_tuning
     - root_password
     - security_hardening
+    - service_state
     #- shell_profile
     - sshd_configuration
     #- troubleshooting_packages
