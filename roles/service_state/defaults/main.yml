@@ -1,0 +1,13 @@
+---
+# List of services to stop and disable
+# Missing services will be ignored
+service_state_disable:
+  - mlocate-updatedb.timer
+  - nfs-client.target
+  - rpcbind.service
+  - rpcbind.socket
+
+# List of services to enable and start
+# Missing services will be ignored
+service_state_enable:
+  - irqbalance.service

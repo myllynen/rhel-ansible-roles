@@ -1,0 +1,31 @@
+---
+- name: Gather service facts
+  service_facts:
+
+- name: Stop service
+  service:
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ service_state_disable | select() | list }}"
+  when: item in ansible_facts.services
+
+- name: Disable service
+  service:
+    name: "{{ item }}"
+    enabled: false
+  loop: "{{ service_state_disable | select() | list }}"
+  when: item in ansible_facts.services
+
+- name: Enable service
+  service:
+    name: "{{ item }}"
+    enabled: true
+  loop: "{{ service_state_enable | select() | list }}"
+  when: item in ansible_facts.services
+
+- name: Start service
+  service:
+    name: "{{ item }}"
+    state: started
+  loop: "{{ service_state_enable | select() | list }}"
+  when: item in ansible_facts.services
