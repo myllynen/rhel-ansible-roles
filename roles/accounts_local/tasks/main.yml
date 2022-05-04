@@ -1,0 +1,39 @@
+---
+- name: Delete local user
+  user:
+    name: "{{ item }}"
+    state: absent
+    remove: true
+  loop: "{{ accounts_local_users_delete | select() | list }}"
+
+- name: Delete local group
+  group:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ accounts_local_groups_delete | select() | list }}"
+
+- name: Create local group
+  group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid }}"
+    state: present
+  loop: "{{ accounts_local_groups_create | select() | list }}"
+
+- name: Create local user
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    group: "{{ item.group }}"
+    comment: "{{ item.comment | default(omit) }}"
+    home: "{{ item.home | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    state: present
+  loop: "{{ accounts_local_users_create | select() | list }}"
+
+- name: Add user to supplementary groups
+  user:
+    name: "{{ item.name }}"
+    append: "{{ item.append }}"
+    groups: "{{ item.groups }}"
+    state: present
+  loop: "{{ accounts_local_users_groups | select() | list }}"

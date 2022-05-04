@@ -1,0 +1,32 @@
+---
+# List of local users to delete
+# NB. Will remove users' home dirs
+accounts_local_users_delete:
+#  - testuser
+
+# List of local groups to delete
+accounts_local_groups_delete:
+#  - testgroup
+
+# List of local groups to create
+# name, gid are mandatory
+accounts_local_groups_create:
+#  - name: testgroup
+#    gid: 12345
+
+# List of local users to create
+# name, uid, group are mandatory
+accounts_local_users_create:
+#  - name: testuser
+#    uid: 12345
+#    group: testgroup
+#    comment: Test User
+#    home: /home/testuser
+#    shell: /bin/bash
+
+# List of supplementary groups for users
+# name, groups, append are mandatory
+accounts_local_users_groups:
+#  - name: testuser
+#    groups: tcpdump,wheel
+#    append: true
