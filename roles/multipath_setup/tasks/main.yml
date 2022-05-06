@@ -1,0 +1,44 @@
+---
+- name: Install multipath packages
+  yum:
+    name: device-mapper-multipath
+    state: present
+
+- name: Copy multipath configuration file
+  vars:
+    config_content: "{{ lookup('file', multipath_setup_config_file) | trim }}"
+  copy:
+    src: "{{ multipath_setup_config_config }}"
+    dest: /etc/multipath.conf
+    mode: '0644'
+  register: multipath_config
+  when: config_content != 'Placeholder'
+
+- name: Enable multipathd service
+  service:
+    name: multipathd
+    enabled: true
+
+- name: Start multipathd service
+  service:
+    name: multipathd
+    state: started
+  register: service_start
+  when: multipath_setup_reboot | bool
+
+- name: Apply multipathd configuration changes
+  service:
+    name: multipathd
+    state: restarted
+  when:
+    - service_start is not changed
+    - multipath_config is changed
+    - not multipath_setup_reboot | bool
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: multipath_config is changed
+
+- name: Reboot system
+  reboot:
+  when: multipath_config is changed and multipath_setup_reboot | bool

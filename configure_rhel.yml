@@ -138,6 +138,16 @@
     firewall_default_zone: public
 
     #
+    # multipath_setup
+    #
+    # Available alternatives in files/
+    multipath_setup_config_file: multipath.conf
+
+    # Reboot system after changes
+    # multipathd will be restarted if no reboot
+    multipath_setup_reboot: true
+
+    #
     # performance_tuning
     #
     tuned_profile: "{{ 'virtual-guest' if ansible_facts.virtualization_role == 'guest' else 'throughput-performance' }}"
@@ -301,6 +311,7 @@
     - remove_packages
     - boot_parameters
     - system_locale
+    #- multipath_setup
     #- system_update_report_pre
     #- system_update
     #- abrt_setup
