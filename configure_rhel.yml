@@ -311,12 +311,12 @@
     - remove_packages
     - boot_parameters
     - system_locale
+    - audit_setup
     #- multipath_setup
     #- system_update_report_pre
     #- system_update
     #- abrt_setup
     #- aide_setup
-    - audit_setup
     #- accounts_local
     - base_packages
     - certificates
