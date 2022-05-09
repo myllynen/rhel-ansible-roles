@@ -3,5 +3,5 @@
 multipath_setup_config_file: multipath.conf
 
 # Reboot system after changes
-# multipathd will be restarted if no reboot
+# Config file will be reloaded if no reboot
 multipath_setup_reboot: true

@@ -24,12 +24,12 @@
     name: multipathd
     state: started
   register: service_start
-  when: multipath_setup_reboot | bool
+  when: not multipath_setup_reboot | bool
 
 - name: Apply multipathd configuration changes
   service:
     name: multipathd
-    state: restarted
+    state: reloaded
   when:
     - service_start is not changed
     - multipath_config is changed
