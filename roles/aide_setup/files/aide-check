@@ -33,12 +33,12 @@ log_output() {
 
 log_msg info "Starting aide check..."
 
-if [ "$init_db" != "yes" -a ! -f /var/lib/aide/aide.db.gz ]; then
+if [ "$init_db" != "yes" ] && [ ! -f /var/lib/aide/aide.db.gz ]; then
   log_msg alert "aide database not initialized, aborting check!"
   exit 1
 fi
 
-if [ "$init_db" = "yes" -a ! -f /var/lib/aide/aide.db.gz ]; then
+if [ "$init_db" = "yes" ] && [ ! -f /var/lib/aide/aide.db.gz ]; then
   log_msg alert "Initializing new aide database..."
   rc=0
   aide --init > $tempfile 2>&1
@@ -76,7 +76,7 @@ if [ $rc -ne 0 ]; then
 fi
 rm -f $tempfile
 
-if [ "$update_db" = "yes" -a $rc -ne 0 ]; then
+if [ "$update_db" = "yes" ] && [ $rc -ne 0 ]; then
   log_msg alert "Updating aide database..."
   mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz >> $tempfile 2>&1
   if [ $? -ne 0 ]; then
