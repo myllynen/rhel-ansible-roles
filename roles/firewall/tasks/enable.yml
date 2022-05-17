@@ -37,7 +37,7 @@
 
 - name: Set list of ports to open
   set_fact:
-    ports_to_open: "{{ (firewall_always_open_ports | default([], true) + firewall_open_ports | default([], true)) | select() | list | unique }}"
+    ports_to_open: "{{ (__firewall_always_open_ports | default([], true) + firewall_open_ports | default([], true)) | select() | list | unique }}"
 
 - name: Open configured ports in firewall
   firewalld:
@@ -65,7 +65,7 @@
 
 - name: Set list of services to open
   set_fact:
-    services_to_open: "{{ (firewall_always_open_services | default([], true) + firewall_open_services | default([], true)) | select() | list | unique }}"
+    services_to_open: "{{ (__firewall_always_open_services | default([], true) + firewall_open_services | default([], true)) | select() | list | unique }}"
 
 - name: Open configured services in firewall
   firewalld:

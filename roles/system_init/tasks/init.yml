@@ -114,7 +114,7 @@
 - name: Mark system initialized
   copy:
     content: "This system was initialized on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
-    dest: "{{ system_init_file }}"
+    dest: "{{ __system_init_file }}"
     mode: '0644'
 
 - name: Reboot system

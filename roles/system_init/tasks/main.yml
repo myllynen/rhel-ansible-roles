@@ -1,7 +1,7 @@
 ---
 - name: Check system status
   stat:
-    path: "{{ system_init_file }}"
+    path: "{{ __system_init_file }}"
   register: system_init
 
 - name: Initialize fresh system

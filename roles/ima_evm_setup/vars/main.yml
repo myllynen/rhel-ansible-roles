@@ -1,19 +1,19 @@
 ---
-ima_packages:
+__ima_packages:
   - attr
   - ima-evm-utils
   - keyutils
   - rpm-plugin-ima
 
-mok_packages:
+__mok_packages:
   - mokutil
 
-tpm_packages:
+__tpm_packages:
   - tpm2-abrmd
   - tpm2-tools
   - tpm2-tss
 
-ima_boot_params:
+__ima_boot_params:
   - evm
   - ima_appraise
   - ima_hash

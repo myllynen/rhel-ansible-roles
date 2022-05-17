@@ -12,7 +12,7 @@
 
 - name: Install IMA/EVM packages
   yum:
-    name: "{{ ima_packages }}"
+    name: "{{ __ima_packages }}"
     state: present
 
 - name: Check TPM device
@@ -29,7 +29,7 @@
 
 - name: Install TPM packages
   yum:
-    name: "{{ tpm_packages }}"
+    name: "{{ __tpm_packages }}"
     state: present
   when: ima_evm_setup_enable_tpm | bool
 
@@ -47,7 +47,7 @@
 
 - name: Install MOK packages
   yum:
-    name: "{{ mok_packages }}"
+    name: "{{ __mok_packages }}"
     state: present
   when: "'secure_boot' in ima_evm_setup_ima_policy"
 
@@ -109,7 +109,7 @@
   command: >
     grubby
     --update-kernel=ALL
-    --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
+    --remove-args="{{ __ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="evm=fix ima_appraise=fix ima_policy=appraise_tcb ima_hash={{ ima_evm_setup_ima_hash }}"
   when:
     - "'sig' not in ima_evm_setup_method"
@@ -119,7 +119,7 @@
   command: >
     grubby
     --update-kernel=ALL
-    --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
+    --remove-args="{{ __ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="ima_hash={{ ima_evm_setup_ima_hash }}"
   when:
     - "'sig' in ima_evm_setup_method"
@@ -304,7 +304,7 @@
   command: >
     grubby
     --update-kernel=ALL
-    --remove-args="{{ ima_boot_params | difference('integrity_audit') | join(' ') }}"
+    --remove-args="{{ __ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="{{ ima_params | join(' ') + ' ' + ima_policies | join(' ') }}"
   register: boot_config
   when: (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
