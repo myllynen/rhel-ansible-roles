@@ -8,7 +8,7 @@
   vars:
     config_content: "{{ lookup('file', multipath_setup_config_file) | trim }}"
   copy:
-    src: "{{ multipath_setup_config_config }}"
+    src: "{{ multipath_setup_config_file }}"
     dest: /etc/multipath.conf
     mode: '0600'
   register: multipath_config
