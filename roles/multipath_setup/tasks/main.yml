@@ -10,7 +10,7 @@
   copy:
     src: "{{ multipath_setup_config_config }}"
     dest: /etc/multipath.conf
-    mode: '0644'
+    mode: '0600'
   register: multipath_config
   when: config_content != 'Placeholder'
 
