@@ -22,7 +22,7 @@
 
 - name: Set sshd configuration file
   set_fact:
-    conf_file: "{{ '/etc/ssh/sshd_config' if not conf_dir.stat.exists else '/etc/ssh/sshd_config.d/zz-local.conf' }}"
+    conf_file: "{{ '/etc/ssh/sshd_config' if not conf_dir.stat.exists else '/etc/ssh/sshd_config.d/01-local.conf' }}"
 
 - name: Enable sshd configuration options
   lineinfile:
