@@ -43,7 +43,8 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
-  when: nic_config is changed or hostname_config is changed
+  when: nic_config is changed or
+        hostname_config is changed
 
 - name: Check installer log directory
   stat:

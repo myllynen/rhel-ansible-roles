@@ -317,4 +317,5 @@
 
 - name: Reboot system
   reboot:
-  when: boot_config is changed or boot_check_audit.found == 0
+  when: boot_config is changed or
+        boot_check_audit.found == 0

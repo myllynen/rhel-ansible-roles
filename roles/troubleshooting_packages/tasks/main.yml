@@ -10,8 +10,8 @@
     state: started
     enabled: true
   when:
-    - "'pcp-system-tools' in troubleshooting_packages"
     - troubleshooting_packages_enable_perf_metrics | bool
+    - "'pcp-system-tools' in troubleshooting_packages"
 
 - name: Enable performance metrics archiving
   service:
@@ -19,5 +19,5 @@
     state: started
     enabled: true
   when:
-    - "'pcp-system-tools' in troubleshooting_packages"
     - troubleshooting_packages_enable_perf_metrics | bool
+    - "'pcp-system-tools' in troubleshooting_packages"

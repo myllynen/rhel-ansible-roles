@@ -16,7 +16,9 @@
   loop: "{{ package_install.changes.updated }}"
   loop_control:
     label: "{{ item[0] }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - package_install.changes is defined
 
 - name: Read list of updated packages (RHEL 7, part II)
   set_fact:
@@ -24,17 +26,23 @@
   loop: "{{ package_install.changes.installed }}"
   loop_control:
     label: "{{ item[0] }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - package_install.changes is defined
 
 - name: Set list of updated packages (RHEL 7)
   set_fact:
     package_updates: "{{ (el7_updates + el7_installs | default([])) | sort | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - package_install.changes is defined
 
 - name: Set list of updated packages
   set_fact:
     package_updates: "{{ package_install.results | sort | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
+  when:
+    - ansible_facts.pkg_mgr == 'dnf'
+    - 'Nothing to do' not in package_install.msg
 
 - name: Display list of updated packages
   debug:
@@ -77,12 +85,16 @@
   run_once: true
   become: false
   loop: "{{ ansible_play_batch }}"
-  when: system_update_report | bool and hostvars[item].package_updates is defined
+  when:
+    - system_update_report | bool
+    - hostvars[item].package_updates is defined
 
 - name: Display notification command debug output
   debug:
     msg: "{{ command_output.results | selectattr('item', 'equalto', inventory_hostname) | map(attribute='stdout') | first }}"
-  when: system_update_report | bool and hostvars[inventory_hostname].package_updates is defined
+  when:
+    - system_update_report | bool
+    - hostvars[inventory_hostname].package_updates is defined
 
 - name: Remove local PDF directory
   file:

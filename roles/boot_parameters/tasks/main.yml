@@ -38,8 +38,12 @@
   shell: |
     eval $(grubby --info=DEFAULT | awk '/^args/ {print $0}')
     sed -i -e "s,^GRUB_CMDLINE_LINUX=.*,GRUB_CMDLINE_LINUX=\"$args\"," /etc/default/grub
-  when: boot_config is changed and ansible_facts.distribution_major_version|int == 7
+  when:
+    - ansible_facts.distribution_major_version|int == 7
+    - boot_config is changed
 
 - name: Reboot system
   reboot:
-  when: boot_config is changed and boot_parameters_reboot | bool
+  when:
+    - boot_parameters_reboot | bool
+    - boot_config is changed

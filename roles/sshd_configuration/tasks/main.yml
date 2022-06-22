@@ -49,4 +49,5 @@
   service:
     name: sshd
     state: reloaded
-  when: enable_options is changed or disable_options is changed
+  when: enable_options is changed or
+        disable_options is changed

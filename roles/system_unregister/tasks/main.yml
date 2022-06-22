@@ -37,5 +37,5 @@
     cmd: dnf -C clean all
     warn: false
   when:
-    - registration is changed
     - ansible_facts.distribution_major_version|int >= 8
+    - registration is changed

@@ -8,11 +8,11 @@
 - name: Enable IMA/EVM
   include_tasks: enable.yml
   when:
-    - ima_evm_setup_enable | bool
     - ansible_facts.distribution_major_version|int >= 8
+    - ima_evm_setup_enable | bool
 
 - name: Disable IMA/EVM
   include_tasks: disable.yml
   when:
-    - not ima_evm_setup_enable | bool
     - ansible_facts.distribution_major_version|int >= 8
+    - not ima_evm_setup_enable | bool

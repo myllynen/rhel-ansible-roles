@@ -14,7 +14,9 @@
   loop: "{{ package_install.changes.updated }}"
   loop_control:
     label: "{{ item[0] }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - package_install.changes is defined
 
 - name: Read list of available package updates (RHEL 7, part II)
   set_fact:
@@ -22,17 +24,23 @@
   loop: "{{ package_install.changes.installed }}"
   loop_control:
     label: "{{ item[0] }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - package_install.changes is defined
 
 - name: Set list of available package updates (RHEL 7)
   set_fact:
     package_updates: "{{ (el7_updates + el7_installs | default([])) | sort | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'yum' and package_install.changes is defined
+  when:
+    - ansible_facts.pkg_mgr == 'yum'
+    - package_install.changes is defined
 
 - name: Set list of available package updates
   set_fact:
     package_updates: "{{ package_install.results | sort | join('\n') }}"
-  when: ansible_facts.pkg_mgr == 'dnf' and 'Nothing to do' not in package_install.msg
+  when:
+    - ansible_facts.pkg_mgr == 'dnf'
+    - 'Nothing to do' not in package_install.msg
 
 - name: Display list of available package updates
   debug:
@@ -41,7 +49,9 @@
 
 - name: Create PDF report
   include_tasks: pdf.yml
-  when: system_update_report_pre_pdf | bool and package_updates is defined
+  when:
+    - system_update_report_pre_pdf | bool
+    - package_updates is defined
 
 - name: Notify about upcoming package updates
   environment:

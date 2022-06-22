@@ -32,4 +32,6 @@
 
 - name: Reboot system
   reboot:
-  when: locale_config is changed and system_locale_reboot | bool
+  when:
+    - system_locale_reboot | bool
+    - locale_config is changed

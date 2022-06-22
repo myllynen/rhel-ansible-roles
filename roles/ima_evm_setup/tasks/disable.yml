@@ -25,7 +25,8 @@
 
 - name: Reboot system
   reboot:
-  when: boot_config is changed or custom_policy is changed
+  when: boot_config is changed or
+        custom_policy is changed
 
 - name: Gather package facts
   package_facts:
@@ -57,15 +58,18 @@
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
   register: evm_attrs
   failed_when: false
-  when: ima_evm_setup_sign_files | bool or 'security.evm' in fattr_info.stdout
+  when: ima_evm_setup_sign_files | bool or
+        'security.evm' in fattr_info.stdout
 
 - name: Remove IMA file security attributes
   shell: |
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
   register: ima_attrs
   failed_when: false
-  when: ima_evm_setup_sign_files | bool or 'security.ima' in fattr_info.stdout
+  when: ima_evm_setup_sign_files | bool or
+        'security.ima' in fattr_info.stdout
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
-  when: evm_attrs is changed or ima_attrs is changed
+  when: evm_attrs is changed or
+        ima_attrs is changed
