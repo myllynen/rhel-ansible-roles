@@ -2,7 +2,9 @@
 - name: Abort if audit disabled on kernel command line
   fail:
     msg: "Audit disabled on kernel command line."
-  when: "'audit' in ansible_facts.cmdline and ansible_facts.cmdline['audit'] == '0'"
+  when:
+    - "'audit' in ansible_facts.cmdline
+    - ansible_facts.cmdline['audit'] == '0'"
 
 - name: Install audit package
   yum:
