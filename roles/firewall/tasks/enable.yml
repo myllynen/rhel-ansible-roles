@@ -61,7 +61,18 @@
     immediate: true
     state: disabled
   loop: "{{ open_ports.stdout.split(' ') | select() | list }}"
-  when: item not in ports_to_open
+  when:
+    - firewall_close_unconfigured | bool
+    - item not in ports_to_open
+
+- name: Display unconfigured ports left open
+  vars:
+    unclosed_ports: "{{ open_ports.stdout.split(' ') | select() | difference(ports_to_open) | list }}"
+  debug:
+    msg: "{{ unclosed_ports | join(' ') }}"
+  when:
+    - not firewall_close_unconfigured | bool
+    - unclosed_ports
 
 - name: Set list of services to open
   set_fact:
@@ -89,4 +100,16 @@
     immediate: true
     state: disabled
   loop: "{{ open_services.stdout.split(' ') | select() | list }}"
-  when: item != 'ssh' and item not in services_to_open
+  when:
+    - item != 'ssh'
+    - firewall_close_unconfigured | bool
+    - item not in services_to_open
+
+- name: Display unconfigured services left open
+  vars:
+    unclosed_services: "{{ open_services.stdout.split(' ') | select() | difference(services_to_open) | difference(['ssh']) | list }}"
+  debug:
+    msg: "{{ unclosed_services | join(' ') }}"
+  when:
+    - not firewall_close_unconfigured | bool
+    - unclosed_services

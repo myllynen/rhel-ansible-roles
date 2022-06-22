@@ -10,4 +10,7 @@ firewall_open_ports:
 firewall_open_services:
 #  - samba
 
+# Close unconfigured ports and services
+firewall_close_unconfigured: true
+
 firewall_default_zone: public
