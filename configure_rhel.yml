@@ -34,28 +34,49 @@
     #  - testgroup
 
     # List of local groups to create
-    # name, gid are mandatory
+    # Mandatory parameters: name, gid
     accounts_local_groups_create:
     #  - name: testgroup
     #    gid: 12345
 
     # List of local users to create
-    # name, uid, group are mandatory
+    # Mandatory parameters: name, uid
     accounts_local_users_create:
     #  - name: testuser
+    #    password: $6$s...
     #    uid: 12345
     #    group: testgroup
     #    comment: Test User
     #    home: /home/testuser
     #    shell: /bin/bash
+    #    expires: -1
 
     # List of supplementary groups for users
-    # name, groups, append are mandatory
+    # Mandatory parameters: name, groups, append
     accounts_local_users_groups:
     #  - name: testuser
     #    groups: tcpdump,wheel
     #    append: true
 
+    #
+    # accounts_policy
+    #
+    # Accounts, login, password, PAM policies and profiles
+    # All settings are optional, unset are not configured
+
+    # Available alternatives in files/
+    login_access_config_file:
+
+    # Available alternatives in files/
+    login_defs_config_file:
+
+    # Available alternatives in files/
+    password_quality_policy: local
+
+    # Available alternatives in files/
+    system_auth_profile:
+    # Extra parameters for "authselect select" command
+    system_auth_select_parameters:
 
     #
     # aide_setup
@@ -69,7 +90,7 @@
     # audit_setup
     #
     # Available alternatives in files/
-    audit_setup_rules: local_default
+    audit_setup_rules: local
 
     #
     # base_packages - list omitted here for brevity
@@ -135,7 +156,15 @@
     firewall_open_services:
     #  - samba
 
+    # Close unconfigured ports and services
+    firewall_close_unconfigured: true
+
     firewall_default_zone: public
+
+    #
+    # motd_issue
+    #
+    # No configuration needed
 
     #
     # multipath_setup
@@ -169,9 +198,6 @@
 
     crypto_policy: DEFAULT
 
-    # Available alternatives in files/
-    password_quality_policy: local_default
-
     # One of: disabled, integrity, confidentiality
     # NB. Enabling lockdown will prevent using kdump
     kernel_lockdown: disabled
@@ -191,6 +217,11 @@
     # Missing services will be ignored
     service_state_enable:
       - irqbalance.service
+
+    #
+    # shell_profile
+    #
+    # No configuration needed
 
     #
     # splunk_forwarder
@@ -217,6 +248,12 @@
       - Banner
 
     #
+    # system_coredump
+    #
+    # Enable system-wide coredumps
+    system_coredump_enable: true
+
+    #
     # system_init
     #
     # Actions to take after initialization
@@ -239,6 +276,16 @@
     system_locale_reboot: true
 
     #
+    # system_timezone
+    #
+    system_timezone: UTC
+
+    #
+    # system_unregister
+    #
+    # No configuration needed
+
+    #
     # system_update
     #
     # Reboot policy after applying updates
@@ -247,7 +294,6 @@
     # when_updated - reboot if updates were installed
     # always - always reboot even if no updates were installed
     system_update_reboot_policy: when_needed
-
 
     # Set true to send a report after updating packages
     system_update_report: true
@@ -261,10 +307,20 @@
     # utilities from enscript and ghostscript packages
     system_update_report_pdf: false
 
-    # Preamble text to include in all generated PDFs,
-    # <HOST> will be replaced with inventory hostname.
+    # Preamble text to include in all generated PDFs
+    # <HOST> will be replaced with inventory hostname
+    # <OSREL> will be replaced with OS release name
+    # <DATE> will be replaced with patching date/time
+    # <REBOOT> will be indicate reboot, true or false
     system_update_report_pdf_preamble: |
-        System Update Report for <HOST>
+        System Update Report
+        
+        
+        Server: <HOST>
+        Patch date: <DATE>
+        OS version: <OSREL>
+        Server rebooted: <REBOOT>
+        
         
         The following packages were updated:
 
@@ -280,10 +336,16 @@
     # utilities from enscript and ghostscript packages
     system_update_report_pre_pdf: false
 
-    # Preamble text to include in all generated PDFs,
-    # <HOST> will be replaced with inventory hostname.
+    # Preamble text to include in all generated PDFs
+    # <HOST> will be replaced with inventory hostname
+    # <OSREL> will be replaced with OS release name
     system_update_report_pre_pdf_preamble: |
-        Pending System Updates Report for <HOST>
+        Pending System Update Report
+        
+        
+        Server: <HOST>
+        OS version: <OSREL>
+        
         
         The following package updates are pending:
 
@@ -307,16 +369,19 @@
     web_console_enable_perf_metrics: true
 
   roles:
+    #- system_timezone
     - timesync
     - remove_packages
     - boot_parameters
     - system_locale
     - audit_setup
     #- multipath_setup
+    #- rhel-system-roles.storage
     #- system_update_report_pre
     #- system_update
     #- abrt_setup
     #- aide_setup
+    #- accounts_policy
     #- accounts_local
     - base_packages
     - certificates
@@ -334,4 +399,5 @@
     #- troubleshooting_packages
     #- web_console
     #- splunk_forwarder
+    - system_coredump
     - system_init

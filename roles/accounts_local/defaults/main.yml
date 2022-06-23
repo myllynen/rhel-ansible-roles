@@ -9,13 +9,13 @@ accounts_local_groups_delete:
 #  - testgroup
 
 # List of local groups to create
-# name, gid are mandatory
+# Mandatory parameters: name, gid
 accounts_local_groups_create:
 #  - name: testgroup
 #    gid: 12345
 
 # List of local users to create
-# name, uid, group are mandatory
+# Mandatory parameters: name, uid
 accounts_local_users_create:
 #  - name: testuser
 #    password: $6$s...
@@ -27,7 +27,7 @@ accounts_local_users_create:
 #    expires: -1
 
 # List of supplementary groups for users
-# name, groups, append are mandatory
+# Mandatory parameters: name, groups, append
 accounts_local_users_groups:
 #  - name: testuser
 #    groups: tcpdump,wheel
