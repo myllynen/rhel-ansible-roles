@@ -1,0 +1,19 @@
+---
+- name: Restore system default coredump limit
+  lineinfile:
+    path: /etc/systemd/system.conf
+    regexp: '(#|)DefaultLimitCORE=.*'
+    line: 'DefaultLimitCORE=0:infinity'
+  register: core_config
+
+- name: Apply coredump limit change
+  systemd:
+    daemon_reload: true
+  when: core_config is changed
+
+- name: Disallow suid binary coredumps
+  sysctl:
+    name: fs.suid_dumpable
+    value: '0'
+    sysctl_file: /etc/sysctl.d/50-coredump.conf
+    sysctl_set: true

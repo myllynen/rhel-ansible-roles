@@ -1,0 +1,3 @@
+---
+# Enable system-wide coredumps
+system_coredump_enable: true
