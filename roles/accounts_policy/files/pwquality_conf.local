@@ -1,0 +1,3 @@
+# Local default password quality requirements configuration
+minclass = 4
+minlen = 12

@@ -1,0 +1,17 @@
+---
+# Accounts, login, password, PAM policies and profiles
+# All settings are optional, unset are not configured
+
+# Available alternatives in files/
+login_access_config_file:
+
+# Available alternatives in files/
+login_defs_config_file:
+
+# Available alternatives in files/
+password_quality_policy: local
+
+# Available alternatives in files/
+system_auth_profile:
+# Extra parameters for "authselect select" command
+system_auth_select_parameters:
