@@ -399,5 +399,5 @@
     #- troubleshooting_packages
     #- web_console
     #- splunk_forwarder
-    - system_coredump
+    #- system_coredump
     - system_init
