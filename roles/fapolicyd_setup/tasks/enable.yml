@@ -73,4 +73,6 @@
   when:
     - fapolicyd_setup_enable_service | bool
     - service_start is not changed
-    - daemon_config is changed or rules_config is changed or trust_config is changed
+    - daemon_config is changed or
+      rules_config is changed or
+      trust_config is changed

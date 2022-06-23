@@ -50,4 +50,5 @@
     warn: false
   when:
     - service_start is not changed
-    - rules_config is changed or auditd_config is changed
+    - rules_config is changed or
+      auditd_config is changed

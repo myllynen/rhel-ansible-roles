@@ -99,7 +99,8 @@
     state: restarted
   when:
     - service_start is not changed
-    - client_config is changed or user_config is changed
+    - client_config is changed or
+      user_config is changed
 
 - name: Read Splunk Forwarder version
   command: /opt/splunkforwarder/bin/splunk version
