@@ -18,11 +18,13 @@ accounts_local_groups_create:
 # name, uid, group are mandatory
 accounts_local_users_create:
 #  - name: testuser
+#    password: $6$s...
 #    uid: 12345
 #    group: testgroup
 #    comment: Test User
 #    home: /home/testuser
 #    shell: /bin/bash
+#    expires: -1
 
 # List of supplementary groups for users
 # name, groups, append are mandatory
