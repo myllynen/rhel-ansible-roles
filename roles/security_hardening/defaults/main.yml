@@ -3,9 +3,6 @@ selinux: enforcing
 
 crypto_policy: DEFAULT
 
-# Available alternatives in files/
-password_quality_policy: local_default
-
 # One of: disabled, integrity, confidentiality
 # NB. Enabling lockdown will prevent using kdump
 kernel_lockdown: disabled

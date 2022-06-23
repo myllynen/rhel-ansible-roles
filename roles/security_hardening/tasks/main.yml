@@ -40,28 +40,6 @@
     - ansible_facts.distribution_major_version|int >= 8
     - current_crypto_policy.stdout != crypto_policy
 
-- name: Configure system-local password quality requirements (RHEL 7)
-  copy:
-    src: "{{ password_quality_policy }}.conf"
-    dest: /etc/security/pwquality.conf
-    mode: '0644'
-  when: ansible_facts.distribution_major_version|int < 8
-
-- name: Configure system-local password quality requirements
-  copy:
-    src: "{{ password_quality_policy }}.conf"
-    dest: /etc/security/pwquality.conf.d/zz-local.conf
-    mode: '0644'
-  when: ansible_facts.distribution_major_version|int >= 8
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=2055604
-- name: Ensure system-local password quality requirements
-  copy:
-    src: rhel{{ ansible_facts.distribution_major_version }}_default.conf
-    dest: /etc/security/pwquality.conf
-    mode: '0644'
-  when: ansible_facts.distribution_major_version|int >= 8
-
 - name: Install grubby package
   yum:
     name: grubby
