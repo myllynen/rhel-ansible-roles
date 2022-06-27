@@ -3,8 +3,8 @@
   fail:
     msg: "Audit disabled on kernel command line."
   when:
-    - "'audit' in ansible_facts.cmdline
-    - ansible_facts.cmdline['audit'] == '0'"
+    - "'audit' in ansible_facts.cmdline"
+    - ansible_facts.cmdline['audit'] == '0'
 
 - name: Install audit package
   yum:
