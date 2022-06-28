@@ -2,5 +2,5 @@
 - name: Configure root password
   user:
     name: root
-    password: "{{ root_password | password_hash('sha512', 1234567890 | random(seed=inventory_hostname)) }}"
+    password: "{{ root_password | string | password_hash('sha512', 1234567890 | random(seed=inventory_hostname)) }}"
   when: root_password is defined
