@@ -375,7 +375,7 @@
     - boot_parameters
     - system_locale
     - audit_setup
-    #- multipath_setup
+    #- { role: multipath_setup, when: ansible_facts.virtualization_role != 'guest' }
     #- rhel-system-roles.storage
     #- system_update_report_pre
     #- system_update
