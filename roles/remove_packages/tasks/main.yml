@@ -3,4 +3,4 @@
   yum:
     name: "{{ remove_packages }}"
     state: absent
-    autoremove: true
+    autoremove: "{{ remove_packages_autoremove }}"
