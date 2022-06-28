@@ -42,7 +42,7 @@
     package_updates: "{{ package_install.results | sort | join('\n') }}"
   when:
     - ansible_facts.pkg_mgr == 'dnf'
-    - 'Nothing to do' not in package_install.msg
+    - "'Nothing to do' not in package_install.msg"
 
 - name: Display list of updated packages
   debug:

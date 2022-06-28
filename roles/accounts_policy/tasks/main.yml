@@ -20,7 +20,7 @@
     mode: '0644'
   when:
     - ansible_facts.distribution_major_version|int < 8
-    - password_quality_policy | defaults(false)
+    - password_quality_policy | default(false)
 
 - name: Configure system-local password quality requirements
   copy:
@@ -29,7 +29,7 @@
     mode: '0644'
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - password_quality_policy | defaults(false)
+    - password_quality_policy | default(false)
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2055604
 - name: Ensure system-local password quality requirements
@@ -39,7 +39,7 @@
     mode: '0644'
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - password_quality_policy | defaults(false)
+    - password_quality_policy | default(false)
 
 - name: Install authselect package
   yum:
@@ -47,7 +47,7 @@
     state: present
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - system_auth_profile | defaults(false)
+    - system_auth_profile | default(false)
 
 - name: Copy system-local authentication profile template
   copy:
@@ -56,11 +56,11 @@
   register: auth_profile_copy
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - system_auth_profile | defaults(false)
+    - system_auth_profile | default(false)
 
 - name: Configure system-local authentication
   command: authselect select -f custom/auth_profile_{{ system_auth_profile }} {{ system_auth_select_parameters }}
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - system_auth_profile | defaults(false)
+    - system_auth_profile | default(false)
     - auth_profile_copy is changed
