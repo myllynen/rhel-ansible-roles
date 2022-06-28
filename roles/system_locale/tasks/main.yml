@@ -11,7 +11,7 @@
   vars:
     locale_packages:
       - glibc-minimal-langpack
-      - "{{ 'glibc-langpack-en' if system_locale == 'en_US.UTF-8' else '' }}"
+      - "{{ 'glibc-langpack-en' if not c_utf_8 or system_locale == 'en_US.UTF-8' else '' }}"
   yum:
     name: "{{ locale_packages | select() | list }}"
     state: present
