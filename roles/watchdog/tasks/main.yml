@@ -1,0 +1,8 @@
+---
+- name: Enable system watchdog
+  include_tasks: enable.yml
+  when: watchdog_enable | bool
+
+- name: Disable system watchdog
+  include_tasks: disable.yml
+  when: not watchdog_enable | bool
