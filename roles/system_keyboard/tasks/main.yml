@@ -1,0 +1,49 @@
+---
+- name: Install required packages
+  yum:
+    name:
+      - kbd
+      - kbd-misc
+    state: present
+  register: package_install
+
+- name: Check system keyboard configuration
+  lineinfile:
+    path: /etc/vconsole.conf
+    regexp: '^KEYMAP=("|){{ system_keyboard }}(|")'
+    state: absent
+  check_mode: true
+  register: keyboard_check
+  changed_when: false
+
+- name: Configure system keyboard
+  command: localectl set-keymap {{ system_keyboard }}
+  register: keyboard_config
+  when: not keyboard_check.found
+
+- name: Check system console font configuration
+  lineinfile:
+    path: /etc/vconsole.conf
+    regexp: '^FONT=("|){{ system_font }}(|")'
+    state: absent
+  check_mode: true
+  register: font_check
+  changed_when: false
+
+- name: Configure system console font
+  replace:
+    path: /etc/vconsole.conf
+    regexp: '^FONT=("|).*(|")'
+    replace: 'FONT={{ system_font }}'
+  register: font_config
+  when: not font_check.found
+
+- name: Change system console font
+  command: setfont {{ system_font }}
+  when: font_config is changed
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: package_install is changed or
+        keyboard_config is changed or
+        font_config is changed
