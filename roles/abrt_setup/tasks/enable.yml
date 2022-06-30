@@ -1,23 +1,4 @@
 ---
-- name: Configure default coredump limit
-  lineinfile:
-    path: /etc/systemd/system.conf
-    regexp: '(#|)DefaultLimitCORE=.*'
-    line: 'DefaultLimitCORE=infinity'
-  register: core_config
-
-- name: Apply coredump limit change
-  systemd:
-    daemon_reload: true
-  when: core_config is changed
-
-- name: Allow safe suid binary coredumps
-  sysctl:
-    name: fs.suid_dumpable
-    value: '2'
-    sysctl_file: /etc/sysctl.d/50-coredump.conf
-    sysctl_set: true
-
 - name: Install abrt packages
   vars:
     abrt_install:
@@ -97,7 +78,9 @@
   vars:
     abrt_start:
       - abrtd
+      - abrt-ccpp
       - abrt-oops
+      - "{{ 'abrt-xorg' if not abrt_setup_console_notification|bool else '' }}"
   service:
     name: "{{ item }}"
     state: started
@@ -115,3 +98,28 @@
     name: "{{ item.name }}"
     state: "{{ item.state }}"
   loop: "{{ abrt_restart | select() | list }}"
+
+- name: Allow safe suid binary coredumps
+  sysctl:
+    name: fs.suid_dumpable
+    value: '2'
+    sysctl_file: /etc/sysctl.d/50-coredump.conf
+    sysctl_set: true
+  register: suid_config
+
+- name: Configure default coredump limit
+  lineinfile:
+    path: /etc/systemd/system.conf
+    regexp: '(#|)DefaultLimitCORE=.*'
+    line: 'DefaultLimitCORE=infinity'
+  register: core_config
+
+- name: Apply coredump limit change
+  systemd:
+    daemon_reload: true
+  when: core_config is changed
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: core_config is changed or
+        suid_config is changed

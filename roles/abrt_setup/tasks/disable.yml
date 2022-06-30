@@ -1,9 +1,12 @@
 ---
 - name: Restore system default coredump limit
+  vars:
+    option_prefix: "{{ '#' if ansible_facts.distribution_major_version|int < 8 else '' }}"
+    option_value: "{{ '' if ansible_facts.distribution_major_version|int < 8 else '0:infinity' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '(#|)DefaultLimitCORE=.*'
-    line: 'DefaultLimitCORE=0:infinity'
+    line: '{{ option_prefix }}DefaultLimitCORE={{ option_value }}'
   register: core_config
 
 - name: Apply coredump limit change
@@ -17,6 +20,7 @@
     value: '0'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
+  register: suid_config
 
 - name: Remove abrt packages
   yum:
@@ -36,3 +40,8 @@
     - /var/spool/abrt-upload
     - /var/tmp/abrt
   when: abrt_setup_uninstall_purge | bool
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: core_config is changed or
+        suid_config is changed

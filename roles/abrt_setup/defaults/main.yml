@@ -1,7 +1,8 @@
 ---
 # Enable or disable abrt
 # NB. abrt not available on RHEL 9+
-abrt_setup_enable: true
+# NB. Consider using system_coredump instead
+abrt_setup_enable: false
 
 abrt_setup_report_fatal_mce_only: true
 abrt_setup_vmcore_move_not_copy: true
