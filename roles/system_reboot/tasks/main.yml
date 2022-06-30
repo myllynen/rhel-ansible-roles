@@ -1,0 +1,19 @@
+---
+- name: Install yum-utils package
+  yum:
+    name: yum-utils
+    state: present
+  when: system_reboot_policy == 'when_needed'
+
+- name: Check need for rebooting
+  command: needs-restarting -r
+  register: needs_restarting
+  failed_when: false
+  changed_when: false
+  when: system_reboot_policy == 'when_needed'
+
+- name: Reboot system
+  reboot:
+  when: (system_reboot_policy == 'always') or
+        (system_reboot_policy == 'when_needed' and needs_restarting.rc != 0)
+  register: system_reboot

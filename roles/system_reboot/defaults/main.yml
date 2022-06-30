@@ -1,0 +1,6 @@
+---
+# Reboot policy
+# never - never reboot
+# when_needed - reboot if needs-restarting says so
+# always - always reboot
+system_reboot_policy: when_needed
