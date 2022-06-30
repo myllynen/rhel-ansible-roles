@@ -8,7 +8,8 @@
     #
     # Enable or disable abrt
     # NB. abrt not available on RHEL 9+
-    abrt_setup_enable: true
+    # NB. Consider using system_coredump instead
+    abrt_setup_enable: false
 
     abrt_setup_report_fatal_mce_only: true
     abrt_setup_vmcore_move_not_copy: true
@@ -264,6 +265,12 @@
       - syslog
 
     #
+    # system_keyboard
+    #
+    system_keyboard: us
+    system_font: eurlatgr
+
+    #
     # system_locale
     #
     # Available locale choices:
@@ -276,9 +283,13 @@
     system_locale_reboot: true
 
     #
-    # system_timezone
+    # system_reboot
     #
-    system_timezone: UTC
+    # Reboot policy
+    # never - never reboot
+    # when_needed - reboot if needs-restarting says so
+    # always - always reboot
+    system_reboot_policy: when_needed
 
     #
     # system_unregister
@@ -360,8 +371,25 @@
       - time.cloudflare.com
 
     #
+    # timezone
+    #
+    timezone: UTC
+
+    #
     # troubleshooting_packages - list omitted here for brevity
     #
+
+    #
+    # watchdog
+    #
+    watchdog_enable: true
+
+    # Configure systemd watchdog options,
+    # see systemd-system.conf(5) for info
+    watchdog_runtime_sec: '60s'
+    watchdog_reboot_sec: #'10min'
+    watchdog_kexec_sec: #'off'
+    watchdog_device: #/dev/watchdog0
 
     #
     # web_console
@@ -369,10 +397,11 @@
     web_console_enable_perf_metrics: true
 
   roles:
-    #- system_timezone
+    #- timezone
     - timesync
     - remove_packages
     - boot_parameters
+    #- system_keyboard
     - system_locale
     - audit_setup
     #- { role: multipath_setup, when: ansible_facts.virtualization_role != 'guest' }
@@ -401,3 +430,5 @@
     #- splunk_forwarder
     #- system_coredump
     - system_init
+    - watchdog
+    #- system_reboot
