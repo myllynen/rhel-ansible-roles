@@ -1,4 +1,20 @@
 ---
+- name: Configure system core dump pattern
+  sysctl:
+    name: kernel.core_pattern
+    value: '/var/lib/systemd/coredump/core'
+    sysctl_file: /etc/sysctl.d/50-coredump.conf
+    sysctl_set: true
+  register: pattern_config
+
+- name: Allow safe suid binary coredumps
+  sysctl:
+    name: fs.suid_dumpable
+    value: '2'
+    sysctl_file: /etc/sysctl.d/50-coredump.conf
+    sysctl_set: true
+  register: suid_config
+
 - name: Configure default coredump limit
   lineinfile:
     path: /etc/systemd/system.conf
@@ -11,9 +27,8 @@
     daemon_reload: true
   when: core_config is changed
 
-- name: Allow safe suid binary coredumps
-  sysctl:
-    name: fs.suid_dumpable
-    value: '2'
-    sysctl_file: /etc/sysctl.d/50-coredump.conf
-    sysctl_set: true
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: core_config is changed or
+        suid_config is changed or
+        pattern_config is changed
