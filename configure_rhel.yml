@@ -414,7 +414,7 @@
     #- accounts_local
     - base_packages
     - certificates
-    #- domain_ad
+    #- { role: domain_ad, when: domain_ad_admin_username is defined }
     ##- ima_evm_setup
     #- fapolicyd_setup
     - firewall
