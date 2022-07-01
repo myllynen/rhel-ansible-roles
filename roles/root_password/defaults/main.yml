@@ -1,3 +1,8 @@
 ---
+# Use true if providing crypted value,
+# false to encrypt cleartext password.
+root_password_encrypted: false
+# Seed for password_hash salt value
+root_password_salt_seed: "{{ inventory_hostname }}"
 # This should come from vault
 #root_password:

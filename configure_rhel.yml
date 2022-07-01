@@ -44,13 +44,20 @@
     # Mandatory parameters: name, uid
     accounts_local_users_create:
     #  - name: testuser
-    #    password: $6$s...
+    #    # This should come from vault
+    #    password: ...
     #    uid: 12345
     #    group: testgroup
     #    comment: Test User
     #    home: /home/testuser
     #    shell: /bin/bash
     #    expires: -1
+
+    # Use true if providing crypted values,
+    # false to encrypt cleartext passwords.
+    accounts_local_password_encrypted: false
+    # Seed for password_hash salt value
+    accounts_local_password_salt_seed: "{{ inventory_hostname }}"
 
     # List of supplementary groups for users
     # Mandatory parameters: name, groups, append
@@ -189,6 +196,11 @@
     #
     # root_password
     #
+    # Use true if providing crypted value,
+    # false to encrypt cleartext password.
+    root_password_encrypted: false
+    # Seed for password_hash salt value
+    root_password_salt_seed: "{{ inventory_hostname }}"
     # This should come from vault
     #root_password:
 

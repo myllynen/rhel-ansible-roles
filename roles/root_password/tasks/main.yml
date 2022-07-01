@@ -1,6 +1,11 @@
 ---
 - name: Configure root password
+  vars:
+    salt_seed: "{{ root_password_salt_seed }}"
+    encrypted: "{{ root_password_encrypted | bool }}"
+    pw_string: "{{ root_password | string }}"
+    pw_encrypted: "{{ pw_string if encrypted else pw_string | password_hash('sha512', 1234567890 | random(seed=salt_seed) | string) }}"
   user:
     name: root
-    password: "{{ root_password | string | password_hash('sha512', 1234567890 | random(seed=inventory_hostname)) }}"
-  when: root_password is defined
+    password: "{{ pw_encrypted }}"
+  when: root_password | default(false)

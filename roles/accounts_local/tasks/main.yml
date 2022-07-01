@@ -20,9 +20,15 @@
   loop: "{{ accounts_local_groups_create | select() | list }}"
 
 - name: Create local user
+  vars:
+    salt_seed: "{{ accounts_local_password_salt_seed }}"
+    encrypted: "{{ accounts_local_password_encrypted | bool }}"
+    pw_string: "{{ item.password | string if item.password is defined and item.password is not none else omit }}"
+    pw_omitted: "{{ pw_string.startswith('__omit') }}"
+    pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', 1234567890 | random(seed=salt_seed) | string) }}"
   user:
     name: "{{ item.name }}"
-    password: "{{ item.password | default(omit) }}"
+    password: "{{ pw_encrypted | default(omit) }}"
     uid: "{{ item.uid }}"
     group: "{{ item.group | default(omit) }}"
     comment: "{{ item.comment | default(omit) }}"
@@ -31,6 +37,8 @@
     expires: "{{ item.expires | default(omit) }}"
     state: present
   loop: "{{ accounts_local_users_create | select() | list }}"
+  loop_control:
+    label: "{{ item.name + ':' + item.uid | string }}"
 
 - name: Add user to supplementary groups
   user:
