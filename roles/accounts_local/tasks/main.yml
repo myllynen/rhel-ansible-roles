@@ -32,6 +32,7 @@
     uid: "{{ item.uid }}"
     group: "{{ item.group | default(omit) }}"
     comment: "{{ item.comment | default(omit) }}"
+    create_home: "{{ item.create_home | default(omit) }}"
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
     expires: "{{ item.expires | default(omit) }}"

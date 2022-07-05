@@ -23,6 +23,7 @@ accounts_local_users_create:
 #    uid: 12345
 #    group: testgroup
 #    comment: Test User
+#    create_home: true
 #    home: /home/testuser
 #    shell: /bin/bash
 #    expires: -1
