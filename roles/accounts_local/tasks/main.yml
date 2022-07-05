@@ -38,12 +38,35 @@
     state: present
   loop: "{{ accounts_local_users_create | select() | list }}"
   loop_control:
-    label: "{{ item.name + ':' + item.uid | string }}"
+    label: "{{ item.name }}"
 
-- name: Add user to supplementary groups
+- name: Add local user to supplementary groups
   user:
     name: "{{ item.name }}"
     append: "{{ item.append }}"
     groups: "{{ item.groups }}"
     state: present
   loop: "{{ accounts_local_users_groups | select() | list }}"
+
+- name: Delete local user sudo configuration
+  file:
+    path: /etc/sudoers.d/{{ item.name }}
+    state: absent
+  loop: "{{ accounts_local_users_create | select() | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: not item.allow_full_sudo | default(false)
+
+- name: Create local user sudo configuration
+  copy:
+    content: |
+      {{ item.name }}  ALL=(ALL) NOPASSWD: ALL
+    dest: /etc/sudoers.d/{{ item.name }}
+    owner: root
+    group: root
+    mode: '0440'
+    validate: /usr/sbin/visudo -csf %s
+  loop: "{{ accounts_local_users_create | select() | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.allow_full_sudo | default(false)
