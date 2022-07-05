@@ -32,7 +32,7 @@
     uid: "{{ item.uid }}"
     group: "{{ item.group | default(omit) }}"
     comment: "{{ item.comment | default(omit) }}"
-    create_home: "{{ item.create_home | default(omit) }}"
+    create_home: "{{ item.create_home | default(true) }}"
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
     expires: "{{ item.expires | default(omit) }}"
@@ -61,7 +61,7 @@
 - name: Create local user sudo configuration
   copy:
     content: |
-      {{ item.name }}  ALL=(ALL) NOPASSWD: ALL
+      {{ item.name }} ALL=(ALL) NOPASSWD: ALL
     dest: /etc/sudoers.d/{{ item.name }}
     owner: root
     group: root
