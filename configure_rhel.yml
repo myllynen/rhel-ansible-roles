@@ -70,7 +70,7 @@
     # accounts_policy
     #
     # Accounts, login, password, PAM policies and profiles
-    # All settings are optional, unset are not configured
+    # All parameters are optional, unset are left untouched
 
     # Available alternatives in files/
     login_access_config_file:
@@ -79,12 +79,15 @@
     login_defs_config_file:
 
     # Available alternatives in files/
-    password_quality_policy: local
+    password_quality_policy:
 
-    # Available alternatives in files/
+    # Available custom alternatives in files/
+    # Either use a default profile (e.g., "minimal")
+    # or a custom one provided (e.g., "custom/test")
     system_auth_profile:
     # Extra parameters for "authselect select" command
-    system_auth_select_parameters:
+    # See the "authselect show <profile>" output for details
+    system_auth_select_parameters: without-nullok with-pamaccess
 
     #
     # aide_setup
@@ -142,6 +145,10 @@
     # Enable or disable running authconfig/authselect
     # If false then setup by this role is not complete
     domain_ad_auth_config_update: true
+
+    # Extra parameters for "authselect select" command
+    # See the "authselect show sssd" output for details
+    domain_ad_auth_select_parameters: without-nullok with-pamaccess with-mkhomedir
 
     #
     # fapolicyd_setup

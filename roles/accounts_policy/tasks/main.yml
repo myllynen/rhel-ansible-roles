@@ -49,18 +49,29 @@
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
 
-- name: Copy system-local authentication profile template
+- name: Check current system-local authentication profile
+  command: authselect current -r
+  register: current_profile
+  failed_when: current_profile.rc != 0 and "No existing configuration" not in current_profile.stdout
+  changed_when: false
+  when:
+    - ansible_facts.distribution_major_version|int >= 8
+    - system_auth_profile | default(false)
+
+- name: Copy custom authentication profile template
   copy:
-    src: auth_profile_{{ system_auth_profile }}
+    src: "{{ system_auth_profile.replace('custom/', '') }}"
     dest: /etc/authselect/custom
   register: auth_profile_copy
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
+    - system_auth_profile.startswith('custom/')
 
-- name: Configure system-local authentication
-  command: authselect select -f custom/auth_profile_{{ system_auth_profile }} {{ system_auth_select_parameters }}
+- name: Configure system-local authentication profile
+  command: authselect select -f {{ system_auth_profile }} {{ system_auth_select_parameters }}
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
-    - auth_profile_copy is changed
+    - system_auth_profile not in current_profile.stdout or
+      auth_profile_copy is changed
