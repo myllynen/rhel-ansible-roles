@@ -73,5 +73,5 @@
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
-    - system_auth_profile not in current_profile.stdout or
+    - system_auth_profile != current_profile.stdout or
       auth_profile_copy is changed
