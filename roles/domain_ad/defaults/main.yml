@@ -15,3 +15,7 @@ domain_ad_computer_delete_on_leave: true
 # Enable or disable running authconfig/authselect
 # If false then setup by this role is not complete
 domain_ad_auth_config_update: true
+
+# Extra parameters for "authselect select" command
+# See the "authselect show sssd" output for details
+domain_ad_auth_select_parameters: without-nullok with-pamaccess with-mkhomedir

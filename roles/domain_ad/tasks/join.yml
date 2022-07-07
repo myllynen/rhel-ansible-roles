@@ -71,7 +71,7 @@
     - auth_config.found == 0
 
 - name: Configure system-wide authentication
-  command: authselect select -f sssd with-mkhomedir
+  command: authselect select -f sssd {{ domain_ad_auth_select_parameters }}
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - domain_ad_auth_config_update | bool
