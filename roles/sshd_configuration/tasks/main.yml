@@ -31,7 +31,7 @@
     line: '{{ item.key + " " + item.value }}'
     create: true
     mode: '0600'
-    validate: sshd -tf %s
+    validate: /usr/sbin/sshd -tf %s
   register: enable_options
   loop: "{{ sshd | dict2items | select() | list }}"
   when: item.key not in sshd_disable
