@@ -13,6 +13,11 @@ used together. For additional roles to configure RHEL (such as network
 and storage), see https://github.com/linux-system-roles (available as
 _rhel-system-roles_ on RHEL).
 
+NB. Recent versions of _rhel-system-roles_ may include similar roles as
+is included in this repository. Depending on the use case and support
+needs it should be evaluated which one to prefer, if in doubt use the
+supported versions.
+
 ## See Also
 
 See also
