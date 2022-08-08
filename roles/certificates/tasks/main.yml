@@ -1,11 +1,20 @@
 ---
-- name: Copy CA bundle file
+- name: Copy CA bundle files to CA trust directory
   copy:
-    src: "{{ certificates_ca_file }}"
-    dest: /etc/pki/ca-trust/source/anchors/{{ certificates_ca_file }}
+    src: "{{ item }}"
+    dest: /etc/pki/ca-trust/source/anchors/{{ item }}
     mode: '0644'
-  register: ca_file
+  register: ca_files
+  loop: "{{ certificates_ca_files | select() | list }}"
+
+- name: Copy CA bundle files to certs directory
+  copy:
+    src: "{{ item }}"
+    dest: /etc/pki/tls/certs/{{ item }}
+    mode: '0644'
+  loop: "{{ certificates_ca_files | select() | list }}"
+  when: certificates_copy_certs | bool
 
 - name: Update trusted certificates
   command: update-ca-trust extract
-  when: ca_file is changed
+  when: ca_files is changed

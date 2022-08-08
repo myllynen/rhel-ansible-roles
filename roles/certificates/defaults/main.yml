@@ -1,3 +1,7 @@
 ---
-# CA bundle file in PEM format
-certificates_ca_file: local-ca-bundle.pem
+# List of CA bundle files in PEM format
+certificates_ca_files:
+#  - local-ca-bundle.pem
+
+# Optionally copy the CA cert files to /etc/pki/tls/certs
+certificates_copy_certs: true
