@@ -1,0 +1,17 @@
+---
+- name: Create /etc/hosts file
+  vars:
+    etc_hosts_content: |
+      {% for line in etc_hosts_header.split('\n') + etc_hosts_entries | default([], true) %}
+      {% if etc_hosts_omit_hosts == 'none' or
+            etc_hosts_omit_hosts == 'ipv4' and '.' not in line.split(' ')[0] or
+            etc_hosts_omit_hosts == 'ipv6' and ':' not in line.split(' ')[0] %}
+      {{ line }}
+      {% endif %}
+      {% endfor %}
+  copy:
+    content: "{{ etc_hosts_content }}"
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '0644'
