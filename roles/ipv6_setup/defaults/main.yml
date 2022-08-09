@@ -1,0 +1,7 @@
+---
+# Enable or disable IPv6 using sysctl settings
+# Boot parameter to disable IPv6 will be removed
+# See https://access.redhat.com/solutions/8709
+# NB. Use system-roles/network to configure NM
+# NB. Use etc_hosts to configure /etc/hosts
+ipv6_setup_enable: true

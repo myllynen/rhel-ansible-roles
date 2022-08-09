@@ -1,0 +1,41 @@
+---
+- name: Install grubby package
+  yum:
+    name: grubby
+    state: present
+
+- name: Check boot parameter to disable IPv6
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| )ipv6.disable(=| |")'
+    state: absent
+  check_mode: true
+  register: boot_param_check
+  changed_when: false
+
+- name: Remove IPv6 boot parameter
+  command: >
+    grubby
+    --update-kernel=ALL
+    --remove-args="ipv6.disable"
+  register: boot_config
+  when: boot_param_check.found == 1
+
+- name: Configure IPv6 using sysctl
+  vars:
+    ipv6_option: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
+  copy:
+    content: |
+      net.ipv6.conf.all.disable_ipv6 = {{ ipv6_option }}
+      net.ipv6.conf.default.disable_ipv6 = {{ ipv6_option }}
+    dest: /etc/sysctl.d/50-ipv6.conf
+  register: sysctl_config
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: sysctl_config is changed
+
+- name: Reboot system
+  reboot:
+  when: boot_config is changed or
+        sysctl_config is changed
