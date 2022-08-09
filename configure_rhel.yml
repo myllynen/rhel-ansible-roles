@@ -123,8 +123,12 @@
     #
     # certificates
     #
-    # CA bundle file in PEM format
-    certificates_ca_file: local-ca-bundle.pem
+    # List of CA bundle files in PEM format
+    certificates_ca_files:
+    #  - local-ca-bundle.pem
+
+    # Copy CA certs also to /etc/pki/tls/cert
+    certificates_copy_certs: false
 
     #
     # domain_ad
@@ -151,6 +155,29 @@
     domain_ad_auth_select_parameters: without-nullok with-pamaccess with-mkhomedir
 
     #
+    # etc_hosts
+    #
+    # /etc/hosts header to always apply (subject to etc_hosts_omit_hosts)
+    # This default header matches the most recent Fedora/upstream headers
+    etc_hosts_header: |
+      # Loopback entries; do not change.
+      # For historical reasons, localhost precedes localhost.localdomain:
+      127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+      ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+    # List of lines to add to /etc/hosts
+    # NB. Other entries will be removed
+    etc_hosts_entries:
+    #  - 192.168.122.1   gateway.example.com gateway
+    #  - 192.168.122.150 bastion.example.com bastion
+
+    # Entries to omit from the above variables
+    # none - do not omit entries, this the default
+    # ipv4 - omit all IPv4 entries, not recommended
+    # ipv6 - omit all IPv6 entries, not recommended
+    etc_hosts_omit_hosts: none
+
+    #
     # fapolicyd_setup
     #
     # Enable or disable service after configuration
@@ -175,6 +202,16 @@
     firewall_close_unconfigured: true
 
     firewall_default_zone: public
+
+    #
+    # ipv6_setup
+    #
+    # Enable or disable IPv6 using sysctl settings
+    # Boot parameter to disable IPv6 will be removed
+    # See https://access.redhat.com/solutions/8709
+    # NB. Use system-roles/network to configure NM
+    # NB. Use etc_hosts to configure /etc/hosts
+    ipv6_setup_enable: true
 
     #
     # motd_issue
@@ -416,6 +453,9 @@
     web_console_enable_perf_metrics: true
 
   roles:
+    - etc_hosts
+    - ipv6_setup
+    #- rhel-system-roles.network
     #- timezone
     - timesync
     - remove_packages
