@@ -23,11 +23,11 @@
 
 - name: Configure IPv6 using sysctl
   vars:
-    ipv6_option: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
+    disable_ipv6: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
   copy:
     content: |
-      net.ipv6.conf.all.disable_ipv6 = {{ ipv6_option }}
-      net.ipv6.conf.default.disable_ipv6 = {{ ipv6_option }}
+      net.ipv6.conf.all.disable_ipv6 = {{ disable_ipv6 }}
+      net.ipv6.conf.default.disable_ipv6 = {{ disable_ipv6 }}
     dest: /etc/sysctl.d/50-ipv6.conf
   register: sysctl_config
 

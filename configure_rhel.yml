@@ -171,10 +171,10 @@
     #  - 192.168.122.1   gateway.example.com gateway
     #  - 192.168.122.150 bastion.example.com bastion
 
-    # Entries to omit from the above variables
-    # none - do not omit entries, this the default
-    # ipv4 - omit all IPv4 entries, not recommended
-    # ipv6 - omit all IPv6 entries, not recommended
+    # /etc/hosts entries to omit
+    # none - do not omit entries
+    # ipv4 - omit all IPv4 entries
+    # ipv6 - omit all IPv6 entries
     etc_hosts_omit_hosts: none
 
     #
