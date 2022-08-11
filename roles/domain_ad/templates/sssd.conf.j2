@@ -25,6 +25,7 @@ access_provider = simple
 ad_domain = {{ domain_ad_domain | lower }}
 krb5_realm = {{ domain_ad_domain | upper }}
 krb5_store_password_if_offline = True
+krb5_auth_timeout = 6
 
 dyndns_update = False
 ldap_id_mapping = True
@@ -32,8 +33,10 @@ case_sensitive = False
 
 ad_maximum_machine_account_password_age = 30
 
+subdomain_inherit = ignore_group_members
 ignore_group_members = False
 entry_cache_timeout = 3600
+ldap_deref_threshold = 10
 cache_credentials = True
 
 min_id = 1000
