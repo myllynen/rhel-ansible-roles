@@ -12,7 +12,7 @@
     removes: /etc/rhsm/ca/katello-server-ca.pem
   when: ansible_facts.distribution_major_version|int < 8
 
-- name: Unregister from Red Hat Satellite
+- name: Unregister from Red Hat Subscription Management
   redhat_subscription:
     state: absent
   register: registration
