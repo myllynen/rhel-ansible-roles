@@ -20,7 +20,7 @@
   register: domain_info
   changed_when: false
 
-- name: Abort if AD domain controller not usable
+- name: Verify AD domain controller usable
   fail:
     msg: "AD domain reports domain controller not usable."
   when: "'domain-controller-usable = yes' not in domain_info.stdout"
@@ -39,7 +39,7 @@
   changed_when: false
   when: ansible_facts.distribution_major_version|int >= 8
 
-- name: Abort if expected computer does not exist in AD domain
+- name: Verify computer exists in AD domain
   fail:
     msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
   when:

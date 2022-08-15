@@ -1,5 +1,5 @@
 ---
-- name: Install cockpit web console packages
+- name: Install required cockpit web console packages
   vars:
     cockpit_install:
       - cockpit
@@ -12,7 +12,7 @@
     state: present
     install_weak_deps: false
 
-- name: Remove cockpit web console packages
+- name: Remove unneeded cockpit web console packages
   vars:
     cockpit_remove:
       - "{{ 'cockpit-pcp' if not web_console_enable_perf_metrics|bool else '' }}"

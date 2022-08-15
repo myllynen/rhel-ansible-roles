@@ -1,5 +1,5 @@
 ---
-- name: Abort if audit disabled on kernel command line
+- name: Verify audit enabled
   fail:
     msg: "Audit disabled on kernel command line."
   when:

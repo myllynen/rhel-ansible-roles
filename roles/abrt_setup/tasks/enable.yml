@@ -1,5 +1,5 @@
 ---
-- name: Install abrt packages
+- name: Install required abrt packages
   vars:
     abrt_install:
       - abrt
@@ -13,7 +13,7 @@
     name: "{{ abrt_install | select() | list }}"
     state: present
 
-- name: Remove abrt packages
+- name: Remove unneeded abrt packages
   vars:
     abrt_remove:
       - "{{ 'abrt-console-notification' if not abrt_setup_console_notification|bool else '' }}"
