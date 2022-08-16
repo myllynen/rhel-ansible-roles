@@ -22,6 +22,10 @@
     mode: '0600'
   register: sssd_config
 
+- name: Verify SSSD configuration
+  command: sssctl config-check
+  changed_when: false
+
 - name: Join AD domain
   shell: >
     echo '{{ domain_ad_admin_password }}' |

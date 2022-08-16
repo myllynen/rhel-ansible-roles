@@ -7,6 +7,7 @@
       - krb5-workstation
       - oddjob-mkhomedir
       - sssd
+      - sssd-tools
     state: present
 
 - name: Check Kerberos keytab file
