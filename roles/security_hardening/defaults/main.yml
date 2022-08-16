@@ -1,8 +1,12 @@
 ---
-selinux: enforcing
-
-crypto_policy: DEFAULT
+# Verify Secure Boot is enabled
+# Must be enabled on hardware level
+secure_boot_verify: false
 
 # One of: disabled, integrity, confidentiality
 # NB. Enabling lockdown will prevent using kdump
 kernel_lockdown: disabled
+
+selinux: enforcing
+
+crypto_policy: DEFAULT

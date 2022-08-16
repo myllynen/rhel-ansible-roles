@@ -1,4 +1,24 @@
 ---
+- name: Install mokutil package
+  yum:
+    name: mokutil
+    state: present
+  when: secure_boot_verify | bool
+
+- name: Check Secure Boot state
+  command: mokutil --sb-state
+  register: sb_state
+  failed_when: false
+  changed_when: false
+  when: secure_boot_verify | bool
+
+- name: Verify Secure Boot enabled
+  fail:
+    msg: "Secure Boot not enabled."
+  when:
+    - secure_boot_verify | bool
+    - "'Secure Boot enabled' not in sb_state.stdout"
+
 - name: Install SELinux packages
   vars:
     selinux_package_lists:
