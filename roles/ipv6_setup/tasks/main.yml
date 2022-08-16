@@ -31,6 +31,47 @@
     dest: /etc/sysctl.d/50-ipv6.conf
   register: sysctl_config
 
+- name: Locate NIC ifcfg configuration files
+  find:
+    paths: /etc/sysconfig/network-scripts
+    patterns:
+      - 'ifcfg-e*'
+      - 'ifcfg-net*'
+  register: ifcfg_files
+  when: ipv6_setup_configure_nm | bool
+
+- name: Locate NM connection configuration files
+  find:
+    paths: /etc/NetworkManager/system-connections
+    patterns:
+      - '*.nmconnection'
+  register: nmconnection_files
+  when: ipv6_setup_configure_nm | bool
+
+- name: Configure IPv6 in NIC ifcfg configuration files
+  vars:
+    disable_ipv6: "{{ 'yes' if ipv6_setup_enable | bool else 'no' }}"
+  replace:
+    path: "{{ item }}"
+    regexp: '^IPV6INIT=.*'
+    replace: 'IPV6INIT={{ disable_ipv6 }}'
+  register: ifcfg_config
+  loop: "{{ ifcfg_files.files | map(attribute='path') | list }}"
+  when: ipv6_setup_configure_nm | bool
+
+- name: Configure IPv6 in NM connection configuration files
+  vars:
+    disable_ipv6: "{{ 'auto' if ipv6_setup_enable | bool else 'disabled' }}"
+  replace:
+    path: "{{ item }}"
+    after: '\[ipv6\]'
+    before: '\[proxy\]'
+    regexp: '^method=.*'
+    replace: 'method={{ disable_ipv6 }}'
+  register: nmconnection_config
+  loop: "{{ nmconnection_files.files | map(attribute='path') | list }}"
+  when: ipv6_setup_configure_nm | bool
+
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
   when: sysctl_config is changed
@@ -38,4 +79,6 @@
 - name: Reboot system
   reboot:
   when: boot_config is changed or
-        sysctl_config is changed
+        sysctl_config is changed or
+        ifcfg_config is changed or
+        nmconnection_config is changed
