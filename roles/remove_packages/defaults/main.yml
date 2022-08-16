@@ -7,4 +7,4 @@ remove_packages:
 
 # Enable or disable yum module 'autoremove' parameter
 # to remove all "leaf" packages no longer required
-remove_packages_autoremove: false
+remove_packages_autoremove: true
