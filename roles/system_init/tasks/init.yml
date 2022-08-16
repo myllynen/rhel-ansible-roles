@@ -3,7 +3,7 @@
   package_facts:
 
 - name: Remove old kernel packages (RHEL 7)
-  command: package-cleanup --oldkernels --count=1 -y
+  command: package-cleanup -C --oldkernels --count=1 -y
   when:
     - ansible_facts.pkg_mgr == 'yum'
     - ansible_facts.packages['kernel'] | length > 1
@@ -36,10 +36,14 @@
 # https://bugzilla.redhat.com/show_bug.cgi?id=2056891
 - name: Ensure correct /etc/hostname
   copy:
-    content: "{{ ansible_facts.fqdn | lower }}\n"
+    content: "{{ inventory_hostname | lower }}\n"
     dest: /etc/hostname
     mode: '0644'
   register: hostname_config
+  when:
+    - "'.' in inventory_hostname"
+    - "':' not in inventory_hostname"
+    - inventory_hostname | regex_search('[a-zA-Z]')
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
@@ -92,7 +96,7 @@
     label: /var/log/anaconda/{{ item | basename }}
   when: installer_logdir.stat.exists
 
-- name: Locate leftover files
+- name: Locate leftover temp files
   find:
     paths: /tmp
     hidden: true
@@ -106,7 +110,7 @@
       - 'vmware-root_*'
   register: leftover_files
 
-- name: Remove leftover files
+- name: Remove all leftover files
   file:
     path: "{{ item }}"
     state: absent
