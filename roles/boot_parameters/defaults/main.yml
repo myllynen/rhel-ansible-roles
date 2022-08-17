@@ -6,5 +6,13 @@ boot_parameters_disable:
   - debug
   - rhgb
 
-# Reboot system after changes
+# Protect boot parameters with password
+# NB. For the time being this should be
+# PBKDF2 hash to allow idempotency, use
+# grub2-mkpasswd-pbkdf2(3) to create one
+# Boot loader username is always 'root'
+# This should come from vault
+#boot_parameters_password:
+
+# Reboot system after parameter changes
 boot_parameters_reboot: true
