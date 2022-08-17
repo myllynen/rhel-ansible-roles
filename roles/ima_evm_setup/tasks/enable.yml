@@ -10,6 +10,12 @@
     - ansible_facts.services['fapolicyd.service'].state == 'running' or
       ansible_facts.services['fapolicyd.service'].status == 'enabled'
 
+- name: Verify IMA policies to apply
+  fail:
+    msg: "Unknown IMA policy {{ item }} configured."
+  when: item not in __ima_policies_supported
+  loop: "{{ ima_evm_setup_ima_policies }}"
+
 - name: Install IMA/EVM packages
   yum:
     name: "{{ __ima_packages }}"
@@ -19,42 +25,45 @@
   stat:
     path: /dev/tpm0
   register: tpm_device
+  when: ima_evm_setup_enable_tpm_use | bool
 
-- name: Abort if unable to enable TPM
+- name: Verify TPM device present
   fail:
-    msg: "Unable to enable TPM, no TPM device present!"
+    msg: "No TPM device present."
   when:
-    - ima_evm_setup_enable_tpm | bool
+    - ima_evm_setup_enable_tpm_use | bool
     - not tpm_device.stat.exists
 
 - name: Install TPM packages
   yum:
     name: "{{ __tpm_packages }}"
     state: present
-  when: ima_evm_setup_enable_tpm | bool
-
-- name: Check platform type
-  stat:
-    path: /sys/firmware/efi
-  register: efi_platform
-
-- name: Abort if Secure Boot not supported
-  fail:
-    msg: "Unable to enable Secure Boot, not UEFI platform!"
-  when:
-    - "'secure_boot' in ima_evm_setup_ima_policy"
-    - not efi_platform.stat.exists
+  when: ima_evm_setup_enable_tpm_use | bool
 
 - name: Install MOK packages
   yum:
     name: "{{ __mok_packages }}"
     state: present
-  when: "'secure_boot' in ima_evm_setup_ima_policy"
+  when: ima_evm_setup_require_secure_boot | bool
+
+- name: Check Secure Boot state
+  command: mokutil --sb-state
+  register: sb_state
+  failed_when: false
+  changed_when: false
+  when: ima_evm_setup_require_secure_boot | bool
+
+- name: Verify Secure Boot enabled
+  fail:
+    msg: "Secure Boot not enabled"
+  when:
+    - ima_evm_setup_require_secure_boot | bool
+    - "'Secure Boot enabled' not in sb_state.stdout"
 
 - name: Set IMA/EVM boot parameters to configure (policies)
   set_fact:
     ima_policies: "{{ ima_policies | default([]) + ['ima_policy=' + item] }}"
-  loop: "{{ ima_evm_setup_ima_policy }}"
+  loop: "{{ ima_evm_setup_ima_policies }}"
 
 - name: Set IMA/EVM boot parameters to configure (other)
   set_fact:
@@ -62,6 +71,7 @@
   loop:
     - ima_appraise={{ ima_evm_setup_ima_appraise }}
     - ima_hash={{ ima_evm_setup_ima_hash }}
+    - module.sig_enforce=1
 
 - name: Check current integrity audit configuration
   lineinfile:
@@ -134,7 +144,7 @@
     name: tpm2-abrmd
     state: started
     enabled: true
-  when: ima_evm_setup_enable_tpm | bool
+  when: ima_evm_setup_enable_tpm_use | bool
 
 - name: Check existing EVM key
   stat:
@@ -168,7 +178,7 @@
     keyctl pipe $(keyctl search @u encrypted evm-key) > /etc/keys/evm-key
     chmod 0400 /etc/keys/kmk /etc/keys/evm-key
   when:
-    - ima_evm_setup_enable_tpm | bool
+    - ima_evm_setup_enable_tpm_use | bool
     - "'evm' in ima_evm_setup_method"
     - "'sig' not in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -185,7 +195,7 @@
     keyctl pipe $(keyctl search @u encrypted evm-key) > /etc/keys/evm-key
     chmod 0400 /etc/keys/kmk /etc/keys/evm-key
   when:
-    - not ima_evm_setup_enable_tpm | bool
+    - not ima_evm_setup_enable_tpm_use | bool
     - "'evm' in ima_evm_setup_method"
     - "'sig' not in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -240,7 +250,7 @@
     key_opt: "{{ '' if env_pw or ima_evm_setup_key_password is not defined else '-p' + q + ima_evm_setup_key_password + q }}"
     sign_opt: "{{ 'ima_sign' if 'evm' not in ima_evm_setup_method else 'sign --imasig' }}"
   shell: |
-    export EVMCTL_KEY_PASSWORD="{{ ima_evm_setup_key_password | default('', true) }}"
+    export EVMCTL_KEY_PASSWORD='{{ ima_evm_setup_key_password | default("", true) }}'
     set -e
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm  > /dev/null 2>&1 || :
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima  > /dev/null 2>&1 || :
@@ -263,14 +273,14 @@
 - name: Verify IMA file attributes
   command: getfattr -m - -d /usr/bin/getfattr
   register: fattr_info
-  changed_when: false
   failed_when: "'security.ima' not in fattr_info.stdout"
+  changed_when: false
 
 - name: Verify EVM file attributes
   command: getfattr -m - -d /usr/bin/getfattr
   register: fattr_info
-  changed_when: false
   failed_when: "'security.evm' not in fattr_info.stdout"
+  changed_when: false
   when: "'evm' in ima_evm_setup_method"
 
 - name: Check current IMA/EVM boot parameters (other)

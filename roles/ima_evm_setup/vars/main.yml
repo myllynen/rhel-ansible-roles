@@ -5,6 +5,10 @@ __ima_packages:
   - keyutils
   - rpm-plugin-ima
 
+__ima_policies_supported:
+  - appraise_tcb
+  - fail_securely
+
 __mok_packages:
   - mokutil
 
@@ -20,3 +24,4 @@ __ima_boot_params:
   - ima_policy
   - ima_template
   - integrity_audit
+  - module.sig_enforce
