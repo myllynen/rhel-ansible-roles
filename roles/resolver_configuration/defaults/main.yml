@@ -1,0 +1,18 @@
+---
+# NetworkManager updates /etc/resolv.conf
+# true - use NM and system-roles.network
+# false - for using below configurations
+resolver_nm_update: true
+
+resolver_nameservers:
+  - 1.1.1.1
+  - 8.8.8.8
+
+resolver_search_domains:
+#  - corp.local
+#  - example.com
+
+resolver_options:
+#  - rotate
+#  - timeout:1
+#  - attempts:1

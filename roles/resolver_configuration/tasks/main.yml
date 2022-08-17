@@ -1,0 +1,33 @@
+---
+- name: Configure NetworkManager resolver updates
+  copy:
+    content: |
+      [main]
+      dns={{ 'default' if resolver_nm_update | bool else 'none' }}
+    dest: /etc/NetworkManager/conf.d/90-dns-none.conf
+    mode: '0644'
+  register: nm_config
+
+- name: Apply NetworkManager configuration change
+  service:
+    name: NetworkManager
+    state: reloaded
+  when: nm_config is changed
+
+- name: Create /etc/resolv.conf file
+  vars:
+    etc_resolv_conf_content: |
+      {% if resolver_search_domains %}
+      search {{ resolver_search_domains | join(' ') }}
+      {% endif %}
+      {% if resolver_options %}
+      options {{ resolver_options | join(' ') }}
+      {% endif %}
+      {% for line in resolver_nameservers | default([], true) %}
+      nameserver {{ line }}
+      {% endfor %}
+  copy:
+    content: "{{ etc_resolv_conf_content }}"
+    dest: /etc/resolv.conf
+    mode: '0644'
+  when: not resolver_nm_update | bool
