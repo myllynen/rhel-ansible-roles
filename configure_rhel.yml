@@ -4,25 +4,6 @@
   become: true
   vars:
     #
-    # abrt_setup
-    #
-    # Enable or disable abrt
-    # NB. abrt not available on RHEL 9+
-    # NB. Consider using system_coredump instead
-    abrt_setup_enable: false
-
-    abrt_setup_report_fatal_mce_only: true
-    abrt_setup_vmcore_move_not_copy: true
-    abrt_setup_console_notification: true
-    abrt_setup_unpackaged_reports: true
-    abrt_setup_sosreport_plugin: true
-    abrt_setup_unsigned_reports: true
-    abrt_setup_java_connector: true
-
-    # Purge abrt directories on uninstall
-    abrt_setup_uninstall_purge: true
-
-    #
     # accounts_local
     #
     # List of local users to delete
@@ -117,7 +98,15 @@
       - debug
       - rhgb
 
-    # Reboot system after changes
+    # Protect boot parameters with password
+    # NB. For the time being this should be
+    # PBKDF2 hash to allow idempotency, use
+    # grub2-mkpasswd-pbkdf2(3) to create one
+    # Boot loader username is always 'root'
+    # This should come from vault
+    #boot_parameters_password:
+
+    # Reboot system after parameter changes
     boot_parameters_reboot: true
 
     #
@@ -209,9 +198,11 @@
     # Enable or disable IPv6 using sysctl settings
     # Boot parameter to disable IPv6 will be removed
     # See https://access.redhat.com/solutions/8709
-    # NB. Use system-roles/network to configure NM
-    # NB. Use etc_hosts to configure /etc/hosts
     ipv6_setup_enable: true
+
+    # Either use system-roles.network to configure NM
+    # or enable changing NM configuration by this role
+    ipv6_setup_configure_nm: true
 
     #
     # motd_issue
@@ -236,6 +227,30 @@
     #
     # remove_packages - list omitted here for brevity
     #
+    # Enable or disable yum module 'autoremove' parameter
+    # to remove all "leaf" packages no longer required
+    remove_packages_autoremove: true
+
+    #
+    # resolver_configuration
+    #
+    # NetworkManager updates /etc/resolv.conf
+    # true - use NM and system-roles.network
+    # false - for using below configurations
+    resolver_nm_update: true
+
+    resolver_nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+
+    resolver_search_domains:
+    #  - corp.local
+    #  - example.com
+
+    resolver_options:
+    #  - rotate
+    #  - timeout:1
+    #  - attempts:1
 
     #
     # root_password
@@ -251,13 +266,17 @@
     #
     # security_hardening
     #
-    selinux: enforcing
-
-    crypto_policy: DEFAULT
+    # Verify Secure Boot is enabled
+    # Must be enabled on hardware level
+    secure_boot_verify: false
 
     # One of: disabled, integrity, confidentiality
     # NB. Enabling lockdown will prevent using kdump
     kernel_lockdown: disabled
+
+    selinux: enforcing
+
+    crypto_policy: DEFAULT
 
     #
     # service_state
@@ -350,7 +369,8 @@
     #
     # system_unregister
     #
-    # No configuration needed
+    # This role unconditionally unregisters a RHEL system from
+    # both Red Hat Insights and Red Hat Subscription Management
 
     #
     # system_update
@@ -455,6 +475,7 @@
   roles:
     - etc_hosts
     - ipv6_setup
+    - resolver_configuration
     #- rhel-system-roles.network
     #- timezone
     - timesync
@@ -467,7 +488,6 @@
     #- rhel-system-roles.storage
     #- system_update_report_pre
     #- system_update
-    #- abrt_setup
     #- aide_setup
     #- accounts_policy
     #- accounts_local
@@ -477,6 +497,7 @@
     ##- ima_evm_setup
     #- fapolicyd_setup
     - firewall
+    - watchdog
     #- motd_issue
     - performance_tuning
     - root_password
@@ -489,5 +510,4 @@
     #- splunk_forwarder
     #- system_coredump
     - system_init
-    - watchdog
     #- system_reboot
