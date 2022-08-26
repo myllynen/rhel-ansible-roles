@@ -175,6 +175,13 @@
     fapolicyd_setup_enable_service: false
 
     #
+    # fips_setup
+    #
+    # Enable or not FIPS mode
+    # Disabling FIPS mode is unsupported
+    fips_setup_enable: true
+
+    #
     # firewall
     #
     firewall_enable: true
