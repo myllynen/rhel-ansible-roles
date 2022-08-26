@@ -501,8 +501,10 @@
     - base_packages
     - certificates
     #- { role: domain_ad, when: domain_ad_admin_username is defined }
+    #- { role: ipaclient, state: present, when: ipaclient_domain is defined }
     ##- ima_evm_setup
     #- fapolicyd_setup
+    #- fips_setup
     - firewall
     - watchdog
     #- motd_issue
