@@ -22,10 +22,10 @@
 
 - name: Copy fapolicyd rules file
   vars:
-    rules_file: "{{ '/etc/fapolicyd/fapolicyd.rules' if not rules_dir.stat.exists else '/etc/fapolicyd/rules.d/zz-local.rules' }}"
+    rules_file: "{{ 'fapolicyd.rules' if not rules_dir.stat.exists else 'rules.d/zz-local.rules' }}"
   copy:
     src: fapolicyd.rules
-    dest: "{{ rules_file }}"
+    dest: /etc/fapolicyd/{{ rules_file }}
     owner: root
     group: fapolicyd
     mode: '0644'
@@ -39,10 +39,10 @@
 
 - name: Copy fapolicyd trust file
   vars:
-    trust_file: "{{ '/etc/fapolicyd/fapolicyd.trust' if not rules_dir.stat.exists else '/etc/fapolicyd/trust.d/zz-local.trust' }}"
+    trust_file: "{{ 'fapolicyd.trust' if not rules_dir.stat.exists else 'trust.d/zz-local.trust' }}"
   copy:
     src: fapolicyd.trust
-    dest: "{{ trust_file }}"
+    dest: /etc/fapolicyd/{{ trust_file }}
     owner: root
     group: fapolicyd
     mode: '0644'

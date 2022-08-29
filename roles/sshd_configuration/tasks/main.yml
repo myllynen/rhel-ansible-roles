@@ -18,15 +18,15 @@
 - name: Check sshd_config.d directory
   stat:
     path: /etc/ssh/sshd_config.d
-  register: conf_dir
+  register: config_dir
 
 - name: Set sshd configuration file
   set_fact:
-    conf_file: "{{ '/etc/ssh/sshd_config' if not conf_dir.stat.exists else '/etc/ssh/sshd_config.d/0-local.conf' }}"
+    config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-local.conf' }}"
 
 - name: Enable sshd configuration options
   lineinfile:
-    path: "{{ conf_file }}"
+    path: "{{ config_file }}"
     regexp: '^(|#){{ item.key }} .*'
     line: '{{ item.key + " " + item.value }}'
     create: true
@@ -43,7 +43,7 @@
     replace: '#\1'
     validate: sshd -tf %s
   register: disable_options
-  loop: "{{ (['/etc/ssh/sshd_config'] + [conf_file]) | unique | product(sshd_disable) | list }}"
+  loop: "{{ (['/etc/ssh/sshd_config'] + [config_file]) | unique | product(sshd_disable) | list }}"
 
 - name: Apply sshd configuration changes
   service:
