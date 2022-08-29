@@ -1,0 +1,6 @@
+---
+# Policy to apply to USB devices
+# reject - block and reject all devices
+# custom - use configurations in files/
+# allow - disable USBGuard and allow all
+usbguard_setup_policy: reject

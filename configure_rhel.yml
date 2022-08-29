@@ -463,6 +463,15 @@
     #
 
     #
+    # usbguard_setup
+    #
+    # Policy to apply to USB devices
+    # reject - block and reject all devices
+    # custom - use configurations in files/
+    # allow - disable USBGuard and allow all
+    usbguard_setup_policy: reject
+
+    #
     # watchdog
     #
     watchdog_enable: true
@@ -515,6 +524,7 @@
     #- shell_profile
     - sshd_configuration
     #- troubleshooting_packages
+    #- usbguard_setup
     #- web_console
     #- splunk_forwarder
     #- system_coredump

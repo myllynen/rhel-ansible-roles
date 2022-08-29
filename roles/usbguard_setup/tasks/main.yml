@@ -1,0 +1,8 @@
+---
+- name: Enable USBGuard
+  include_tasks: enable.yml
+  when: usbguard_setup_policy != "allow"
+
+- name: Disable USBGuard
+  include_tasks: disable.yml
+  when: usbguard_setup_policy == "allow"

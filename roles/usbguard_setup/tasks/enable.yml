@@ -1,0 +1,82 @@
+---
+- name: Install USBGuard packages
+  yum:
+    name: usbguard
+    state: present
+
+- name: Copy reject-all USBGuard configuration file
+  copy:
+    content: |
+      ImplicitPolicyTarget=reject
+      PresentDevicePolicy=reject
+      PresentControllerPolicy=reject
+      InsertedDevicePolicy=reject
+      IPCAllowedUsers=not_allowed
+      IPCAllowedGroups=not_allowed
+    dest: /etc/usbguard/usbguard-daemon.conf
+    mode: '0600'
+  register: daemon_config_reject
+  when: usbguard_setup_policy == 'reject'
+
+- name: Copy custom USBGuard configuration file
+  vars:
+    config_files:
+      rhel7: rhel7_usbguard-daemon.conf
+      default: default_usbguard-daemon.conf
+    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
+    config_file_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
+    config_file: "{{ config_files[config_file_id] }}"
+  copy:
+    src: "{{ config_file }}"
+    dest: /etc/usbguard/usbguard-daemon.conf
+    mode: '0600'
+  register: daemon_config_custom
+  when: usbguard_setup_policy == 'custom'
+
+- name: Clear default USBGuard rules file
+  vars:
+    rules_content: "{{ lookup('file', 'zz-local.conf') | trim }}"
+  copy:
+    content: ''
+    dest: /etc/usbguard/rules.conf
+    mode: '0600'
+  register: rules_config_default
+  when:
+    - ansible_facts.distribution_major_version|int >= 8 or
+      rules_content == 'Placeholder'
+
+- name: Copy custom USBGuard rules file
+  vars:
+    old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 8 else false }}"
+    rules_config: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-local.conf' }}"
+    rules_content: "{{ lookup('file', 'zz-local.conf') | trim }}"
+  template:
+    src: zz-local.conf
+    dest: /etc/usbguard/{{ rules_config }}
+    mode: '0600'
+  register: rules_config_custom
+  when:
+    - usbguard_setup_policy == 'custom'
+    - rules_content != 'Placeholder'
+
+- name: Enable usbguard service
+  service:
+    name: usbguard
+    enabled: true
+
+- name: Start usbguard service
+  service:
+    name: usbguard
+    state: started
+  register: service_start
+
+- name: Apply usbguard configuration changes
+  service:
+    name: usbguard
+    state: restarted
+  when:
+    - service_start is not changed
+    - daemon_config_reject is changed or
+      daemon_config_custom is changed or
+      rules_config_default is changed or
+      rules_config_custom is changed
