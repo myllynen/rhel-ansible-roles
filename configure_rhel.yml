@@ -471,6 +471,10 @@
     # allow - disable USBGuard and allow all
     usbguard_setup_policy: reject
 
+    # To completely disable the USB subsyste
+    # use the usbcore.nousb boot parameter,
+    # also see usbcore.authorized_default.
+
     #
     # watchdog
     #

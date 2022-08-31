@@ -4,3 +4,7 @@
 # custom - use configurations in files/
 # allow - disable USBGuard and allow all
 usbguard_setup_policy: reject
+
+# To completely disable the USB subsystem
+# use the usbcore.nousb boot parameter,
+# also see usbcore.authorized_default.
