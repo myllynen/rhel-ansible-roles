@@ -13,8 +13,8 @@
 - name: Verify IMA policies to apply
   fail:
     msg: "Unknown IMA policy {{ item }} configured."
-  when: item not in __ima_policies_supported
   loop: "{{ ima_evm_setup_ima_policies }}"
+  when: item not in __ima_policies_supported
 
 - name: Install IMA/EVM packages
   yum:

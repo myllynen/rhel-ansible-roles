@@ -23,7 +23,7 @@
 
 - name: Configure IPv6 using sysctl
   vars:
-    disable_ipv6: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
+    disable_ipv6: "{{ '0' if ipv6_setup_enable|bool else '1' }}"
   copy:
     content: |
       net.ipv6.conf.all.disable_ipv6 = {{ disable_ipv6 }}
@@ -50,7 +50,7 @@
 
 - name: Configure IPv6 in NIC ifcfg configuration files
   vars:
-    disable_ipv6: "{{ 'yes' if ipv6_setup_enable | bool else 'no' }}"
+    disable_ipv6: "{{ 'yes' if ipv6_setup_enable|bool else 'no' }}"
   replace:
     path: "{{ item }}"
     regexp: '^IPV6INIT=.*'
@@ -61,7 +61,7 @@
 
 - name: Configure IPv6 in NM connection configuration files
   vars:
-    disable_ipv6: "{{ 'auto' if ipv6_setup_enable | bool else 'disabled' }}"
+    disable_ipv6: "{{ 'auto' if ipv6_setup_enable|bool else 'disabled' }}"
   replace:
     path: "{{ item }}"
     after: '\[ipv6\]'

@@ -41,21 +41,21 @@
   delegate_to: localhost
   run_once: true
   become: false
-  when: hostvars[item].package_updates is defined
   loop: "{{ ansible_play_batch }}"
+  when: hostvars[item].package_updates is defined
 
 - name: Convert TXT file to PS file
   command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ item }} -T 4 -o {{ hostvars[item].server_ps }} {{ hostvars[item].server_txt }}
   delegate_to: localhost
   run_once: true
   become: false
-  when: hostvars[item].package_updates is defined
   loop: "{{ ansible_play_batch }}"
+  when: hostvars[item].package_updates is defined
 
 - name: Convert PS file to PDF file
   command: ps2pdf {{ hostvars[item].server_ps }} {{ hostvars[item].server_pdf }}
   delegate_to: localhost
   run_once: true
   become: false
-  when: hostvars[item].package_updates is defined
   loop: "{{ ansible_play_batch }}"
+  when: hostvars[item].package_updates is defined
