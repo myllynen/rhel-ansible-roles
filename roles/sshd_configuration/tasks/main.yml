@@ -7,7 +7,7 @@
   fail:
     msg: "Refusing to configure 'PermitRootLogin no' when connected as root!"
   when:
-    - "ansible_user == 'root'"
+    - "'SUDO_USER' not in ansible_env"
     - "'PermitRootLogin' in sshd"
     - "sshd.PermitRootLogin == 'no'"
 
