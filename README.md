@@ -29,6 +29,9 @@ See also
 See also
 [https://github.com/myllynen/windows-ansible-roles](https://github.com/myllynen/windows-ansible-roles).
 
+See also
+[https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles).
+
 ## License
 
 GPLv2+
