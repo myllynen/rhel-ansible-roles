@@ -1,0 +1,32 @@
+---
+- name: Copy repository configuration files
+  copy:
+    src: "{{ item }}"
+    dest: /etc/yum.repos.d/{{ item }}
+    mode: '0644'
+  loop: "{{ repository_setup_repo_files_copy | select() | list }}"
+
+- name: Remove repository configuration files
+  file:
+    path: /etc/yum.repos.d/{{ item }}
+    state: absent
+  loop: "{{ repository_setup_repo_files_remove | select() | list }}"
+
+# Sanity check before the next tasks
+- name: Install subscription-manager package
+  yum:
+    name: subscription-manager
+    state: present
+  when: repository_setup_rhsm_configure | bool
+
+- name: Enable Red Hat Subscription Management
+  include_tasks: enable.yml
+  when:
+    - repository_setup_rhsm_configure | bool
+    - repository_setup_rhsm_subscribe | bool
+
+- name: Disable Red Hat Subscription Management
+  include_tasks: disable.yml
+  when:
+    - repository_setup_rhsm_configure | bool
+    - not repository_setup_rhsm_subscribe | bool

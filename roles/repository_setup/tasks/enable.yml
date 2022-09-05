@@ -1,0 +1,51 @@
+---
+- name: Install katello-ca-consumer-latest package
+  yum:
+    name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    state: present
+    validate_certs: false
+    disable_gpg_check: true
+  when:
+    - "'rhsm_baseurl' in repository_setup_rhsm_parameters"
+    - repository_setup_install_katello_rpm | bool
+
+- name: Configure Red Hat Subscription
+  redhat_subscription:
+    activationkey: "{{ repository_setup_rhsm_parameters.activationkey | default(omit) }}"
+    orgid: "{{ repository_setup_rhsm_parameters.orgid | default(omit) }}"
+    username: "{{ repository_setup_rhsm_parameters.username | default(omit) }}"
+    password: "{{ repository_setup_rhsm_parameters.password | default(omit) }}"
+    auto_attach: "{{ repository_setup_rhsm_parameters.auto_attach | default(omit) }}"
+    consumer_id: "{{ repository_setup_rhsm_parameters.consumer_id | default(omit) }}"
+    consumer_name: "{{ repository_setup_rhsm_parameters.consumer_name | default(omit) }}"
+    consumer_type: "{{ repository_setup_rhsm_parameters.consumer_type | default(omit) }}"
+    environment: "{{ repository_setup_rhsm_parameters.environment | default(omit) }}"
+    force_register: "{{ repository_setup_rhsm_parameters.force_register | default(omit) }}"
+    pool_ids: "{{ repository_setup_rhsm_parameters.pool_ids | default(omit) }}"
+    release: "{{ repository_setup_rhsm_parameters.release | default(omit) }}"
+    rhsm_baseurl: "{{ repository_setup_rhsm_parameters.rhsm_baseurl | default(omit) }}"
+    rhsm_repo_ca_cert: "{{ repository_setup_rhsm_parameters.rhsm_repo_ca_cert | default(omit) }}"
+    server_hostname: "{{ repository_setup_rhsm_parameters.server_hostname | default(omit) }}"
+    server_port: "{{ repository_setup_rhsm_parameters.server_port | default(omit) }}"
+    server_insecure: "{{ repository_setup_rhsm_parameters.server_insecure | default(omit) }}"
+    server_prefix: "{{ repository_setup_rhsm_parameters.server_prefix | default(omit) }}"
+    server_proxy_hostname: "{{ repository_setup_rhsm_parameters.server_proxy_hostname | default(omit) }}"
+    server_proxy_port: "{{ repository_setup_rhsm_parameters.server_proxy_port | default(omit) }}"
+    server_proxy_user: "{{ repository_setup_rhsm_parameters.server_proxy_user | default(omit) }}"
+    server_proxy_password: "{{ repository_setup_rhsm_parameters.server_proxy_password | default(omit) }}"
+    syspurpose: "{{ repository_setup_rhsm_parameters.syspurpose | default(omit) }}"
+  when: ('activationkey' in repository_setup_rhsm_parameters) or
+        ('username' in repository_setup_rhsm_parameters)
+
+- name: Disable Red Hat repositories
+  rhsm_repository:
+    name: "{{ repository_setup_rhsm_repositories_disable }}"
+    state: disabled
+  when: repository_setup_rhsm_repositories_disable | default(false)
+
+- name: Enable Red Hat repositories
+  rhsm_repository:
+    name: "{{ repository_setup_rhsm_repositories_enable }}"
+    purge: "{{ repository_setup_rhsm_repositories_purge }}"
+    state: enabled
+  when: repository_setup_rhsm_repositories_enable | default(false)

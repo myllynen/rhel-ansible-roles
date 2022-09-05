@@ -1,0 +1,17 @@
+---
+- name: Unsubscribe from Red Hat Subscription Management
+  redhat_subscription:
+    state: absent
+
+- name: Remove Katello CA package
+  yum:
+    name: katello-ca-consumer-*
+    state: absent
+
+- name: Remove Katello CA certificates
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/rhsm/ca/katello-default-ca.pem
+    - /etc/rhsm/ca/katello-server-ca.pem

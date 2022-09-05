@@ -239,6 +239,10 @@
     remove_packages_autoremove: true
 
     #
+    # repository_setup - config omitted here for brevity
+    #
+
+    #
     # resolver_configuration
     #
     # NetworkManager updates /etc/resolv.conf
@@ -497,6 +501,7 @@
     - ipv6_setup
     - resolver_configuration
     #- rhel-system-roles.network
+    #- repository_setup
     #- timezone
     - timesync
     - remove_packages
