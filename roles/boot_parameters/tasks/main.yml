@@ -49,7 +49,7 @@
     replace: 'GRUB_TIMEOUT={{ boot_parameters_timeout }}'
   when:
     - boot_parameters_timeout is integer
-    - boot_parameters_timeout | int >= 0
+    - boot_parameters_timeout | int >= 1
   register: boot_timeout
 
 - name: Determine platform type
