@@ -1,0 +1,46 @@
+---
+- name: Remove dracut-config-rescue package
+  yum:
+    name: dracut-config-rescue
+    state: absent
+
+# For RHEL 7
+- name: Check boot loader entries directory
+  stat:
+    path: /boot/loader/entries
+  register: entries_dir
+
+- name: Locate rescue images
+  vars:
+    find_paths:
+      - /boot
+      - "{{ '/boot/loader/entries' if entries_dir.stat.exists else '' }}"
+  find:
+    paths: "{{ find_paths | select() | list }}"
+    patterns: '*rescue*'
+  register: rescue_images
+
+- name: Remove rescue images
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ rescue_images.files | map(attribute='path') | list }}"
+  register: remove_images
+
+- name: Determine platform type
+  stat:
+    path: /sys/firmware/efi
+  register: efi_dir
+  when:
+    - not entries_dir.stat.exists
+    - remove_images is changed
+
+- name: Update boot loader configuration
+  vars:
+    old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 9 else false }}"
+    efi_path: "{{ true if old_rhel and efi_dir.stat.exists else false }}"
+    grub_config: "{{ '/boot/grub2/grub.cfg' if not efi_path else '/boot/efi/EFI/redhat/grub.cfg' }}"
+  command: grub2-mkconfig -o {{ grub_config }}
+  when:
+    - not entries_dir.stat.exists
+    - remove_images is changed

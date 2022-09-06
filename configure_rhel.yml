@@ -232,6 +232,13 @@
     tuned_profile: "{{ 'virtual-guest' if ansible_facts.virtualization_role == 'guest' else 'throughput-performance' }}"
 
     #
+    # rescue_image
+    #
+    # Enable or disable rescue image
+    # NB. Rescue images will be created on next kernel install
+    rescue_image_enable: false
+
+    #
     # remove_packages - list omitted here for brevity
     #
     # Enable or disable yum module 'autoremove' parameter
@@ -502,6 +509,7 @@
     - resolver_configuration
     #- rhel-system-roles.network
     #- repository_setup
+    #- rescue_image
     #- timezone
     - timesync
     - remove_packages
