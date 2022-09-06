@@ -42,6 +42,16 @@
     - ansible_facts.distribution_major_version|int == 7
     - boot_config is changed
 
+- name: Configure boot loader timeout
+  replace:
+    path: /etc/default/grub
+    regexp: '^GRUB_TIMEOUT=.*'
+    replace: 'GRUB_TIMEOUT={{ boot_parameters_timeout }}'
+  when:
+    - boot_parameters_timeout is integer
+    - boot_parameters_timeout | int >= 0
+  register: boot_timeout
+
 - name: Determine platform type
   stat:
     path: /sys/firmware/efi
@@ -73,7 +83,8 @@
 
 - name: Update boot loader configuration
   command: grub2-mkconfig -o {{ grub_config }}
-  when: password_remove is changed or
+  when: boot_timeout is changed or
+        password_remove is changed or
         password_update is changed
 
 - name: Reboot system

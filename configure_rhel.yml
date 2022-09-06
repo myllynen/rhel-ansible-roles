@@ -98,6 +98,9 @@
       - debug
       - rhgb
 
+    # NB. Using 0 requires manual selection
+    boot_parameters_timeout: 1
+
     # Protect boot parameters with password
     # NB. For the time being this should be
     # PBKDF2 hash to allow idempotency, use
