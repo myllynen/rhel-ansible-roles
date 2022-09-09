@@ -12,13 +12,6 @@
     state: absent
   loop: "{{ repository_setup_repo_files_remove | select() | list }}"
 
-# Sanity check before the next tasks
-- name: Install subscription-manager package
-  yum:
-    name: subscription-manager
-    state: present
-  when: repository_setup_rhsm_configure | bool
-
 - name: Enable Red Hat Subscription Management
   include_tasks: enable.yml
   when:
