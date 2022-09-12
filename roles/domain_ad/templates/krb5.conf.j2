@@ -5,7 +5,7 @@
 
 [libdefaults]
     default_realm = {{ domain_ad_domain | upper }}
-{% if distribution_major_version|int >= 8 %}
+{% if ansible_facts.distribution_major_version|int >= 8 %}
     dns_canonicalize_hostname = fallback
 {% endif %}
     dns_lookup_realm = true
