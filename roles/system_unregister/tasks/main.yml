@@ -20,6 +20,7 @@
 - name: Remove Katello CA package
   yum:
     name: katello-ca-consumer-*
+    cacheonly: true
     state: absent
   when: registration is changed
 

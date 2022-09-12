@@ -6,6 +6,7 @@
 - name: Remove Katello CA package
   yum:
     name: katello-ca-consumer-*
+    cacheonly: true
     state: absent
 
 - name: Remove Katello CA certificates

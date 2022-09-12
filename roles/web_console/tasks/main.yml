@@ -9,8 +9,8 @@
       - "{{ 'cockpit-pcp' if web_console_enable_perf_metrics|bool else '' }}"
   yum:
     name: "{{ cockpit_install | select() | list }}"
-    state: present
     install_weak_deps: false
+    state: present
 
 - name: Remove unneeded cockpit web console packages
   vars:
@@ -18,8 +18,9 @@
       - "{{ 'cockpit-pcp' if not web_console_enable_perf_metrics|bool else '' }}"
   yum:
     name: "{{ cockpit_remove | select() | list }}"
-    state: absent
     autoremove: true
+    cacheonly: true
+    state: absent
 
 - name: Enable cockpit web console
   service:

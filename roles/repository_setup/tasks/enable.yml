@@ -2,9 +2,10 @@
 - name: Install katello-ca-consumer-latest package
   yum:
     name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"
-    state: present
-    validate_certs: false
     disable_gpg_check: true
+    validate_certs: false
+    cacheonly: true
+    state: present
   when:
     - "'rhsm_baseurl' in repository_setup_rhsm_parameters"
     - repository_setup_install_katello_rpm | bool

@@ -21,8 +21,9 @@
       - "{{ 'abrt-plugin-sosreport' if not abrt_setup_sosreport_plugin|bool else '' }}"
   yum:
     name: "{{ abrt_remove | select() | list }}"
-    state: absent
     autoremove: true
+    cacheonly: true
+    state: absent
 
 - name: Configure abrt (unsigned reports)
   vars:
