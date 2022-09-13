@@ -1,11 +1,16 @@
 # RHEL Ansible Roles
 
-[![License: GPLv2](https://img.shields.io/badge/license-GPLv2-brightgreen.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Ansible roles for RHEL configuration.
 
 ## Quick Intro
+
+To install this collection:
+
+```
+ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-roles,master
+```
 
 See the example playbook [configure_rhel.yml](configure_rhel.yml) for
 all the configuration options these roles support and how they could be
@@ -34,4 +39,4 @@ See also
 
 ## License
 
-GPLv2+
+GPLv3+

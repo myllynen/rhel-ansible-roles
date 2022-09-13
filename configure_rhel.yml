@@ -2,6 +2,8 @@
 - name: Configure RHEL systems
   hosts: all
   become: true
+  collections:
+    - myllynen.rhel_ansible_roles
   vars:
     #
     # accounts_local

@@ -1,0 +1,17 @@
+namespace: myllynen
+name: rhel_ansible_roles
+version: "0.1.0"
+readme: README.md
+authors:
+  - Marko Myllynen <myllynen@redhat.com>
+description: >
+  Ansible roles for RHEL configuration.
+license:
+  - GPL-3.0-or-later
+tags:
+  - rhel
+  - centos
+  - configuration
+dependencies: {}
+repository: https://www.github.com/myllynen/rhel-ansible-roles
+issues: https://www.github.com/myllynen/rhel-ansible-roles/issues
