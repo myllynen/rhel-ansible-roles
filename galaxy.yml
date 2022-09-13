@@ -12,6 +12,8 @@ tags:
   - rhel
   - centos
   - configuration
-dependencies: {}
+dependencies:
+  ansible.posix: ">=1.4.0"
+  community.general: ">=5.5.0"
 repository: https://www.github.com/myllynen/rhel-ansible-roles
 issues: https://www.github.com/myllynen/rhel-ansible-roles/issues
