@@ -1,6 +1,6 @@
 ---
 - name: Configure system core dump pattern
-  sysctl:
+  ansible.posix.sysctl:
     name: kernel.core_pattern
     value: '/var/lib/systemd/coredump/core'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
@@ -8,7 +8,7 @@
   register: pattern_config
 
 - name: Allow safe suid binary coredumps
-  sysctl:
+  ansible.posix.sysctl:
     name: fs.suid_dumpable
     value: '2'
     sysctl_file: /etc/sysctl.d/50-coredump.conf

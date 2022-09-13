@@ -15,7 +15,7 @@
   when: core_config is changed
 
 - name: Disallow suid binary coredumps
-  sysctl:
+  ansible.posix.sysctl:
     name: fs.suid_dumpable
     value: '0'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
@@ -23,7 +23,7 @@
   register: suid_config
 
 - name: Restore system default core pattern configuration
-  sysctl:
+  ansible.posix.sysctl:
     name: kernel.core_pattern
     value: 'core'
     sysctl_file: /etc/sysctl.d/50-coredump.conf

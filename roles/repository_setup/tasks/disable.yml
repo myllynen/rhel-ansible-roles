@@ -1,6 +1,6 @@
 ---
 - name: Unsubscribe from Red Hat Subscription Management
-  redhat_subscription:
+  community.general.redhat_subscription:
     state: absent
 
 - name: Remove Katello CA package

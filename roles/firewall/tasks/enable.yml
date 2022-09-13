@@ -40,7 +40,7 @@
     ports_to_open: "{{ (__firewall_always_open_ports | default([], true) + firewall_open_ports | default([], true)) | select() | list | unique }}"
 
 - name: Open configured ports in firewall
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
     permanent: true
@@ -54,7 +54,7 @@
   changed_when: false
 
 - name: Close unconfigured ports in firewall
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
     permanent: true
@@ -79,7 +79,7 @@
     services_to_open: "{{ (__firewall_always_open_services | default([], true) + firewall_open_services | default([], true)) | select() | list | unique }}"
 
 - name: Open configured services in firewall
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
     permanent: true
@@ -93,7 +93,7 @@
   changed_when: false
 
 - name: Close unconfigured services in firewall
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
     permanent: true

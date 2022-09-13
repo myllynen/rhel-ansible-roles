@@ -109,6 +109,6 @@
   when: package_install is changed
 
 - name: Log message on package install
-  syslogger:
+  community.general.syslogger:
     msg: "{{ splunk_version.stdout }} installed on {{ ansible_facts.fqdn }}."
   when: package_install is changed

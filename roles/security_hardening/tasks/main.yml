@@ -42,7 +42,7 @@
     state: present
 
 - name: Configure SELinux state
-  selinux:
+  ansible.posix.selinux:
     policy: targeted
     state: "{{ selinux }}"
   register: selinux_config

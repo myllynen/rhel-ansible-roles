@@ -11,7 +11,7 @@
     - repository_setup_install_katello_rpm | bool
 
 - name: Configure Red Hat Subscription
-  redhat_subscription:
+  community.general.redhat_subscription:
     activationkey: "{{ repository_setup_rhsm_parameters.activationkey | default(omit) }}"
     orgid: "{{ repository_setup_rhsm_parameters.orgid | default(omit) }}"
     username: "{{ repository_setup_rhsm_parameters.username | default(omit) }}"
@@ -39,13 +39,13 @@
         ('username' in repository_setup_rhsm_parameters)
 
 - name: Disable Red Hat repositories
-  rhsm_repository:
+  community.general.rhsm_repository:
     name: "{{ repository_setup_rhsm_repositories_disable }}"
     state: disabled
   when: repository_setup_rhsm_repositories_disable | default(false)
 
 - name: Enable Red Hat repositories
-  rhsm_repository:
+  community.general.rhsm_repository:
     name: "{{ repository_setup_rhsm_repositories_enable }}"
     purge: "{{ repository_setup_rhsm_repositories_purge }}"
     state: enabled
