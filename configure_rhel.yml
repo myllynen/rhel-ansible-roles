@@ -211,6 +211,12 @@
     # See https://access.redhat.com/solutions/8709
     ipv6_setup_enable: true
 
+    # Some applications (e.g., Samba) require IPv6 stack
+    # to be enabled to function but need no IPv6 routing
+    # This option keeps IPv6 on for the loopback device
+    # This option has effect only when disabling IPv6
+    ipv6_setup_loopback_persist: false
+
     # Either use system-roles.network to configure NM
     # or enable changing NM configuration by this role
     ipv6_setup_configure_nm: true
