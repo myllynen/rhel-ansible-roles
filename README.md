@@ -15,8 +15,9 @@ ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-r
 See the example playbook [configure_rhel.yml](configure_rhel.yml) for
 all the configuration options these roles support and how they could be
 used together. For additional roles to configure RHEL (such as network
-and storage), see https://github.com/linux-system-roles (available as
-_rhel-system-roles_ on RHEL).
+and storage), see
+[Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
+(available also as _rhel-system-roles_ RPM on RHEL).
 
 NB. Recent versions of _rhel-system-roles_ may include similar roles as
 are included in this repository. Depending on the use case and support
