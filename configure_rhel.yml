@@ -1,5 +1,5 @@
 ---
-- name: Configure RHEL systems
+- name: Configure RHEL
   hosts: all
   become: true
   collections:
