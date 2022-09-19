@@ -81,6 +81,7 @@
     remote_src: true
     src: "{{ item }}"
     dest: /var/log/anaconda
+    mode: '0700'
   loop: "{{ installer_files }}"
   loop_control:
     label: "{{ item }} -> /var/log/anaconda/{{ item | basename }}"

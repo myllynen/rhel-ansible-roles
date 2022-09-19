@@ -3,6 +3,7 @@
   file:
     path: /etc/issue.d
     state: directory
+    mode: '0755'
   when: ansible_facts.distribution_major_version|int >= 8
 
 - name: Create issue file
@@ -19,6 +20,7 @@
   file:
     path: /etc/motd.d
     state: directory
+    mode: '0755'
   when: ansible_facts.distribution_major_version|int > 8
 
 - name: Create motd file

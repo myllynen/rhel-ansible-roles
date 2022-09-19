@@ -2,8 +2,8 @@
 - name: Update all packages
   yum:
     name: '*'
-    state: latest
     update_cache: true
+    state: latest
   register: package_install
 
 - name: Set package update timestamp

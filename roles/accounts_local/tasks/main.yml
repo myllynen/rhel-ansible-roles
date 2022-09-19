@@ -2,8 +2,8 @@
 - name: Delete local user
   user:
     name: "{{ item }}"
-    state: absent
     remove: true
+    state: absent
   loop: "{{ accounts_local_users_delete | select() | list }}"
 
 - name: Delete local group

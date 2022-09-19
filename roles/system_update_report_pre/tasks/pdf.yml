@@ -11,6 +11,7 @@
   file:
     path: /tmp/.ansible.pdf
     state: directory
+    mode: '0700'
   delegate_to: localhost
   run_once: true
   become: false

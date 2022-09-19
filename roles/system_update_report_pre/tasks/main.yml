@@ -2,8 +2,8 @@
 - name: Check available package updates
   yum:
     name: '*'
-    state: latest
     update_cache: true
+    state: latest
   check_mode: true
   register: package_install
   changed_when: false

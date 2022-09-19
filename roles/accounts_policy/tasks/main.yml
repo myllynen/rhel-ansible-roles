@@ -62,6 +62,7 @@
   copy:
     src: "{{ system_auth_profile.replace('custom/', '') }}"
     dest: /etc/authselect/custom
+    mode: '0644'
   register: auth_profile_copy
   when:
     - ansible_facts.distribution_major_version|int >= 8
