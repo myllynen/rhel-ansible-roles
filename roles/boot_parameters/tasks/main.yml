@@ -36,6 +36,7 @@
 
 - name: Fix default kernel boot parameters (RHEL 7)
   shell: |
+    set -o pipefail
     eval $(grubby --info=DEFAULT | awk '/^args/ {print $0}')
     sed -i -e "s,^GRUB_CMDLINE_LINUX=.*,GRUB_CMDLINE_LINUX=\"$args\"," /etc/default/grub
   when:
