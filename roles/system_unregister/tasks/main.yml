@@ -13,7 +13,7 @@
   when: ansible_facts.distribution_major_version|int < 8
 
 - name: Unregister from Red Hat Subscription Management
-  redhat_subscription:
+  community.general.redhat_subscription:
     state: absent
   register: registration
 
@@ -31,6 +31,24 @@
   loop:
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
+  when: registration is changed
+
+- name: Locate RHSM cache files
+  find:
+    paths: /var/lib/rhsm
+    recurse: true
+    file_type: file
+    excludes:
+      - redhat.repo
+      - syspurpose.json
+  register: rhsm_cache
+  when: registration is changed
+
+- name: Remove RHSM cache files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
   when: registration is changed
 
 - name: Clean package manager caches

@@ -16,3 +16,19 @@
   loop:
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
+
+- name: Locate RHSM cache files
+  find:
+    paths: /var/lib/rhsm
+    recurse: true
+    file_type: file
+    excludes:
+      - redhat.repo
+      - syspurpose.json
+  register: rhsm_cache
+
+- name: Remove RHSM cache files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
