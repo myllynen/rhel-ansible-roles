@@ -1,0 +1,31 @@
+---
+- name: Install nscd package
+  yum:
+    name: nscd
+    state: present
+
+- name: Copy nscd configuration file
+  copy:
+    src: nscd.conf
+    dest: /etc/nscd.conf
+    mode: '0644'
+  register: daemon_config
+
+- name: Enable nscd service
+  service:
+    name: nscd
+    enabled: true
+
+- name: Start nscd service
+  service:
+    name: nscd
+    state: started
+  register: service_start
+
+- name: Apply nscd configuration changes
+  service:
+    name: nscd
+    state: reloaded
+  when:
+    - service_start is not changed
+    - daemon_config is changed

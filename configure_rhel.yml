@@ -124,6 +124,17 @@
     certificates_copy_certs: false
 
     #
+    # dns_cache
+    #
+    # Enable or disable DNS cache
+    dns_cache_enable: true
+
+    # DNS caching component
+    # Allowed values: nscd
+    # See https://access.redhat.com/solutions/2189381
+    dns_cache_component: nscd
+
+    #
     # domain_ad
     #
     # Allowed actions: join, leave
@@ -536,6 +547,7 @@
     #- accounts_local
     - base_packages
     - certificates
+    #- dns_cache
     #- { role: domain_ad, when: domain_ad_admin_username is defined }
     #- { role: ipaclient, state: present, when: ipaclient_domain is defined }
     ##- ima_evm_setup

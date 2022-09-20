@@ -1,0 +1,10 @@
+---
+- name: Enable nscd DNS cache
+  include_tasks: nscd.yml
+  when:
+    - dns_cache_enable | bool
+    - dns_cache_component == 'nscd'
+
+- name: Disable DNS cache
+  include_tasks: disable.yml
+  when: not dns_cache_enable | bool

@@ -1,0 +1,8 @@
+---
+# Enable or disable DNS cache
+dns_cache_enable: true
+
+# DNS caching component
+# Allowed values: nscd
+# See https://access.redhat.com/solutions/2189381
+dns_cache_component: nscd
