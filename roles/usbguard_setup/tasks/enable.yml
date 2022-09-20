@@ -35,7 +35,7 @@
 
 - name: Clear default USBGuard rules file
   vars:
-    rules_content: "{{ lookup('file', 'zz-local.conf') | trim }}"
+    rules_content: "{{ lookup('file', 'local.conf') | trim }}"
   copy:
     content: ''
     dest: /etc/usbguard/rules.conf
@@ -49,9 +49,9 @@
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 8 else false }}"
     rules_config: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-local.conf' }}"
-    rules_content: "{{ lookup('file', 'zz-local.conf') | trim }}"
+    rules_content: "{{ lookup('file', 'local.conf') | trim }}"
   template:
-    src: zz-local.conf
+    src: local.conf
     dest: /etc/usbguard/{{ rules_config }}
     mode: '0600'
   register: rules_config_custom
