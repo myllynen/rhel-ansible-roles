@@ -1,0 +1,4 @@
+# Needed by system_update and system_update_pre_report when generating PDFs
+enscript [platform:rpm]
+ghostscript [platform:rpm]
+sed [platform:rpm]
