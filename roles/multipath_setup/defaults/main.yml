@@ -1,5 +1,5 @@
 ---
-# Available alternatives in files/
+# Role provided alternatives in files/
 multipath_setup_config_file: multipath.conf
 
 # Reboot system after changes

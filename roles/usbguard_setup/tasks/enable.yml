@@ -24,10 +24,10 @@
       rhel7: rhel7_usbguard-daemon.conf
       default: default_usbguard-daemon.conf
     distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
-    config_file_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
-    config_file: "{{ config_files[config_file_id] }}"
+    config_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
+    config_file: "{{ config_files[config_id] }}"
   copy:
-    src: "{{ config_file }}"
+    src: "{{ usbguard_setup_config_file | default(config_file, true) }}"
     dest: /etc/usbguard/usbguard-daemon.conf
     mode: '0600'
   register: daemon_config_custom
@@ -35,7 +35,7 @@
 
 - name: Clear default USBGuard rules file
   vars:
-    rules_content: "{{ lookup('file', 'local.conf') | trim }}"
+    rules_content: "{{ lookup('file', usbguard_setup_rules_file) | trim }}"
   copy:
     content: ''
     dest: /etc/usbguard/rules.conf
@@ -48,11 +48,11 @@
 - name: Copy custom USBGuard rules file
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 8 else false }}"
-    rules_config: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-local.conf' }}"
-    rules_content: "{{ lookup('file', 'local.conf') | trim }}"
+    rules_file: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-local.conf' }}"
+    rules_content: "{{ lookup('file', usbguard_setup_rules_file) | trim }}"
   template:
-    src: local.conf
-    dest: /etc/usbguard/{{ rules_config }}
+    src: "{{ usbguard_setup_rules_file }}"
+    dest: /etc/usbguard/{{ rules_file }}
     mode: '0600'
   register: rules_config_custom
   when:

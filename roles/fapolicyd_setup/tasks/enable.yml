@@ -13,7 +13,7 @@
 
 - name: Copy fapolicyd configuration file
   copy:
-    src: fapolicyd.conf
+    src: "{{ fapolicyd_setup_config_file }}"
     dest: /etc/fapolicyd/fapolicyd.conf
     owner: root
     group: fapolicyd
@@ -24,7 +24,7 @@
   vars:
     rules_file: "{{ 'fapolicyd.rules' if not rules_dir.stat.exists else 'rules.d/zz-local.rules' }}"
   copy:
-    src: fapolicyd.rules
+    src: "{{ fapolicyd_setup_rules_file }}"
     dest: /etc/fapolicyd/{{ rules_file }}
     owner: root
     group: fapolicyd
@@ -41,7 +41,7 @@
   vars:
     trust_file: "{{ 'fapolicyd.trust' if not rules_dir.stat.exists else 'trust.d/zz-local.trust' }}"
   copy:
-    src: fapolicyd.trust
+    src: "{{ fapolicyd_setup_trust_file }}"
     dest: /etc/fapolicyd/{{ trust_file }}
     owner: root
     group: fapolicyd

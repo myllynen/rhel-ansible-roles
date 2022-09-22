@@ -1,21 +1,21 @@
 ---
 - name: Configure system-local login access
   copy:
-    src: access_conf.{{ login_access_config_file }}
+    src: "{{ login_access_config_file }}"
     dest: /etc/security/access.conf
     mode: '0644'
   when: login_access_config_file | default(false)
 
 - name: Configure system-local login defaults
   copy:
-    src: login_defs.{{ login_defs_config_file }}
+    src: "{{ login_defs_config_file }}"
     dest: /etc/login.defs
     mode: '0644'
   when: login_defs_config_file | default(false)
 
 - name: Configure system-local password quality requirements (RHEL 7)
   copy:
-    src: pwquality_conf.{{ password_quality_policy }}
+    src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf
     mode: '0644'
   when:
@@ -24,7 +24,7 @@
 
 - name: Configure system-local password quality requirements
   copy:
-    src: pwquality_conf.{{ password_quality_policy }}
+    src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf.d/zz-local.conf
     mode: '0644'
   when:
@@ -52,7 +52,7 @@
 - name: Check current system-local authentication profile
   command: authselect current -r
   register: current_profile
-  failed_when: current_profile.rc != 0 and "No existing configuration" not in current_profile.stdout
+  failed_when: current_profile.rc != 0 and 'No existing configuration' not in current_profile.stdout
   changed_when: false
   when:
     - ansible_facts.distribution_major_version|int >= 8

@@ -1,3 +1,6 @@
 ---
-# Available alternatives in files/
-audit_setup_rules: local
+# Role provided alternatives in files/
+audit_setup_rules_file: local.rules
+
+# If unset default RHEL configuration will be used
+audit_setup_config_file:

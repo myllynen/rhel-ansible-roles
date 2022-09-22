@@ -55,16 +55,15 @@
     # Accounts, login, password, PAM policies and profiles
     # All parameters are optional, unset are left untouched
 
-    # Available alternatives in files/
+    # Role provided alternatives in files/
     login_access_config_file:
 
-    # Available alternatives in files/
+    # Role provided alternatives in files/
     login_defs_config_file:
 
-    # Available alternatives in files/
-    password_quality_policy:
+    # Role provided alternatives in files/
+    pwquality_config_file:
 
-    # Available custom alternatives in files/
     # Either use a default profile (e.g., "minimal")
     # or a custom one provided (e.g., "custom/test")
     system_auth_profile:
@@ -83,8 +82,11 @@
     #
     # audit_setup
     #
-    # Available alternatives in files/
-    audit_setup_rules: local
+    # Role provided alternatives in files/
+    audit_setup_rules: local.rules
+
+    # If unset default RHEL configuration will be used
+    audit_setup_config_file:
 
     #
     # base_packages - list omitted here for brevity
@@ -189,6 +191,15 @@
     # NB. See ima_evm_setup if planning to use IMA.
     fapolicyd_setup_enable_service: false
 
+    # Role provided alternative in files/
+    fapolicyd_setup_config_file: fapolicyd.conf
+
+    # Role provided alternative in files/
+    fapolicyd_setup_rules_file: fapolicyd.rules
+
+    # Role provided alternative in files/
+    fapolicyd_setup_trust_file: fapolicyd.trust
+
     #
     # fips_setup
     #
@@ -235,12 +246,16 @@
     #
     # motd_issue
     #
-    # No configuration needed
+    # motd template to copy to the target host
+    motd_template: motd.j2
+
+    # issue template to copy to the target host
+    issue_template: issue.j2
 
     #
     # multipath_setup
     #
-    # Available alternatives in files/
+    # Role provided alternatives in files/
     multipath_setup_config_file: multipath.conf
 
     # Reboot system after changes
@@ -336,7 +351,8 @@
     #
     # shell_profile
     #
-    # No configuration needed
+    # Shell profile file to copy to the target host
+    shell_profile_file: local-login.sh
 
     #
     # splunk_forwarder
@@ -499,11 +515,18 @@
     #
     # Policy to apply to USB devices
     # reject - block and reject all devices
-    # custom - use configurations in files/
-    # allow - disable USBGuard and allow all
+    # custom - custom configuration, see below
+    # allow - disable USBGuard and allow all USB devices
     usbguard_setup_policy: reject
 
-    # To completely disable the USB subsyste
+    # Custom USBGuard configuration file
+    # If unset default RHEL configuration will be used
+    usbguard_setup_config_file:
+
+    # Custom USBGuard rules file
+    usbguard_setup_rules_file: local.conf
+
+    # To completely disable the USB subsystem
     # use the usbcore.nousb boot parameter,
     # also see usbcore.authorized_default.
 

@@ -13,7 +13,7 @@
 
 - name: Copy audit rules configuration file
   copy:
-    src: "{{ audit_setup_rules }}.rules"
+    src: "{{ audit_setup_rules_file }}"
     dest: /etc/audit/rules.d/zz-local.rules
     mode: '0600'
   register: rules_config
@@ -24,10 +24,10 @@
       rhel7: rhel7_auditd.conf
       default: default_auditd.conf
     distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
-    config_file_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
-    config_file: "{{ config_files[config_file_id] }}"
+    config_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
+    config_file: "{{ config_files[config_id] }}"
   copy:
-    src: "{{ config_file }}"
+    src: "{{ audit_setup_config_file | default(config_file, true) }}"
     dest: /etc/audit/auditd.conf
     mode: '0640'
   register: auditd_config

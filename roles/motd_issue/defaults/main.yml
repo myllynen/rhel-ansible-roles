@@ -1,3 +1,6 @@
 ---
-# This role needs no configuration,
-# it uses motd.j2 and issue.j2 templates
+# motd template to copy to the target host
+motd_template: motd.j2
+
+# issue template to copy to the target host
+issue_template: issue.j2

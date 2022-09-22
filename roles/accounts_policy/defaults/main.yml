@@ -2,16 +2,15 @@
 # Accounts, login, password, PAM policies and profiles
 # All parameters are optional, unset are left untouched
 
-# Available alternatives in files/
+# Role provided alternatives in files/
 login_access_config_file:
 
-# Available alternatives in files/
+# Role provided alternatives in files/
 login_defs_config_file:
 
-# Available alternatives in files/
-password_quality_policy:
+# Role provided alternatives in files/
+pwquality_config_file:
 
-# Available custom alternatives in files/
 # Either use a default profile (e.g., "minimal")
 # or a custom one provided (e.g., "custom/test")
 system_auth_profile:
