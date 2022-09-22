@@ -385,6 +385,11 @@
     system_coredump_enable: true
 
     #
+    # system_hostname
+    #
+    system_hostname: "{{ inventory_hostname | lower }}"
+
+    #
     # system_init
     #
     # Actions to take after initialization
@@ -548,6 +553,7 @@
     web_console_enable_perf_metrics: true
 
   roles:
+    #- system_hostname
     - etc_hosts
     - ipv6_setup
     - resolver_configuration
