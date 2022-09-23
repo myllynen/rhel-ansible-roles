@@ -6,7 +6,7 @@ Ansible roles for RHEL configuration.
 
 ## Quick Intro
 
-To install this collection:
+To install this collection from GitHub:
 
 ```
 ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-roles,master
