@@ -19,6 +19,7 @@ SMTP_PASSWORD = None
 EMAIL_SENDER = "no-reply@localhost.localdomain"
 EMAIL_SUBJECT = "[INFO] Upcoming System Update"
 EMAIL_PDF = False
+PDF_DIR = "/tmp/.ansible.pdf"
 
 debug = True
 message = ""
@@ -43,6 +44,8 @@ if "EMAIL_SUBJECT" in os.environ:
     EMAIL_SUBJECT = os.environ["EMAIL_SUBJECT"]
 if "EMAIL_PDF" in os.environ:
     EMAIL_PDF = os.environ["EMAIL_PDF"] in ("True", "true")
+if "PDF_DIR" in os.environ:
+    PDF_DIR = os.environ["PDF_DIR"]
 
 message += "\n<p>System to be updated:\t\t%s</p>\n" % system
 if len(sys.argv) == 4:
@@ -68,7 +71,7 @@ report.attach(MIMEText(message, "html"))
 
 if EMAIL_PDF:
     system_pdf = system.replace(".", "_") + ".pdf"
-    with open("/tmp/.ansible.pdf/" + system_pdf, "rb") as pdf:
+    with open(PDF_DIR + "/" + system_pdf, "rb") as pdf:
         attachment = MIMEApplication(pdf.read(), _subtype="pdf")
     attachment.add_header("Content-Disposition", "attachment", filename=system_pdf)
     report.attach(attachment)

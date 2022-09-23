@@ -79,6 +79,7 @@
 - name: Notify about updated packages
   environment:
     EMAIL_PDF: "{{ system_update_report_pdf }}"
+    PDF_DIR: "{{ system_update_report_pdf_dir }}"
   script: send-notification '{{ hostvars[item].email | default(system_update_report_default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
   register: command_output
   delegate_to: localhost
@@ -98,7 +99,7 @@
 
 - name: Remove local PDF directory
   file:
-    path: /tmp/.ansible.pdf
+    path: "{{ system_update_report_pdf_dir }}"
     state: absent
   register: command_output
   delegate_to: localhost

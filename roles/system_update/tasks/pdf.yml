@@ -1,7 +1,7 @@
 ---
 - name: Remove local PDF directory
   file:
-    path: /tmp/.ansible.pdf
+    path: "{{ system_update_report_pdf_dir }}"
     state: absent
   delegate_to: localhost
   run_once: true
@@ -9,7 +9,7 @@
 
 - name: Create local PDF directory
   file:
-    path: /tmp/.ansible.pdf
+    path: "{{ system_update_report_pdf_dir }}"
     state: directory
     mode: '0700'
   delegate_to: localhost
@@ -27,9 +27,9 @@
 
 - name: Set report PDF/PS/TXT file names
   set_fact:
-    server_pdf: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
-    server_ps: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.ps' }}"
-    server_txt: "{{ '/tmp/.ansible.pdf/' + inventory_hostname | replace('.', '_') + '.txt' }}"
+    server_pdf: "{{ system_update_report_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
+    server_ps: "{{ system_update_report_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.ps' }}"
+    server_txt: "{{ system_update_report_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.txt' }}"
 
 - name: Write report to TXT file
   shell: |

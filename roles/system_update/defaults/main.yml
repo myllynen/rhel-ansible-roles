@@ -34,3 +34,6 @@ system_update_report_pdf_preamble: |
     
     
     The following packages were updated:
+
+# Directory used to generate PDF files
+system_update_report_pdf_dir: /tmp/.ansible.pdf

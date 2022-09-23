@@ -20,3 +20,6 @@ system_update_report_pre_pdf_preamble: |
     
     
     The following package updates are pending:
+
+# Directory used to generate PDF files
+system_update_report_pre_pdf_dir: /tmp/.ansible.pdf
