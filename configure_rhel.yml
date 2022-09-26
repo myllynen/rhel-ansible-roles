@@ -546,8 +546,10 @@
     timezone: UTC
 
     #
-    # troubleshooting_packages - list omitted here for brevity
+    # troubleshooting_tools - package list omitted here for brevity
     #
+    # Enable PCP performance metrics as needed
+    troubleshooting_tools_enable_perf_metrics: true
 
     #
     # usbguard_setup
@@ -625,7 +627,7 @@
     - service_state
     #- shell_profile
     - sshd_configuration
-    #- troubleshooting_packages
+    #- troubleshooting_tools
     #- usbguard_setup
     #- web_console
     #- splunk_forwarder

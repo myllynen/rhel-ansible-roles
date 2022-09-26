@@ -1,5 +1,16 @@
+# troubleshooting_tools role
+
+[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+Please see the collection main page for a higher level description.
+
+## Configuration
+
+Below are the role default values from defaults/main.yml:
+
+<pre>
 ---
-troubleshooting_packages:
+troubleshooting_tools:
   - bind-utils
   - curl
   - ethtool
@@ -23,4 +34,9 @@ troubleshooting_packages:
   - time
 
 # Enable PCP performance metrics when needed
-troubleshooting_packages_enable_perf_metrics: true
+troubleshooting_tools_enable_perf_metrics: true
+</pre>
+
+## License
+
+GPLv3+
