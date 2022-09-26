@@ -6,7 +6,7 @@
 
 - name: Disallow zone drifting
   replace:
-    dest: /etc/firewalld/firewalld.conf
+    path: /etc/firewalld/firewalld.conf
     regexp: '^AllowZoneDrifting=yes'
     replace: 'AllowZoneDrifting=no'
   register: firewalld_config
