@@ -1,4 +1,4 @@
-# remove_packages role
+# packages_remove role
 
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -10,7 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-remove_packages:
+packages_remove:
   - gofer
   - katello-agent
   - puppet-agent
@@ -18,7 +18,7 @@ remove_packages:
 
 # Enable or disable yum module 'autoremove' parameter
 # to remove all "leaf" packages no longer required
-remove_packages_autoremove: true
+packages_remove_autoremove: true
 </pre>
 
 ## License

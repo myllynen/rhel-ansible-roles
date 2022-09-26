@@ -1,0 +1,5 @@
+---
+- name: Install wanted packages
+  yum:
+    name: "{{ packages_install }}"
+    state: present

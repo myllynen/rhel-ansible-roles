@@ -1,5 +1,0 @@
----
-- name: Install base packages
-  yum:
-    name: "{{ base_packages }}"
-    state: present

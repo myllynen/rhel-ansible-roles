@@ -89,8 +89,10 @@
     audit_setup_config_file:
 
     #
-    # base_packages - list omitted here for brevity
+    # packages_install - default list omitted here for brevity
     #
+    #packages_install:
+    #  -
 
     #
     # boot_parameters
@@ -309,11 +311,14 @@
     rescue_image_enable: false
 
     #
-    # remove_packages - list omitted here for brevity
+    # packages_remove - default list omitted here for brevity
     #
+    #packages_remove:
+    #  -
+
     # Enable or disable yum module 'autoremove' parameter
     # to remove all "leaf" packages no longer required
-    remove_packages_autoremove: true
+    packages_remove_autoremove: true
 
     #
     # repository_setup - config omitted here for brevity
@@ -546,8 +551,11 @@
     timezone: UTC
 
     #
-    # troubleshooting_tools - package list omitted here for brevity
+    # troubleshooting_tools - default list omitted here for brevity
     #
+    #troubleshooting_tools:
+    #  -
+
     # Enable PCP performance metrics as needed
     troubleshooting_tools_enable_perf_metrics: true
 
@@ -598,7 +606,7 @@
     #- rescue_image
     #- timezone
     - timesync
-    - remove_packages
+    - packages_remove
     - boot_parameters
     #- system_keyboard
     - system_locale
@@ -610,7 +618,6 @@
     #- aide_setup
     #- accounts_policy
     #- accounts_local
-    - base_packages
     - certificates
     #- dns_cache
     #- { role: domain_ad, when: domain_ad_admin_username is defined }
@@ -621,6 +628,7 @@
     - firewall
     - watchdog
     #- motd_issue
+    - packages_install
     - performance_tuning
     - root_password
     - security_hardening
