@@ -28,7 +28,6 @@
 
 - name: Check computer status in AD domain
   shell: >
-    set -o pipefail
     echo '{{ domain_ad_admin_password }}' |
     adcli -v show-computer
     --domain={{ domain_ad_domain }}

@@ -28,7 +28,6 @@
 
 - name: Join AD domain
   shell: >
-    set -o pipefail
     echo '{{ domain_ad_admin_password }}' |
     adcli -v join
     --domain={{ domain_ad_domain }}

@@ -3,7 +3,6 @@
   vars:
     leave_action: "{{ 'delete-computer' if domain_ad_computer_delete_on_leave else 'reset-computer' }}"
   shell: >
-    set -o pipefail
     echo '{{ domain_ad_admin_password }}' |
     adcli -v {{ leave_action }}
     --domain={{ domain_ad_domain }}
