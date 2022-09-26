@@ -1,0 +1,109 @@
+---
+- name: Install OpenSCAP packages
+  yum:
+    name:
+      - openscap
+      - openscap-scanner
+      - scap-security-guide
+    state: "{{ scap_compliance_package_state }}"
+
+- name: Create oscap results directory
+  file:
+    path: "{{ scap_compliance_report_dir }}"
+    state: directory
+    mode: '0700'
+
+- name: Display security profile name
+  debug:
+    var: scap_compliance_profile
+
+- name: Apply system security profile
+  vars:
+    tailoring_file: "{{ scap_compliance_tailoring_file_path | default(false) }}"
+    tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file, '', '') }}"
+  shell: >
+    set -o pipefail &&
+    oscap xccdf eval --remediate
+    --profile xccdf_org.ssgproject.content_profile_{{ scap_compliance_profile }}
+    {{ tailoring_option }}
+    --results {{ scap_compliance_report_dir }}/remediate-results.xml
+    --results-arf {{ scap_compliance_report_dir }}/remediate-results-arf.xml
+    --report {{ scap_compliance_report_dir }}/remediate-report.html
+    /usr/share/xml/scap/ssg/content/ssg-rhel{{ ansible_facts.distribution_major_version }}-ds.xml 2>&1
+    | tee {{ scap_compliance_report_dir }}/oscap-remediate-output.txt
+    | grep -A 10000 "Starting Remediation"
+    | tr -d '\r'
+    | expand
+  register: remediate_status
+  failed_when: remediate_status.rc == 1
+  changed_when: "'fixed' in remediate_status.stdout"
+  when: scap_compliance_remediate | bool
+
+- name: Display remediation results
+  debug:
+    msg: "{{ remediate_status.stdout }}"
+  when: remediate_status is changed
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: remediate_status is changed
+
+- name: Reboot system
+  reboot:
+  when:
+    - scap_compliance_remediate_reboot | bool
+    - remediate_status is changed
+
+- name: Run system security profile compliance check
+  vars:
+    tailoring_file: "{{ scap_compliance_tailoring_file_path | default(false) }}"
+    tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file, '', '') }}"
+  shell: >
+    set -o pipefail &&
+    oscap xccdf eval
+    --profile xccdf_org.ssgproject.content_profile_{{ scap_compliance_profile }}
+    {{ tailoring_option }}
+    --results {{ scap_compliance_report_dir }}/eval-results.xml
+    --results-arf {{ scap_compliance_report_dir }}/eval-results-arf.xml
+    --report {{ scap_compliance_report_dir }}/eval-report.html
+    /usr/share/xml/scap/ssg/content/ssg-rhel{{ ansible_facts.distribution_major_version }}-ds.xml 2>&1
+    | tee {{ scap_compliance_report_dir }}/oscap-eval-output.txt
+    | tr -d '\r'
+    | expand
+  register: eval_status
+  failed_when: eval_status.rc == 1
+  changed_when: false
+
+- name: Display compliance check result
+  debug:
+    msg: >-
+      Compliance check result for {{ inventory_hostname }}:
+      {{ scap_compliance_profile }} -
+      {{ 'PASSED' if eval_status.rc == 0 else 'FAILED' }}
+
+- name: Find failed compliance check items
+  shell: >
+    grep -B 3 'fail$' {{ scap_compliance_report_dir }}/oscap-eval-output.txt
+    | tr -d '\r'
+    | expand
+  register: grep_result
+  failed_when: false
+  changed_when: false
+  when: eval_status.rc == 2
+
+- name: Display failed compliance check items
+  debug:
+    msg: "{{ grep_result.stdout }}"
+  when: eval_status.rc == 2
+
+- name: Display compliance check complete results
+  debug:
+    var: eval_status
+  when: scap_compliance_check_result_show_all | bool
+
+- name: Abort play on compliance check failure if requested
+  fail:
+    msg: "{{ scap_compliance_profile }} compliance check failed."
+  when:
+    - not scap_compliance_check_fail_role_pass | bool
+    - eval_status.rc == 2
