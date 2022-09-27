@@ -14,7 +14,7 @@
     enabled: false
   when: "'rhc' in ansible_facts.packages"
 
-- name: Unregister from Red Hat Insights
+- name: Unregister system from Red Hat Insights
   command:
     cmd: insights-client --unregister
     removes: /etc/insights-client/.registered
