@@ -22,7 +22,7 @@
     mode: '0600'
   register: sssd_config
 
-- name: Verify SSSD configuration
+- name: Run SSSD configuration check
   command: sssctl config-check
   changed_when: false
 

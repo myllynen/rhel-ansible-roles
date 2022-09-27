@@ -10,9 +10,9 @@
     - ansible_facts.services['fapolicyd.service'].state == 'running' or
       ansible_facts.services['fapolicyd.service'].status == 'enabled'
 
-- name: Verify IMA policies to apply
+- name: Abort if IMA policy not supported
   fail:
-    msg: "Unknown IMA policy {{ item }} configured."
+    msg: "Unsupported IMA policy {{ item }} configured."
   loop: "{{ ima_evm_setup_ima_policies }}"
   when: item not in __ima_policies_supported
 
@@ -27,7 +27,7 @@
   register: tpm_device
   when: ima_evm_setup_enable_tpm_use | bool
 
-- name: Verify TPM device present
+- name: Abort if no TPM device present
   fail:
     msg: "No TPM device present."
   when:
@@ -53,9 +53,9 @@
   changed_when: false
   when: ima_evm_setup_require_secure_boot | bool
 
-- name: Verify Secure Boot enabled
+- name: Abort if Secure Boot not enabled
   fail:
-    msg: "Secure Boot not enabled"
+    msg: "Secure Boot not enabled."
   when:
     - ima_evm_setup_require_secure_boot | bool
     - "'Secure Boot enabled' not in sb_state.stdout"

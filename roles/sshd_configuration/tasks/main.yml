@@ -5,7 +5,7 @@
 
 - name: Abort if root trying to block root access completely
   fail:
-    msg: "Refusing to configure 'PermitRootLogin no' when connected as root!"
+    msg: "Refusing to configure 'PermitRootLogin no' when connected as root."
   when:
     - "'SUDO_USER' not in ansible_env"
     - "'PermitRootLogin' in sshd"

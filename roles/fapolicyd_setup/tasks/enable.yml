@@ -48,7 +48,7 @@
     mode: '0644'
   register: trust_config
 
-- name: Verify fapolicyd configuration
+- name: Run fapolicyd configuration check
   command: fapolicyd-cli --check-config
   changed_when: false
   when: rules_dir.stat.exists
