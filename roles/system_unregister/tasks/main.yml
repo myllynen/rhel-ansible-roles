@@ -1,8 +1,24 @@
 ---
+- name: Gather package facts
+  package_facts:
+
+- name: Stop rhcd service
+  service:
+    name: rhcd
+    state: stopped
+  when: "'rhc' in ansible_facts.packages"
+
+- name: Disable rhcd service
+  service:
+    name: rhcd
+    enabled: false
+  when: "'rhc' in ansible_facts.packages"
+
 - name: Unregister from Red Hat Insights
   command:
     cmd: insights-client --unregister
     removes: /etc/insights-client/.registered
+  when: "'insights-client' in ansible_facts.packages"
 
 # Use removes: to only run on registered systems
 - name: Clean package manager caches (RHEL 7)
