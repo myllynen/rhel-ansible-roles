@@ -1,0 +1,43 @@
+---
+- name: Install required packages
+  vars:
+    rhc_packages:
+      - "{{ 'rhc' if insights_client_rhc_enable | bool else '' }}"
+      - "{{ 'rhc-worker-playbook' if ansible_facts.distribution_major_version|int >= 8 else '' }}"
+    openscap_packages:
+      - openscap
+      - openscap-scanner
+      - scap-security-guide
+    required_packages:
+      "{{ ['insights-client'] +
+          (rhc_packages if insights_client_rhc_enable | bool else []) +
+          (openscap_packages if insights_client_scap_enable | bool else []) }}"
+  yum:
+    name: "{{ required_packages | select() | list }}"
+    state: present
+
+- name: Configure insights-client proxy server
+  vars:
+    proxy_set: 'proxy={{ insights_client_proxy_server }}'
+    proxy_not: '#proxy='
+  replace:
+    path: /etc/insights-client/insights-client.conf
+    regexp: '^(|#)proxy=.*'
+    replace: '{{ proxy_set if insights_client_proxy_server | default(false) else proxy_not }}'
+
+- name: Register system to Red Hat Insights
+  command:
+    cmd: insights-client --register
+    creates: /etc/insights-client/.registered
+
+- name: Enable rhcd service
+  service:
+    name: rhcd
+    enabled: true
+  when: insights_client_rhc_enable | bool
+
+- name: Start rhcd service
+  service:
+    name: rhcd
+    state: started
+  when: insights_client_rhc_enable | bool

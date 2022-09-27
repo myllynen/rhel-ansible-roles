@@ -1,0 +1,15 @@
+---
+# Register or unregister the system for Red Hat Insights
+# See https://access.redhat.com/products/red-hat-insights
+insights_client_register: true
+
+# Enable Red Hat connector (rhc)
+# See https://access.redhat.com/articles/rhc
+insights_client_rhc_enable: true
+
+# Install OpenSCAP packages to allow compliance scanning
+# See https://access.redhat.com/articles/4602981
+insights_client_scap_enable: true
+
+# Proxy server to use with insights-client
+insights_client_proxy_server:

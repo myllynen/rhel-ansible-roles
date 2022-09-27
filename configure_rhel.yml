@@ -89,12 +89,6 @@
     audit_setup_config_file:
 
     #
-    # packages_install - default list omitted here for brevity
-    #
-    #packages_install:
-    #  -
-
-    #
     # boot_parameters
     #
     boot_parameters_enable:
@@ -228,6 +222,24 @@
     firewall_close_unconfigured: true
 
     #
+    # insights_client
+    #
+    # Register or unregister the system for Red Hat Insights
+    # See https://access.redhat.com/products/red-hat-insights
+    insights_client_register: true
+
+    # Enable Red Hat connector (rhc)
+    # See https://access.redhat.com/articles/rhc
+    insights_client_rhc_enable: true
+
+    # Install OpenSCAP packages to allow compliance scanning
+    # See https://access.redhat.com/articles/4602981
+    insights_client_scap_enable: true
+
+    # Proxy server to use with insights-client
+    insights_client_proxy_server:
+
+    #
     # ipv6_setup
     #
     # Enable or disable IPv6 using sysctl settings
@@ -265,38 +277,16 @@
     multipath_setup_reboot: true
 
     #
-    # scap_compliance
+    # packages_install - default list omitted here for brevity
     #
-    # RHEL provided OpenSCAP security profile
-    # to apply and / or check for compliance.
-    # Switching from one security profile to
-    # another may not work and is unsupported
-    scap_compliance_profile: cis_server_l1
+    #packages_install:
+    #  -
 
-    # Optional local tailoring file to use
-    scap_compliance_tailoring_file_path:
-
-    # State of OpenSCAP packages on the target
-    # Allowed states: present, latest
-    scap_compliance_package_state: present
-
-    # Where to store oscap tool execution results
-    # NB. Only the most recent results are stored
-    scap_compliance_report_dir: /root/oscap-results
-
-    # Remediate compliance issues
-    # Warning: Reverting changes is not supported
-    scap_compliance_remediate: false
-
-    # Reboot system if remediation changed anything
-    scap_compliance_remediate_reboot: true
-
-    # Display complete results of compliance check
-    # Failed check items will always be displayed
-    scap_compliance_check_result_show_all: false
-
-    # Allow role complete even if compliance check fails
-    scap_compliance_check_fail_role_pass: false
+    #
+    # packages_remove - default list omitted here for brevity
+    #
+    #packages_remove:
+    #  -
 
     #
     # performance_tuning
@@ -309,12 +299,6 @@
     # Enable or disable rescue image
     # NB. Rescue images will be created on next kernel install
     rescue_image_enable: false
-
-    #
-    # packages_remove - default list omitted here for brevity
-    #
-    #packages_remove:
-    #  -
 
     # Enable or disable yum module 'autoremove' parameter
     # to remove all "leaf" packages no longer required
@@ -355,6 +339,40 @@
     root_password_salt_seed: "{{ inventory_hostname }}"
     # This should come from vault
     #root_password:
+
+    #
+    # scap_compliance
+    #
+    # RHEL provided OpenSCAP security profile
+    # to apply and / or check for compliance.
+    # Switching from one security profile to
+    # another may not work and is unsupported
+    scap_compliance_profile: cis_server_l1
+
+    # Optional local tailoring file to use
+    scap_compliance_tailoring_file_path:
+
+    # State of OpenSCAP packages on the target
+    # Allowed states: present, latest
+    scap_compliance_package_state: present
+
+    # Where to store oscap tool execution results
+    # NB. Only the most recent results are stored
+    scap_compliance_report_dir: /root/oscap-results
+
+    # Remediate compliance issues
+    # Warning: Reverting changes is not supported
+    scap_compliance_remediate: false
+
+    # Reboot system if remediation changed anything
+    scap_compliance_remediate_reboot: true
+
+    # Display complete results of compliance check
+    # Failed check items will always be displayed
+    scap_compliance_check_result_show_all: false
+
+    # Allow role complete even if compliance check fails
+    scap_compliance_check_fail_role_pass: false
 
     #
     # security_hardening
@@ -642,4 +660,5 @@
     #- system_coredump
     - system_init
     #- scap_compliance
+    #- insights_client
     #- system_reboot
