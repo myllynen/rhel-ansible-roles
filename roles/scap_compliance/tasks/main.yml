@@ -19,6 +19,8 @@
 
 - name: Apply system security profile
   vars:
+    stig_file: "{{ scap_compliance_report_dir + '/remediate-results-stig.xml' }}"
+    stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
     tailoring_file: "{{ scap_compliance_tailoring_file_path | default(false) }}"
     tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file, '', '') }}"
   shell: >
@@ -29,6 +31,7 @@
     --results {{ scap_compliance_report_dir }}/remediate-results.xml
     --results-arf {{ scap_compliance_report_dir }}/remediate-results-arf.xml
     --report {{ scap_compliance_report_dir }}/remediate-report.html
+    {{ stig_option }}
     /usr/share/xml/scap/ssg/content/ssg-rhel{{ ansible_facts.distribution_major_version }}-ds.xml 2>&1
     | tee {{ scap_compliance_report_dir }}/oscap-remediate-output.txt
     | grep -A 10000 "Starting Remediation"
@@ -56,6 +59,8 @@
 
 - name: Run system security profile compliance check
   vars:
+    stig_file: "{{ scap_compliance_report_dir + '/eval-results-stig.xml' }}"
+    stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
     tailoring_file: "{{ scap_compliance_tailoring_file_path | default(false) }}"
     tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file, '', '') }}"
   shell: >
@@ -66,6 +71,7 @@
     --results {{ scap_compliance_report_dir }}/eval-results.xml
     --results-arf {{ scap_compliance_report_dir }}/eval-results-arf.xml
     --report {{ scap_compliance_report_dir }}/eval-report.html
+    {{ stig_option }}
     /usr/share/xml/scap/ssg/content/ssg-rhel{{ ansible_facts.distribution_major_version }}-ds.xml 2>&1
     | tee {{ scap_compliance_report_dir }}/oscap-eval-output.txt
     | tr -d '\r'
