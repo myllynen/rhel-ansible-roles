@@ -12,10 +12,15 @@ To install this collection from GitHub:
 ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-roles,master
 ```
 
+Depending on the environment and requirements separate playbooks and/or
+vars files, group vars, variables defined in an inventory, or some
+other approach might be appropriate for defining configuration
+variables for the roles.
+
 See the example playbook [configure_rhel.yml](configure_rhel.yml) for
-all the configuration options these roles support and how they could be
-used together. For additional roles to configure RHEL (such as network
-and storage), see
+all the configuration variables these roles support and how they could
+be used together. For additional roles to configure RHEL (such as
+network and storage), see
 [Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
