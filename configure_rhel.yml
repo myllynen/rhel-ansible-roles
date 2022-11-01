@@ -1,3 +1,4 @@
+
 ---
 - name: Configure RHEL
   hosts: all
@@ -288,6 +289,10 @@
     #packages_remove:
     #  -
 
+    # Enable or disable yum module 'autoremove' parameter
+    # to remove all "leaf" packages no longer required
+    packages_remove_autoremove: true
+
     #
     # performance_tuning
     #
@@ -299,10 +304,6 @@
     # Enable or disable rescue image
     # NB. Rescue images will be created on next kernel install
     rescue_image_enable: false
-
-    # Enable or disable yum module 'autoremove' parameter
-    # to remove all "leaf" packages no longer required
-    packages_remove_autoremove: true
 
     #
     # repository_setup - config omitted here for brevity
