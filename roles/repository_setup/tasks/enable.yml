@@ -35,6 +35,7 @@
     server_proxy_user: "{{ repository_setup_rhsm_parameters.server_proxy_user | default(omit) }}"
     server_proxy_password: "{{ repository_setup_rhsm_parameters.server_proxy_password | default(omit) }}"
     syspurpose: "{{ repository_setup_rhsm_parameters.syspurpose | default(omit) }}"
+  register: subscription_state
   when: ('activationkey' in repository_setup_rhsm_parameters) or
         ('username' in repository_setup_rhsm_parameters)
 
@@ -42,6 +43,7 @@
   community.general.rhsm_repository:
     name: "{{ repository_setup_rhsm_repositories_disable }}"
     state: disabled
+  register: repos_disabled
   when: repository_setup_rhsm_repositories_disable | default(false)
 
 - name: Enable Red Hat repositories
@@ -49,4 +51,12 @@
     name: "{{ repository_setup_rhsm_repositories_enable }}"
     purge: "{{ repository_setup_rhsm_repositories_purge }}"
     state: enabled
+  register: repos_enabled
   when: repository_setup_rhsm_repositories_enable | default(false)
+
+- name: Update RHSM system facts
+  command: subscription-manager facts --update
+  when: repository_setup_rhsm_facts_update_always | bool or
+        subscription_state is changed or
+        repos_disabled is changed or
+        repos_enabled is changed

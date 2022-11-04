@@ -11,7 +11,6 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # List of files to copy to /etc/yum.repos.d
-# Available repository files in files/
 repository_setup_repo_files_copy:
 #  -
 
@@ -20,7 +19,8 @@ repository_setup_repo_files_remove:
 #  -
 
 
-# Configure or not Red Hat Subscription Management
+# Do Red Hat Subscription Management configuration
+# If false then rest of the parameters are ignored
 repository_setup_rhsm_configure: true
 
 # Install Satellite katello-ca-consumer-latest.rpm
@@ -29,6 +29,10 @@ repository_setup_install_katello_rpm: true
 
 # Subscribe or unsubscribe to Red Hat or Satellite
 repository_setup_rhsm_subscribe: true
+
+# Force updating system facts at RHSM even if no
+# changes made for subscription or repositories
+repository_setup_rhsm_facts_update_always: false
 
 # Red Hat Subscription Management parameters, see
 # https://docs.ansible.com/ansible/latest/collections/community/general/redhat_subscription_module.html
@@ -66,7 +70,6 @@ repository_setup_rhsm_parameters:
   #  service_level_agreement: Premium
   #  #addons: []
   #  sync: true
-
 
 # List of Red Hat / Satellite repository IDs to disable
 repository_setup_rhsm_repositories_disable:
