@@ -56,7 +56,7 @@
   loop: "{{ accounts_local_users_create | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
-  when: not item.allow_full_sudo | default(false)
+  when: not item.allow_full_sudo | default(false) | bool
 
 - name: Create local user sudo configuration
   copy:
@@ -70,4 +70,4 @@
   loop: "{{ accounts_local_users_create | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
-  when: item.allow_full_sudo | default(false)
+  when: item.allow_full_sudo | default(false) | bool

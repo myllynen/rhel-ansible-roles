@@ -11,8 +11,8 @@
     state: absent
   check_mode: true
   register: enable_check
-  loop: "{{ boot_parameters_enable | select() | list }}"
   changed_when: false
+  loop: "{{ boot_parameters_enable | select() | list }}"
 
 - name: Check disabled boot parameters
   lineinfile:
@@ -21,8 +21,8 @@
     state: absent
   check_mode: true
   register: disable_check
-  loop: "{{ boot_parameters_disable | select() | list }}"
   changed_when: false
+  loop: "{{ boot_parameters_disable | select() | list }}"
 
 - name: Configure boot parameters
   command: >
