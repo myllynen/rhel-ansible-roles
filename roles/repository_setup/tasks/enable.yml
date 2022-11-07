@@ -7,7 +7,7 @@
     cacheonly: true
     state: present
   when:
-    - "'rhsm_baseurl' in repository_setup_rhsm_parameters"
+    - repository_setup_rhsm_parameters.rhsm_baseurl | default(false)
     - repository_setup_install_katello_rpm | bool
 
 - name: Configure Red Hat Subscription
@@ -36,8 +36,8 @@
     server_proxy_password: "{{ repository_setup_rhsm_parameters.server_proxy_password | default(omit) }}"
     syspurpose: "{{ repository_setup_rhsm_parameters.syspurpose | default(omit) }}"
   register: subscription_state
-  when: ('activationkey' in repository_setup_rhsm_parameters) or
-        ('username' in repository_setup_rhsm_parameters)
+  when: repository_setup_rhsm_parameters.activationkey | default(false) or
+        repository_setup_rhsm_parameters.username | default(false)
 
 - name: Disable Red Hat repositories
   community.general.rhsm_repository:
