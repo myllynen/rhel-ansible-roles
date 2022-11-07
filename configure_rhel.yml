@@ -631,6 +631,7 @@
     - system_locale
     - audit_setup
     #- { role: multipath_setup, when: ansible_facts.virtualization_role != 'guest' }
+    #- rhel-system-roles.kernel_settings
     #- rhel-system-roles.storage
     #- rhel-system-roles.kdump
     #- system_update_report_pre
@@ -659,6 +660,7 @@
     #- usbguard_setup
     #- web_console
     #- rhel-system-roles.logging
+    #- rhel-system-roles.metrics
     #- splunk_forwarder
     #- system_coredump
     - system_init
