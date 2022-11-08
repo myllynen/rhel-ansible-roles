@@ -10,6 +10,9 @@
       - sssd-tools
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Check Kerberos keytab file
   stat:
     path: /etc/krb5.keytab
@@ -18,13 +21,17 @@
 - name: Discover AD domain information
   shell: >
     adcli info -v {{ domain_ad_domain }}
+  check_mode: false
   register: domain_info
   changed_when: false
+  when: "'adcli' in ansible_facts.packages"
 
 - name: Abort if AD domain controller not usable
   fail:
     msg: "AD domain reports domain controller not usable."
-  when: "'domain-controller-usable = yes' not in domain_info.stdout"
+  when:
+    - "'adcli' in ansible_facts.packages"
+    - "'domain-controller-usable = yes' not in domain_info.stdout"
 
 - name: Check computer status in AD domain
   shell: >
@@ -35,15 +42,19 @@
     --stdin-password
     {{ ansible_facts.fqdn }}
   no_log: true
+  check_mode: false
   register: computer_info
   failed_when: computer_info.rc != 0 and computer_info.rc != 5
   changed_when: false
-  when: ansible_facts.distribution_major_version|int >= 8
+  when:
+    - "'adcli' in ansible_facts.packages"
+    - ansible_facts.distribution_major_version|int >= 8
 
 - name: Abort if computer does not exist in AD domain
   fail:
     msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
   when:
+    - "'adcli' in ansible_facts.packages"
     - ansible_facts.distribution_major_version|int >= 8
     - domain_ad_computer_precreated | bool
     - computer_info.rc != 0

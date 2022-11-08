@@ -10,6 +10,11 @@
     dest: /usr/local/sbin/aide-check
     mode: '0755'
 
+- name: Check aide-check script
+  stat:
+    path: /usr/local/sbin/aide-check
+  register: aide_check_script
+
 # Use loop to display the configuration
 - name: Enable scheduled aide cron check
   file:
@@ -17,7 +22,9 @@
     dest: /etc/cron.{{ item }}/aide-check
     state: link
   loop: "{{ [aide_setup_check_frequency] }}"
-  when: aide_setup_check_frequency in ['hourly', 'daily', 'weekly', 'monthly']
+  when:
+    - aide_check_script.stat.exists
+    - aide_setup_check_frequency in ['hourly', 'daily', 'weekly', 'monthly']
 
 - name: Disable unscheduled aide cron checks
   vars:

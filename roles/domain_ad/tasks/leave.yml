@@ -16,21 +16,25 @@
   service:
     name: sssd
     enabled: false
+  when: "'sssd' in ansible_facts.packages"
 
 - name: Stop sssd service
   service:
     name: sssd
     state: stopped
+  when: "'sssd' in ansible_facts.packages"
 
 - name: Disable oddjobd service
   service:
     name: oddjobd
     enabled: false
+  when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Stop oddjobd service
   service:
     name: oddjobd
     state: stopped
+  when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Remove Kerberos keytab file
   file:

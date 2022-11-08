@@ -49,12 +49,17 @@
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
 
+- name: Gather package facts
+  package_facts:
+
 - name: Check current system-local authentication profile
   command: authselect current -r
+  check_mode: false
   register: current_profile
   failed_when: current_profile.rc != 0 and 'No existing configuration' not in current_profile.stdout
   changed_when: false
   when:
+    - "'authselect' in ansible_facts.packages"
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
 

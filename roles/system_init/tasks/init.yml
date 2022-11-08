@@ -95,7 +95,10 @@
   loop: "{{ installer_files }}"
   loop_control:
     label: /var/log/anaconda/{{ item | basename }}
-  when: installer_logdir.stat.exists
+  when:
+    - "'libselinux-python' in ansible_facts.packages or
+       'python3-libselinux' in ansible_facts.packages"
+    - installer_logdir.stat.exists
 
 - name: Locate leftover temp files
   find:

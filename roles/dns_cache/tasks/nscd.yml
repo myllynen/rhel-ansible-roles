@@ -4,6 +4,9 @@
     name: nscd
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Copy nscd configuration file
   copy:
     src: nscd.conf
@@ -15,17 +18,20 @@
   service:
     name: nscd
     enabled: true
+  when: "'nscd' in ansible_facts.packages"
 
 - name: Start nscd service
   service:
     name: nscd
     state: started
   register: service_start
+  when: "'nscd' in ansible_facts.packages"
 
 - name: Apply nscd configuration changes
   service:
     name: nscd
     state: reloaded
   when:
+    - "'nscd' in ansible_facts.packages"
     - service_start is not changed
     - daemon_config is changed

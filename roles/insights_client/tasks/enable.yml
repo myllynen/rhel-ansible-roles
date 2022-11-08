@@ -16,6 +16,9 @@
     name: "{{ required_packages | select() | list }}"
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Configure insights-client proxy server
   vars:
     proxy_set: 'proxy={{ insights_client_proxy_server }}'
@@ -24,6 +27,7 @@
     path: /etc/insights-client/insights-client.conf
     regexp: '^(|#)proxy=.*'
     replace: '{{ proxy_set if insights_client_proxy_server | default(false) else proxy_not }}'
+  when: "'insights-client' in ansible_facts.packages"
 
 - name: Register system to Red Hat Insights
   command:
@@ -34,10 +38,14 @@
   service:
     name: rhcd
     enabled: true
-  when: insights_client_rhc_enable | bool
+  when:
+    - "'rhc' in ansible_facts.packages"
+    - insights_client_rhc_enable | bool
 
 - name: Start rhcd service
   service:
     name: rhcd
     state: started
-  when: insights_client_rhc_enable | bool
+  when:
+    - "'rhc' in ansible_facts.packages"
+    - insights_client_rhc_enable | bool

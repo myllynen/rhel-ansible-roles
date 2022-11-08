@@ -5,17 +5,24 @@
     state: present
   when: secure_boot_verify | bool
 
+- name: Gather package facts
+  package_facts:
+
 - name: Check Secure Boot state
   command: mokutil --sb-state
+  check_mode: false
   register: sb_state
   failed_when: false
   changed_when: false
-  when: secure_boot_verify | bool
+  when:
+    - "'mokutil' in ansible_facts.packages"
+    - secure_boot_verify | bool
 
 - name: Abort if Secure Boot not enabled
   fail:
     msg: "Secure Boot not enabled."
   when:
+    - "'mokutil' in ansible_facts.packages"
     - secure_boot_verify | bool
     - "'Secure Boot enabled' not in sb_state.stdout"
 
@@ -41,23 +48,40 @@
     name: "{{ selinux_packages }}"
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Configure SELinux state
   ansible.posix.selinux:
     policy: targeted
     state: "{{ selinux }}"
   register: selinux_config
+  when: "'libselinux-python' in ansible_facts.packages or
+         'python3-libselinux' in ansible_facts.packages"
+
+- name: Install crypto-policies-scripts package
+  yum:
+    name: crypto-policies-scripts
+    state: present
+
+- name: Gather package facts
+  package_facts:
 
 - name: Check current crypto policy
   command: update-crypto-policies --show
+  check_mode: false
   register: current_crypto_policy
   changed_when: false
-  when: ansible_facts.distribution_major_version|int >= 8
+  when:
+    - "'crypto-policies-scripts' in ansible_facts.packages"
+    - ansible_facts.distribution_major_version|int >= 8
 
 - name: Configure crypto policy
   command: update-crypto-policies --set {{ crypto_policy }}
   register: crypto_policy_config
   when:
     - ansible_facts.distribution_major_version|int >= 8
+    - "'crypto-policies-scripts' in ansible_facts.packages"
     - current_crypto_policy.stdout != crypto_policy
 
 - name: Install grubby package
@@ -92,6 +116,6 @@
 
 - name: Reboot system
   reboot:
-  when: selinux_config.reboot_required or
+  when: (selinux_config.reboot_required is defined and selinux_config.reboot_required) or
         crypto_policy_config is changed or
         lockdown_config is changed

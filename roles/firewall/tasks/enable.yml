@@ -4,31 +4,41 @@
     name: firewalld
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Disallow zone drifting
   replace:
     path: /etc/firewalld/firewalld.conf
     regexp: '^AllowZoneDrifting=yes'
     replace: 'AllowZoneDrifting=no'
   register: firewalld_config
+  when: "'firewalld' in ansible_facts.packages"
 
 - name: Enable firewalld service
   service:
     name: firewalld
     enabled: true
+  when: "'firewalld' in ansible_facts.packages"
 
 - name: Start firewalld service
   service:
     name: firewalld
     state: started
   register: service_start
+  when: "'firewalld' in ansible_facts.packages"
 
 - name: Apply firewalld configuration changes
   service:
     name: firewalld
     state: reloaded
   when:
+    - "'firewalld' in ansible_facts.packages"
     - service_start is not changed
     - firewalld_config is changed
+
+- name: Gather service facts
+  service_facts:
 
 - name: Configure default zone
   command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
@@ -47,11 +57,16 @@
     immediate: true
     state: enabled
   loop: "{{ ports_to_open }}"
+  when: "'firewalld' in ansible_facts.packages"
 
 - name: Check open ports in firewall
   command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
+  check_mode: false
   register: open_ports
   changed_when: false
+  when:
+    - "'firewalld' in ansible_facts.packages"
+    - ansible_facts.services['firewalld.service'].state == 'running'
 
 - name: Close unconfigured ports in firewall
   ansible.posix.firewalld:
@@ -62,7 +77,9 @@
     state: disabled
   loop: "{{ open_ports.stdout.split(' ') | select() | list }}"
   when:
+    - "'firewalld' in ansible_facts.packages"
     - firewall_close_unconfigured | bool
+    - open_ports.stdout is defined
     - item not in ports_to_open
 
 - name: Display unconfigured ports left open
@@ -86,11 +103,16 @@
     immediate: true
     state: enabled
   loop: "{{ services_to_open }}"
+  when: "'firewalld' in ansible_facts.packages"
 
 - name: Check open services in firewall
   command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
+  check_mode: false
   register: open_services
   changed_when: false
+  when:
+    - "'firewalld' in ansible_facts.packages"
+    - ansible_facts.services['firewalld.service'].state == 'running'
 
 - name: Close unconfigured services in firewall
   ansible.posix.firewalld:
@@ -101,9 +123,11 @@
     state: disabled
   loop: "{{ open_services.stdout.split(' ') | select() | list }}"
   when:
-    - item != 'ssh'
+    - "'firewalld' in ansible_facts.packages"
     - firewall_close_unconfigured | bool
+    - open_services.stdout is defined
     - item not in services_to_open
+    - item != 'ssh'
 
 - name: Display unconfigured services left open
   vars:

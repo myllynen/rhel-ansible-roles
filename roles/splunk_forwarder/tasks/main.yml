@@ -39,6 +39,9 @@
     state: "{{ splunk_forwarder_package_state }}"
   register: package_install
 
+- name: Gather package facts
+  package_facts:
+
 - name: Create Splunk deployment configuration file
   template:
     src: deploymentclient.conf.j2
@@ -86,18 +89,21 @@
   service:
     name: SplunkForwarder
     enabled: true
+  when: "'splunkforwarder' in ansible_facts.packages"
 
 - name: Start Splunk Forwarder service
   service:
     name: SplunkForwarder
     state: started
   register: service_start
+  when: "'splunkforwarder' in ansible_facts.packages"
 
 - name: Apply Splunk Forwarder configuration changes
   service:
     name: SplunkForwarder
     state: restarted
   when:
+    - "'splunkforwarder' in ansible_facts.packages"
     - service_start is not changed
     - client_config is changed or
       user_config is changed

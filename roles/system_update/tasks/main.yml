@@ -55,18 +55,24 @@
     state: present
   when: system_update_reboot_policy == 'when_needed'
 
+- name: Gather package facts
+  package_facts:
+
 - name: Check need for rebooting
   command: needs-restarting -r
+  check_mode: false
   register: needs_restarting
   failed_when: false
   changed_when: false
-  when: system_update_reboot_policy == 'when_needed'
+  when:
+    - "'yum-utils' in ansible_facts.packages"
+    - system_update_reboot_policy == 'when_needed'
 
 - name: Reboot system
   reboot:
   when: (system_update_reboot_policy == 'always') or
         (system_update_reboot_policy == 'when_updated' and package_install is changed) or
-        (system_update_reboot_policy == 'when_needed' and needs_restarting.rc != 0)
+        (system_update_reboot_policy == 'when_needed' and needs_restarting.rc is defined and needs_restarting.rc != 0)
   register: system_reboot
 
 - name: Create PDF report
@@ -96,12 +102,12 @@
   when:
     - system_update_report | bool
     - hostvars[inventory_hostname].package_updates is defined
+    - command_output.stdout is defined
 
 - name: Remove local PDF directory
   file:
     path: "{{ system_update_report_pdf_dir }}"
     state: absent
-  register: command_output
   delegate_to: localhost
   run_once: true
   become: false

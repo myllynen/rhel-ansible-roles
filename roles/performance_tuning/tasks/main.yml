@@ -4,21 +4,29 @@
     name: tuned
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Enable tuned service
   service:
     name: tuned
     enabled: true
+  when: "'tuned' in ansible_facts.packages"
 
 - name: Start tuned service
   service:
     name: tuned
     state: started
+  when: "'tuned' in ansible_facts.packages"
 
 - name: Check current tuned profile
   slurp:
     src: /etc/tuned/active_profile
   register: active_profile
+  when: "'tuned' in ansible_facts.packages"
 
 - name: Apply tuned profile
   command: tuned-adm profile {{ tuned_profile }}
-  when: active_profile.content|b64decode|trim != tuned_profile
+  when:
+    - "'tuned' in ansible_facts.packages"
+    - active_profile.content|b64decode|trim != tuned_profile

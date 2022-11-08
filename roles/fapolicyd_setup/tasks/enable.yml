@@ -6,6 +6,9 @@
       - fapolicyd-selinux
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Check rules.d directory
   stat:
     path: /etc/fapolicyd/rules.d
@@ -50,27 +53,35 @@
 
 - name: Run fapolicyd configuration check
   command: fapolicyd-cli --check-config
+  check_mode: false
   changed_when: false
-  when: rules_dir.stat.exists
+  when:
+    - "'fapolicyd' in ansible_facts.packages"
+    - rules_dir.stat.exists
 
 - name: Enable fapolicyd service
   service:
     name: fapolicyd
     enabled: true
-  when: fapolicyd_setup_enable_service | bool
+  when:
+    - "'fapolicyd' in ansible_facts.packages"
+    - fapolicyd_setup_enable_service | bool
 
 - name: Start fapolicyd service
   service:
     name: fapolicyd
     state: started
   register: service_start
-  when: fapolicyd_setup_enable_service | bool
+  when:
+    - "'fapolicyd' in ansible_facts.packages"
+    - fapolicyd_setup_enable_service | bool
 
 - name: Apply fapolicyd configuration changes
   service:
     name: fapolicyd
     state: restarted
   when:
+    - "'fapolicyd' in ansible_facts.packages"
     - fapolicyd_setup_enable_service | bool
     - service_start is not changed
     - daemon_config is changed or

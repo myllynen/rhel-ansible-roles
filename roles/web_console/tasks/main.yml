@@ -22,22 +22,30 @@
     cacheonly: true
     state: absent
 
+- name: Gather package facts
+  package_facts:
+
 - name: Enable cockpit web console
   service:
     name: cockpit.socket
     state: started
     enabled: true
+  when: "'cockpit' in ansible_facts.packages"
 
 - name: Enable performance metrics monitoring
   service:
     name: pmcd
     state: started
     enabled: true
-  when: web_console_enable_perf_metrics | bool
+  when:
+    - "'pcp' in ansible_facts.packages"
+    - web_console_enable_perf_metrics | bool
 
 - name: Enable performance metrics archiving
   service:
     name: pmlogger
     state: started
     enabled: true
-  when: web_console_enable_perf_metrics | bool
+  when:
+    - "'pcp' in ansible_facts.packages"
+    - web_console_enable_perf_metrics | bool

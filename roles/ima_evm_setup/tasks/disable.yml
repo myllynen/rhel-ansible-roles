@@ -51,8 +51,10 @@
 
 - name: Check current IMA/EVM file attributes
   command: getfattr -m - -d /usr/bin/getfattr
+  check_mode: false
   register: fattr_info
   changed_when: false
+  when: "'attr' in ansible_facts.packages"
 
 - name: Remove EVM file security attributes
   shell: |
@@ -60,7 +62,7 @@
   register: evm_attrs
   failed_when: false
   when: ima_evm_setup_sign_files | bool or
-        'security.evm' in fattr_info.stdout
+        (fattr_info.stdout is defined and 'security.evm' in fattr_info.stdout)
 
 - name: Remove IMA file security attributes
   shell: |
@@ -68,7 +70,7 @@
   register: ima_attrs
   failed_when: false
   when: ima_evm_setup_sign_files | bool or
-        'security.ima' in fattr_info.stdout
+        (fattr_info.stdout is defined and 'security.ima' in fattr_info.stdout)
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all

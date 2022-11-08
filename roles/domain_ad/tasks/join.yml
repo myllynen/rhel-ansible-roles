@@ -24,7 +24,9 @@
 
 - name: Run SSSD configuration check
   command: sssctl config-check
+  check_mode: false
   changed_when: false
+  when: "'sssd' in ansible_facts.packages"
 
 - name: Join AD domain
   shell: >
@@ -40,28 +42,33 @@
   service:
     name: oddjobd
     enabled: true
+  when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Start oddjobd service
   service:
     name: oddjobd
     state: started
+  when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Enable sssd service
   service:
     name: sssd
     enabled: true
+  when: "'sssd' in ansible_facts.packages"
 
 - name: Start sssd service
   service:
     name: sssd
     state: started
   register: service_start
+  when: "'sssd' in ansible_facts.packages"
 
 - name: Apply sssd configuration changes
   service:
     name: sssd
     state: restarted
   when:
+    - "'sssd' in ansible_facts.packages"
     - service_start is not changed
     - not krb5_keytab.stat.exists or
       krb5_config is changed or

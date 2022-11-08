@@ -68,13 +68,14 @@
 - name: Display notification command debug output
   debug:
     msg: "{{ command_output.results | selectattr('item', 'equalto', inventory_hostname) | map(attribute='stdout') | first }}"
-  when: hostvars[inventory_hostname].package_updates is defined
+  when:
+    - hostvars[inventory_hostname].package_updates is defined
+    - command_output.stdout is defined
 
 - name: Remove local PDF directory
   file:
     path: "{{ system_update_report_pre_pdf_dir }}"
     state: absent
-  register: command_output
   delegate_to: localhost
   run_once: true
   become: false

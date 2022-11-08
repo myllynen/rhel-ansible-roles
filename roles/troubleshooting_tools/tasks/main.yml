@@ -4,12 +4,16 @@
     name: "{{ troubleshooting_tools }}"
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Enable performance metrics monitoring
   service:
     name: pmcd
     state: started
     enabled: true
   when:
+    - "'pcp' in ansible_facts.packages"
     - troubleshooting_tools_enable_perf_metrics | bool
     - "'pcp-system-tools' in troubleshooting_tools"
 
@@ -19,5 +23,6 @@
     state: started
     enabled: true
   when:
+    - "'pcp' in ansible_facts.packages"
     - troubleshooting_tools_enable_perf_metrics | bool
     - "'pcp-system-tools' in troubleshooting_tools"

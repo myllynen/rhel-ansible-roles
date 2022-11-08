@@ -4,6 +4,9 @@
     name: usbguard
     state: present
 
+- name: Gather package facts
+  package_facts:
+
 - name: Copy reject-all USBGuard configuration file
   copy:
     content: |
@@ -63,18 +66,21 @@
   service:
     name: usbguard
     enabled: true
+  when: "'usbguard' in ansible_facts.packages"
 
 - name: Start usbguard service
   service:
     name: usbguard
     state: started
   register: service_start
+  when: "'usbguard' in ansible_facts.packages"
 
 - name: Apply usbguard configuration changes
   service:
     name: usbguard
     state: restarted
   when:
+    - "'usbguard' in ansible_facts.packages"
     - service_start is not changed
     - daemon_config_reject is changed or
       daemon_config_custom is changed or

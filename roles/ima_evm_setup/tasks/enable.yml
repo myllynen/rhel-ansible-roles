@@ -46,17 +46,24 @@
     state: present
   when: ima_evm_setup_require_secure_boot | bool
 
+- name: Gather package facts
+  package_facts:
+
 - name: Check Secure Boot state
   command: mokutil --sb-state
+  check_mode: false
   register: sb_state
   failed_when: false
   changed_when: false
-  when: ima_evm_setup_require_secure_boot | bool
+  when:
+    - "'mokutil' in ansible_facts.packages"
+    - ima_evm_setup_require_secure_boot | bool
 
 - name: Abort if Secure Boot not enabled
   fail:
     msg: "Secure Boot not enabled."
   when:
+    - "'mokutil' in ansible_facts.packages"
     - ima_evm_setup_require_secure_boot | bool
     - "'Secure Boot enabled' not in sb_state.stdout"
 
@@ -104,16 +111,18 @@
 # Assume IMA/EVM attributes if newest executable has them
 - name: Check current file IMA/EVM attributes
   shell: getfattr -m - -d $(ls -1rt /usr/bin/* | tail -n 1)
+  check_mode: false
   register: fattr_info
   changed_when: false
+  when: "'attr' in ansible_facts.packages"
 
 - name: Check need for measure/sign files
   set_fact:
     ima_evm_setup_sign_files: true
   when: boot_check_ima_hash.found == 0 or
         (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
-        'security.ima' not in fattr_info.stdout or
-        ('evm' in ima_evm_setup_method and 'security.evm' not in fattr_info.stdout)
+        (fattr_info.stdout is defined and 'security.ima' not in fattr_info.stdout) or
+        ('evm' in ima_evm_setup_method and fattr_info.stdout is defined and 'security.evm' not in fattr_info.stdout)
 
 - name: Configure IMA/EVM measurement boot parameters
   command: >
@@ -144,7 +153,9 @@
     name: tpm2-abrmd
     state: started
     enabled: true
-  when: ima_evm_setup_enable_tpm_use | bool
+  when:
+    - "'tpm2-abrmd' in ansible_facts.packages"
+    - ima_evm_setup_enable_tpm_use | bool
 
 - name: Check existing EVM key
   stat:
@@ -272,16 +283,21 @@
 
 - name: Verify IMA file attributes
   command: getfattr -m - -d /usr/bin/getfattr
+  check_mode: false
   register: fattr_info
   failed_when: "'security.ima' not in fattr_info.stdout"
   changed_when: false
+  when: "'attr' in ansible_facts.packages"
 
 - name: Verify EVM file attributes
   command: getfattr -m - -d /usr/bin/getfattr
+  check_mode: false
   register: fattr_info
   failed_when: "'security.evm' not in fattr_info.stdout"
   changed_when: false
-  when: "'evm' in ima_evm_setup_method"
+  when:
+    - "'attr' in ansible_facts.packages"
+    - "'evm' in ima_evm_setup_method"
 
 - name: Check current IMA/EVM boot parameters (other)
   lineinfile:
@@ -298,6 +314,7 @@
     for p in $(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep -Eo 'ima_policy=[a-z_]*'); do
       echo $p | grep -q {{ '-e ' + ' -e '.join(ima_policies) }} || exit 1
     done
+  check_mode: false
   register: boot_check_unwanted_policies
   failed_when: false
   changed_when: false
