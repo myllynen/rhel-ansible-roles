@@ -88,7 +88,7 @@
   when: installer_logdir.stat.exists
 
 - name: Relabel stored installer files
-  sefcontext:
+  community.general.sefcontext:
     target: /var/log/anaconda/{{ item | basename }}
     setype: var_log_t
     state: present
