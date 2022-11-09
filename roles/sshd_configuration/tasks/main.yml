@@ -41,7 +41,7 @@
     path: "{{ item.0 }}"
     regexp: '^({{ item.1 }} .*)'
     replace: '#\1'
-    validate: sshd -tf %s
+    validate: /usr/sbin/sshd -tf %s
   register: disable_options
   loop: "{{ (['/etc/ssh/sshd_config'] + [config_file]) | unique | product(sshd_disable) | list }}"
 
