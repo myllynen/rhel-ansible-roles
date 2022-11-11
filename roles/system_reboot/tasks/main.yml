@@ -22,4 +22,3 @@
   reboot:
   when: (system_reboot_policy == 'always') or
         (system_reboot_policy == 'when_needed' and needs_restarting.rc is defined and needs_restarting.rc != 0)
-  register: system_reboot
