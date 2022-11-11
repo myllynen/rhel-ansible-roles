@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - virtualization_role
+  when: ansible_facts.virtualization_role is not defined
+
 - name: Install tuned package
   yum:
     name: tuned
