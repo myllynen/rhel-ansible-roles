@@ -24,6 +24,8 @@ network and storage), see
 [Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
+The roles expect at least minimal (`min`) facts to have been gathered.
+
 NB. Recent versions of _rhel-system-roles_ may include similar roles as
 are included in this repository. Depending on the use case and support
 needs it should be evaluated which one to prefer. If in doubt, use the
