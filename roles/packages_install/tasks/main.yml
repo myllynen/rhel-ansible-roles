@@ -1,5 +1,8 @@
 ---
 - name: Install wanted packages
+  vars:
+    weak_deps: "{{ packages_install_weak_deps|bool if ansible_facts.distribution_major_version|int >= 8 else false }}"
   yum:
     name: "{{ packages_install }}"
+    install_weak_deps: "{{ weak_deps }}"
     state: present
