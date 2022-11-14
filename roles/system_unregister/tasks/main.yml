@@ -24,7 +24,6 @@
 - name: Clean package manager caches (RHEL 7)
   command:
     cmd: yum -C clean all
-    warn: false
     removes: /etc/rhsm/ca/katello-server-ca.pem
   when: ansible_facts.distribution_major_version|int < 8
 
@@ -36,7 +35,8 @@
 - name: Remove Katello CA package
   yum:
     name: katello-ca-consumer-*
-    cacheonly: true
+    autoremove: true
+    #cacheonly: true
     state: absent
   when: registration is changed
 
@@ -68,9 +68,7 @@
   when: registration is changed
 
 - name: Clean package manager caches
-  command:
-    cmd: dnf -C clean all
-    warn: false
+  command: dnf -C clean all
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - registration is changed

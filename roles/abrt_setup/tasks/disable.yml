@@ -25,8 +25,8 @@
 - name: Remove abrt packages
   yum:
     name: 'abrt*'
-    cacheonly: true
     autoremove: true
+    #cacheonly: true
     state: absent
 
 - name: Remove abrt directories

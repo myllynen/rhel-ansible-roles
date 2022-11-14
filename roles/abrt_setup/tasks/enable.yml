@@ -22,7 +22,7 @@
   yum:
     name: "{{ abrt_remove | select() | list }}"
     autoremove: true
-    cacheonly: true
+    #cacheonly: true
     state: absent
 
 - name: Configure abrt (unsigned reports)

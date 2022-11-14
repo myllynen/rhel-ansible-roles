@@ -19,7 +19,7 @@
   yum:
     name: "{{ cockpit_remove | select() | list }}"
     autoremove: true
-    cacheonly: true
+    #cacheonly: true
     state: absent
 
 - name: Gather package facts

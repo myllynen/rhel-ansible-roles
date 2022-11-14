@@ -9,9 +9,7 @@
     - ansible_facts.packages['kernel'] | length > 1
 
 - name: Remove old kernel packages
-  command:
-    cmd: dnf -C remove --oldinstallonly -y
-    warn: false
+  command: dnf -C remove --oldinstallonly -y
   when:
     - ansible_facts.pkg_mgr == 'dnf'
     - ansible_facts.packages['kernel'] | length > 1

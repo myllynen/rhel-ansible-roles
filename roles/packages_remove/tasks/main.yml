@@ -3,5 +3,5 @@
   yum:
     name: "{{ packages_remove }}"
     autoremove: "{{ packages_remove_autoremove }}"
-    cacheonly: true
+    #cacheonly: true
     state: absent

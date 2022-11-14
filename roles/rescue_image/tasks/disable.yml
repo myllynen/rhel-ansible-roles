@@ -2,6 +2,8 @@
 - name: Remove dracut-config-rescue package
   yum:
     name: dracut-config-rescue
+    autoremove: true
+    #cacheonly: true
     state: absent
 
 # For RHEL 7

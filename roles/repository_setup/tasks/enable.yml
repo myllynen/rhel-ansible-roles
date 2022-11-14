@@ -4,7 +4,7 @@
     name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"
     disable_gpg_check: true
     validate_certs: false
-    cacheonly: true
+    #cacheonly: true
     state: present
   when:
     - repository_setup_rhsm_parameters.rhsm_baseurl | default(false)

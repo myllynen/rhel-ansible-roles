@@ -45,9 +45,7 @@
 
 # auditd is not compatible with the Ansible service module
 - name: Apply audit configuration changes
-  command:
-    cmd: service auditd reload
-    warn: false
+  command: service auditd reload
   when:
     - service_start is not changed
     - rules_config is changed or

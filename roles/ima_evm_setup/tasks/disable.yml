@@ -46,7 +46,8 @@
 - name: Remove RPM IMA plugin package
   yum:
     name: rpm-plugin-ima
-    cacheonly: true
+    autoremove: true
+    #cacheonly: true
     state: absent
 
 - name: Check current IMA/EVM file attributes
