@@ -9,11 +9,6 @@
 - name: Gather package facts
   package_facts:
 
-- name: Check rules.d directory
-  stat:
-    path: /etc/fapolicyd/rules.d
-  register: rules_dir
-
 - name: Copy fapolicyd configuration file
   copy:
     src: "{{ fapolicyd_setup_config_file }}"
@@ -24,11 +19,9 @@
   register: daemon_config
 
 - name: Copy fapolicyd rules file
-  vars:
-    rules_file: "{{ 'fapolicyd.rules' if not rules_dir.stat.exists else 'rules.d/zz-local.rules' }}"
   copy:
     src: "{{ fapolicyd_setup_rules_file }}"
-    dest: /etc/fapolicyd/{{ rules_file }}
+    dest: /etc/fapolicyd/rules.d/zz-local.rules
     owner: root
     group: fapolicyd
     mode: '0644'
@@ -38,14 +31,11 @@
   file:
     path: /etc/fapolicyd/fapolicyd.rules
     state: absent
-  when: rules_dir.stat.exists
 
 - name: Copy fapolicyd trust file
-  vars:
-    trust_file: "{{ 'fapolicyd.trust' if not rules_dir.stat.exists else 'trust.d/zz-local.trust' }}"
   copy:
     src: "{{ fapolicyd_setup_trust_file }}"
-    dest: /etc/fapolicyd/{{ trust_file }}
+    dest: /etc/fapolicyd/trust.d/zz-local.trust
     owner: root
     group: fapolicyd
     mode: '0644'
@@ -55,9 +45,7 @@
   command: fapolicyd-cli --check-config
   check_mode: false
   changed_when: false
-  when:
-    - "'fapolicyd' in ansible_facts.packages"
-    - rules_dir.stat.exists
+  when: "'fapolicyd' in ansible_facts.packages"
 
 - name: Enable fapolicyd service
   service:
