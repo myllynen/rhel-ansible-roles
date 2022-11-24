@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+  when: ansible_facts.distribution_major_version is not defined
+
 - name: Install katello-ca-consumer-latest package
   yum:
     name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"

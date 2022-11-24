@@ -24,7 +24,8 @@ network and storage), see
 [Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
-The roles expect at least minimal (`min`) facts to have been gathered.
+The roles will gather the minimum set of facts as needed meaning that
+they can be used in setups where fact gathering is disabled.
 
 NB. Recent versions of _rhel-system-roles_ may include similar roles as
 are included in this repository. Depending on the use case and support

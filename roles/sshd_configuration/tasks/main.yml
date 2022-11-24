@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - env
+  when: ansible_facts.env is not defined
+
 - name: Set sshd options to enable
   set_fact:
     sshd: "{{ sshd_options | default({}, true) }}"
@@ -7,7 +15,7 @@
   fail:
     msg: "Refusing to configure 'PermitRootLogin no' when connected as root."
   when:
-    - "'SUDO_USER' not in ansible_env"
+    - "'SUDO_USER' not in ansible_facts.env"
     - "'PermitRootLogin' in sshd"
     - "sshd.PermitRootLogin == 'no'"
 

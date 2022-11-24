@@ -1,4 +1,14 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - cmdline
+      - distribution_major_version
+  when: ansible_facts.cmdline is not defined or
+        ansible_facts.distribution_major_version is not defined
+
 - name: Abort if audit disabled in kernel
   fail:
     msg: "Audit disabled on kernel command line."

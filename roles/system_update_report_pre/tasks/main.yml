@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - pkg_mgr
+  when: ansible_facts.pkg_mgr is not defined
+
 - name: Check available package updates
   yum:
     name: '*'

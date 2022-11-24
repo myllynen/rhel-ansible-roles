@@ -1,4 +1,14 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+      - network
+  when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.fqdn is not defined
+
 - name: Install required packages
   yum:
     name:

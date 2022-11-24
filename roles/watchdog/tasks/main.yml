@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+  when: ansible_facts.distribution_major_version is not defined
+
 - name: Enable system watchdog
   include_tasks: enable.yml
   when: watchdog_enable | bool
