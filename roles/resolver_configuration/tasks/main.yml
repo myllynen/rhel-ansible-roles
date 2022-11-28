@@ -1,5 +1,5 @@
 ---
-- name: Configure NetworkManager resolver updates
+- name: Update NetworkManager resolver configuration
   copy:
     content: |
       [main]

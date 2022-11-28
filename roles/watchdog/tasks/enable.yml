@@ -1,12 +1,12 @@
 ---
-- name: Configure system runtime watchdog
+- name: Update system runtime watchdog configuration
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '(#|)RuntimeWatchdogSec=.*'
     line: 'RuntimeWatchdogSec={{ watchdog_runtime_sec }}'
   register: watchdog_runtime
 
-- name: Configure system reboot watchdog
+- name: Update system reboot watchdog configuration
   vars:
     option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version|int >= 9 else 'ShutdownWatchdogSec' }}"
   lineinfile:
@@ -16,7 +16,7 @@
   register: watchdog_reboot
   when: watchdog_reboot_sec | default(false)
 
-- name: Configure system kexec watchdog
+- name: Update system kexec watchdog configuration
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '(#|)KExecWatchdogSec=.*'
@@ -26,7 +26,7 @@
     - ansible_facts.distribution_major_version|int >= 9
     - watchdog_kexec_sec | default(false)
 
-- name: Configure system watchdog device
+- name: Update system watchdog device configuration
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '(#|)WatchdogDevice=.*'

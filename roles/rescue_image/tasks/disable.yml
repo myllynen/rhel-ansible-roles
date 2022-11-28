@@ -45,7 +45,7 @@
     - not entries_dir.stat.exists
     - remove_images is changed
 
-- name: Update boot loader configuration
+- name: Write boot loader configuration
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 9 else false }}"
     efi_path: "{{ true if old_rhel and efi_dir.stat.exists else false }}"

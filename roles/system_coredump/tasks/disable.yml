@@ -7,7 +7,7 @@
       - distribution_major_version
   when: ansible_facts.distribution_major_version is not defined
 
-- name: Restore system default coredump limit
+- name: Restore system default coredump limit configuration
   vars:
     option_prefix: "{{ '#' if ansible_facts.distribution_major_version|int < 8 else '' }}"
     option_value: "{{ '' if ansible_facts.distribution_major_version|int < 8 else '0:infinity' }}"
@@ -30,7 +30,7 @@
     sysctl_set: true
   register: suid_config
 
-- name: Restore system default core pattern configuration
+- name: Restore system default core pattern
   ansible.posix.sysctl:
     name: kernel.core_pattern
     value: 'core'

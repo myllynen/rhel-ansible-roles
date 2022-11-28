@@ -50,7 +50,7 @@
     - ansible_facts.distribution_major_version|int == 7
     - boot_config is changed
 
-- name: Configure boot loader timeout
+- name: Update boot loader timeout configuration
   replace:
     path: /etc/default/grub
     regexp: '^GRUB_TIMEOUT=.*'
@@ -65,7 +65,7 @@
     path: /sys/firmware/efi
   register: efi_dir
 
-- name: Set boot loader configuration file
+- name: Set boot loader configuration files
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 9 else false }}"
     efi_path: "{{ true if old_rhel and efi_dir.stat.exists else false }}"
@@ -73,14 +73,7 @@
     grub_config: "{{ '/boot/grub2/grub.cfg' if not efi_path else '/boot/efi/EFI/redhat/grub.cfg' }}"
     user_config: "{{ '/boot/grub2/user.cfg' if not efi_path else '/boot/efi/EFI/redhat/user.cfg' }}"
 
-- name: Remove boot loader password
-  file:
-    path: "{{ user_config }}"
-    state: absent
-  register: password_remove
-  when: not boot_parameters_password | default(true)
-
-- name: Configure boot loader password
+- name: Update boot loader password configuration
   copy:
     content: |
       GRUB2_PASSWORD={{ boot_parameters_password }}
@@ -89,7 +82,14 @@
   register: password_update
   when: boot_parameters_password | default(false)
 
-- name: Update boot loader configuration
+- name: Remove boot loader password configuration
+  file:
+    path: "{{ user_config }}"
+    state: absent
+  register: password_remove
+  when: not boot_parameters_password | default(true)
+
+- name: Write boot loader configuration
   command: grub2-mkconfig -o {{ grub_config }}
   when: boot_timeout is changed or
         password_remove is changed or

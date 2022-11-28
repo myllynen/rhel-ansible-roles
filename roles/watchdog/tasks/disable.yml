@@ -1,5 +1,5 @@
 ---
-- name: Disable system runtime watchdog
+- name: Disable system runtime watchdog configuration
   vars:
     option_value: "{{ 'off' if ansible_facts.distribution_major_version|int >= 9 else '0' }}"
   lineinfile:
@@ -17,7 +17,7 @@
     line: '#{{ option_name }}=10min'
   register: watchdog_reboot
 
-- name: Disable system kexec watchdog
+- name: Disable system kexec watchdog configuration
   vars:
     option_state: "{{ 'present' if ansible_facts.distribution_major_version|int >= 9 else 'absent' }}"
   lineinfile:

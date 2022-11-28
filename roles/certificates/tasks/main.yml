@@ -15,6 +15,6 @@
   loop: "{{ certificates_ca_files | select() | list }}"
   when: certificates_copy_certs | bool
 
-- name: Update trusted certificates
+- name: Write trusted certificate bundles
   command: update-ca-trust extract
   when: ca_files is changed

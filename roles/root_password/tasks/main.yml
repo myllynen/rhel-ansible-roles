@@ -1,5 +1,5 @@
 ---
-- name: Configure root password
+- name: Update root password
   vars:
     salt_seed: "{{ root_password_salt_seed }}"
     encrypted: "{{ root_password_encrypted }}"

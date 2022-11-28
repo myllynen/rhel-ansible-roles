@@ -7,7 +7,7 @@
 - name: Gather package facts
   package_facts:
 
-- name: Disallow zone drifting
+- name: Disallow zone drifting configuration
   replace:
     path: /etc/firewalld/firewalld.conf
     regexp: '^AllowZoneDrifting=yes'
@@ -40,7 +40,7 @@
 - name: Gather service facts
   service_facts:
 
-- name: Configure default zone
+- name: Configure default firewall zone
   command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
   register: firewall_cmd_result
   changed_when: "'ZONE_ALREADY_SET' not in firewall_cmd_result.stderr"

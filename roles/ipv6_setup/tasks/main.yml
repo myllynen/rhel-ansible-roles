@@ -21,7 +21,7 @@
   register: boot_config
   when: boot_param_check.found == 1
 
-- name: Configure IPv6 sysctl parameters
+- name: Update IPv6 sysctl parameters configuration
   vars:
     disable_ipv6: "{{ '0' if ipv6_setup_enable|bool else '1' }}"
     loopback_disable_ipv6: >
@@ -52,7 +52,7 @@
   register: nmconnection_files
   when: ipv6_setup_configure_nm | bool
 
-- name: Configure IPv6 in NIC ifcfg configuration files
+- name: Update IPv6 configuration in NIC ifcfg files
   vars:
     disable_ipv6: "{{ 'yes' if ipv6_setup_enable|bool else 'no' }}"
   replace:
@@ -63,7 +63,7 @@
   loop: "{{ ifcfg_files.files | map(attribute='path') | list }}"
   when: ipv6_setup_configure_nm | bool
 
-- name: Configure IPv6 in NM connection configuration files
+- name: Update IPv6 configuration in NM connection files
   vars:
     disable_ipv6: "{{ 'auto' if ipv6_setup_enable|bool else 'disabled' }}"
   replace:

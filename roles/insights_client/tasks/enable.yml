@@ -27,7 +27,7 @@
 - name: Gather package facts
   package_facts:
 
-- name: Configure insights-client proxy server
+- name: Update insights-client proxy server configuration
   vars:
     proxy_set: 'proxy={{ insights_client_proxy_server }}'
     proxy_not: '#proxy='

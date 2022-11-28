@@ -30,7 +30,7 @@
   register: font_check
   changed_when: false
 
-- name: Configure system console font
+- name: Update system console font configuration
   replace:
     path: /etc/vconsole.conf
     regexp: '^FONT=("|).*(|")'
@@ -38,7 +38,7 @@
   register: font_config
   when: not font_check.found
 
-- name: Change system console font
+- name: Configure system console font
   command: setfont {{ system_font }}
   when: font_config is changed
 

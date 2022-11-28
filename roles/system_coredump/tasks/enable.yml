@@ -15,7 +15,7 @@
     sysctl_set: true
   register: suid_config
 
-- name: Configure default coredump limit
+- name: Update default coredump limit configuration
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '(#|)DefaultLimitCORE=.*'
