@@ -33,7 +33,7 @@
   register: active_profile
   when: "'tuned' in ansible_facts.packages"
 
-- name: Apply tuned profile
+- name: Configure tuned profile
   command: tuned-adm profile {{ tuned_profile }}
   when:
     - "'tuned' in ansible_facts.packages"

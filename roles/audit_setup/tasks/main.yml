@@ -55,7 +55,7 @@
   register: service_start
 
 # auditd is not compatible with the Ansible service module
-- name: Apply audit configuration changes
+- name: Reload auditd to apply configuration changes
   command: service auditd reload
   when:
     - service_start is not changed

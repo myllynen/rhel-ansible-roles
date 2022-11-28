@@ -37,7 +37,7 @@
     state: "{{ option_state }}"
   register: watchdog_device
 
-- name: Apply watchdog configuration
+- name: Reload systemd to apply watchdog configuration changes
   systemd:
     daemon_reload: true
   when: watchdog_runtime is changed or

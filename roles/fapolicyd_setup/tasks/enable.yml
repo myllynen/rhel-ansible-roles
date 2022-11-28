@@ -64,7 +64,7 @@
     - "'fapolicyd' in ansible_facts.packages"
     - fapolicyd_setup_enable_service | bool
 
-- name: Apply fapolicyd configuration changes
+- name: Restart fapolicyd to apply configuration changes
   service:
     name: fapolicyd
     state: restarted

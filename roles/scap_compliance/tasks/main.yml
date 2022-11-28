@@ -25,7 +25,7 @@
   debug:
     var: scap_compliance_profile
 
-- name: Apply system security profile
+- name: Configure system security profile
   vars:
     stig_file: "{{ scap_compliance_report_dir + '/remediate-results-stig.xml' }}"
     stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"

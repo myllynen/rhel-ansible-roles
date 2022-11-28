@@ -106,7 +106,7 @@
   register: service_start
   when: "'splunkforwarder' in ansible_facts.packages"
 
-- name: Apply Splunk Forwarder configuration changes
+- name: Restart Splunk Forwarder to apply configuration changes
   service:
     name: SplunkForwarder
     state: restarted

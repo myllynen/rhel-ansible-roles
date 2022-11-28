@@ -28,7 +28,7 @@
   register: service_start
   when: "'firewalld' in ansible_facts.packages"
 
-- name: Apply firewalld configuration changes
+- name: Reload firewalld to apply configuration changes
   service:
     name: firewalld
     state: reloaded

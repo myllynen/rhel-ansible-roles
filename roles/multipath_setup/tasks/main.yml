@@ -27,7 +27,7 @@
     - multipath_setup_config_file | default(false)
     - not multipath_setup_reboot | bool
 
-- name: Apply multipathd configuration changes
+- name: Reload multipathd to apply configuration changes
   service:
     name: multipathd
     state: reloaded

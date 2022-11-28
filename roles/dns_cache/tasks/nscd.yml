@@ -27,7 +27,7 @@
   register: service_start
   when: "'nscd' in ansible_facts.packages"
 
-- name: Apply nscd configuration changes
+- name: Reload nscd to apply configuration changes
   service:
     name: nscd
     state: reloaded

@@ -53,7 +53,7 @@
   register: disable_options
   loop: "{{ (['/etc/ssh/sshd_config'] + [config_file]) | unique | product(sshd_disable) | list }}"
 
-- name: Apply sshd configuration changes
+- name: Reload sshd to apply configuration changes
   service:
     name: sshd
     state: reloaded

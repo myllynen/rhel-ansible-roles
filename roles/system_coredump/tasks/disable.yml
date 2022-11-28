@@ -17,7 +17,7 @@
     line: '{{ option_prefix }}DefaultLimitCORE={{ option_value }}'
   register: core_config
 
-- name: Apply coredump limit change
+- name: Reload systemd to apply coredump limit change
   systemd:
     daemon_reload: true
   when: core_config is changed

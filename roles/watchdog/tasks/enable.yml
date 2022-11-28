@@ -36,7 +36,7 @@
     - ansible_facts.distribution_major_version|int >= 9
     - watchdog_device | default(false)
 
-- name: Apply watchdog configuration
+- name: Reload systemd to apply watchdog configuration changes
   systemd:
     daemon_reload: true
   when: watchdog_runtime is changed or

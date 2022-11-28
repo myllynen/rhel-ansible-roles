@@ -81,7 +81,7 @@
   register: service_start
   when: "'usbguard' in ansible_facts.packages"
 
-- name: Apply usbguard configuration changes
+- name: Restart usbguard to apply configuration changes
   service:
     name: usbguard
     state: restarted

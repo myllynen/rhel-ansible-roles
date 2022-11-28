@@ -8,7 +8,7 @@
     mode: '0644'
   register: nm_config
 
-- name: Apply NetworkManager configuration change
+- name: Reload NetworkManager to apply configuration changes
   service:
     name: NetworkManager
     state: reloaded
