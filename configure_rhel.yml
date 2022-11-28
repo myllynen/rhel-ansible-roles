@@ -2,6 +2,7 @@
 - name: Configure RHEL
   hosts: all
   become: true
+  gather_facts: false
   collections:
     - myllynen.rhel_ansible_roles
   vars:
@@ -55,13 +56,18 @@
     # Accounts, login, password, PAM policies and profiles
     # All parameters are optional, unset are left untouched
 
-    # Role provided alternatives in files/
+    # Login access control file access.conf template to use
     login_access_config_file:
 
-    # Role provided alternatives in files/
+    # Shadow configuration file login.defs template to use
     login_defs_config_file:
 
-    # Role provided alternatives in files/
+    # Password quality config file pwquality.conf template to use
+    # Role provides alternatives:
+    # * pwquality_conf.cis_server_l1.j2 - CIS Server level 1 config
+    # * pwquality_conf.local.j2         - role provided basic config
+    # * pwquality_conf.rhel8_default.j2 - RHEL 8 default config
+    # * pwquality_conf.rhel9_default.j2 - RHEL 9 default config
     pwquality_config_file:
 
     # Either use a default profile (e.g., "minimal")
@@ -82,9 +88,10 @@
     #
     # audit_setup
     #
-    # Role provided alternatives in files/
-    audit_setup_rules: local.rules
+    # audit rules file to copy
+    audit_setup_rules_file:
 
+    # audit config file to copy
     # If unset default RHEL configuration will be used
     audit_setup_config_file:
 
@@ -187,13 +194,13 @@
     # NB. See ima_evm_setup if planning to use IMA.
     fapolicyd_setup_enable_service: false
 
-    # Role provided alternative in files/
+    # fapolicyd config file to copy, role default ~ RHEL default
     fapolicyd_setup_config_file: fapolicyd.conf
 
-    # Role provided alternative in files/
+    # fapolicyd rules file to copy, rules default ~ RHEL default
     fapolicyd_setup_rules_file: fapolicyd.rules
 
-    # Role provided alternative in files/
+    # fapolicyd trust file to copy, trust default is empty file
     fapolicyd_setup_trust_file: fapolicyd.trust
 
     #
@@ -260,17 +267,17 @@
     #
     # motd_issue
     #
-    # motd template to copy to the target host
-    motd_template: motd.j2
+    # motd template to use
+    motd_template:
 
-    # issue template to copy to the target host
-    issue_template: issue.j2
+    # issue template to use
+    issue_template:
 
     #
     # multipath_setup
     #
-    # Role provided alternatives in files/
-    multipath_setup_config_file: multipath.conf
+    # Multipath config file to copy
+    multipath_setup_config_file:
 
     # Reboot system after changes
     # multipathd will be restarted if no reboot
@@ -408,8 +415,8 @@
     #
     # shell_profile
     #
-    # Shell profile file to copy to the target host
-    shell_profile_file: local-login.sh
+    # Shell profile template to use
+    shell_profile_file: local.sh.j2
 
     #
     # splunk_forwarder
@@ -590,8 +597,8 @@
     # If unset default RHEL configuration will be used
     usbguard_setup_config_file:
 
-    # Custom USBGuard rules file
-    usbguard_setup_rules_file: local.conf
+    # Custom USBGuard rules file template to use
+    usbguard_setup_rules_file:
 
     # To completely disable the USB subsystem
     # use the usbcore.nousb boot parameter,
