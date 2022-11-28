@@ -27,6 +27,7 @@
     dest: /etc/audit/rules.d/zz-local.rules
     mode: '0600'
   register: rules_config
+  when: audit_setup_rules_file | default(false)
 
 - name: Copy auditd configuration file
   vars:

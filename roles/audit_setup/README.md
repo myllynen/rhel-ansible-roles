@@ -10,9 +10,10 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Role provided alternatives in files/
-audit_setup_rules_file: local.rules
+# audit rules file to copy
+audit_setup_rules_file:
 
+# audit config file to copy
 # If unset default RHEL configuration will be used
 audit_setup_config_file:
 </pre>
