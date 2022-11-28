@@ -45,8 +45,6 @@
   when: usbguard_setup_policy == 'custom'
 
 - name: Clear default USBGuard rules file
-  vars:
-    rules_content: "{{ lookup('file', usbguard_setup_rules_file) | trim }}"
   copy:
     content: ''
     dest: /etc/usbguard/rules.conf
@@ -54,13 +52,13 @@
   register: rules_config_default
   when:
     - ansible_facts.distribution_major_version|int >= 8 or
-      rules_content == 'Placeholder'
+      usbguard_setup_rules_file is none or
+      usbguard_setup_rules_file == ''
 
-- name: Copy custom USBGuard rules file
+- name: Create custom USBGuard rules file
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 8 else false }}"
     rules_file: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-local.conf' }}"
-    rules_content: "{{ lookup('file', usbguard_setup_rules_file) | trim }}"
   template:
     src: "{{ usbguard_setup_rules_file }}"
     dest: /etc/usbguard/{{ rules_file }}
@@ -68,7 +66,7 @@
   register: rules_config_custom
   when:
     - usbguard_setup_policy == 'custom'
-    - rules_content != 'Placeholder'
+    - usbguard_setup_rules_file | default(false)
 
 - name: Enable usbguard service
   service:

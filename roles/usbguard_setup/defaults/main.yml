@@ -9,8 +9,8 @@ usbguard_setup_policy: reject
 # If unset default RHEL configuration will be used
 usbguard_setup_config_file:
 
-# Custom USBGuard rules file
-usbguard_setup_rules_file: local.conf
+# Custom USBGuard rules file template to use
+usbguard_setup_rules_file:
 
 # To completely disable the USB subsystem
 # use the usbcore.nousb boot parameter,
