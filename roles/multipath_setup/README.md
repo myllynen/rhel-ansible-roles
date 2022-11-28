@@ -10,8 +10,8 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Role provided alternatives in files/
-multipath_setup_config_file: multipath.conf
+# Multipath config file to copy
+multipath_setup_config_file:
 
 # Reboot system after changes
 # Config file will be reloaded if no reboot

@@ -5,26 +5,27 @@
     state: present
 
 - name: Copy multipath configuration file
-  vars:
-    config_content: "{{ lookup('file', multipath_setup_config_file) | trim }}"
   copy:
     src: "{{ multipath_setup_config_file }}"
     dest: /etc/multipath.conf
     mode: '0600'
   register: multipath_config
-  when: config_content != 'Placeholder'
+  when: multipath_setup_config_file | default(false)
 
 - name: Enable multipathd service
   service:
     name: multipathd
     enabled: true
+  when: multipath_setup_config_file | default(false)
 
 - name: Start multipathd service
   service:
     name: multipathd
     state: started
   register: service_start
-  when: not multipath_setup_reboot | bool
+  when:
+    - multipath_setup_config_file | default(false)
+    - not multipath_setup_reboot | bool
 
 - name: Apply multipathd configuration changes
   service:
