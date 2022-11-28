@@ -10,8 +10,8 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Shell profile file to copy to the target host
-shell_profile_file: local-login.sh
+# Shell profile template to use
+shell_profile_file: local.sh.j2
 </pre>
 
 ## License

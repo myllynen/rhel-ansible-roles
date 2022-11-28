@@ -1,6 +1,6 @@
 ---
-- name: Copy login profile file
-  copy:
+- name: Create shell profile file
+  template:
     src: "{{ shell_profile_file }}"
-    dest: /etc/profile.d/zz-local-login.sh
+    dest: /etc/profile.d/zz-local.sh
     mode: '0644'
