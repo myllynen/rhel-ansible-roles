@@ -12,31 +12,33 @@
     path: /etc/issue.d
     state: directory
     mode: '0755'
-  when: ansible_facts.distribution_major_version|int >= 8
+  when:
+    - ansible_facts.distribution_major_version|int >= 8
+    - issue_template | default(false)
 
 - name: Create issue file
   vars:
-    issue_content: "{{ lookup('template', issue_template) | trim }}"
     issue_path: "{{ '/etc/issue.d/zz-local.issue' if ansible_facts.distribution_major_version|int >= 8 else '/etc/issue' }}"
   template:
     src: "{{ issue_template }}"
     dest: "{{ issue_path }}"
     mode: '0644'
-  when: issue_content != 'Placeholder'
+  when: issue_template | default(false)
 
 - name: Create motd directory
   file:
     path: /etc/motd.d
     state: directory
     mode: '0755'
-  when: ansible_facts.distribution_major_version|int > 8
+  when:
+    - ansible_facts.distribution_major_version|int >= 9
+    - motd_template | default(false)
 
 - name: Create motd file
   vars:
-    motd_content: "{{ lookup('template', motd_template) | trim }}"
-    motd_path: "{{ '/etc/motd.d/zz-local.motd' if ansible_facts.distribution_major_version|int > 8 else '/etc/motd' }}"
+    motd_path: "{{ '/etc/motd.d/zz-local.motd' if ansible_facts.distribution_major_version|int >= 9 else '/etc/motd' }}"
   template:
     src: "{{ motd_template }}"
     dest: "{{ motd_path }}"
     mode: '0644'
-  when: motd_content != 'Placeholder'
+  when: motd_template | default(false)

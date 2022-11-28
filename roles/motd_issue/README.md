@@ -10,11 +10,11 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# motd template to copy to the target host
-motd_template: motd.j2
+# motd template to use
+motd_template:
 
-# issue template to copy to the target host
-issue_template: issue.j2
+# issue template to use
+issue_template:
 </pre>
 
 ## License
