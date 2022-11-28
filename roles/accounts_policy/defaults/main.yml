@@ -2,13 +2,18 @@
 # Accounts, login, password, PAM policies and profiles
 # All parameters are optional, unset are left untouched
 
-# Role provided alternatives in files/
+# Login access control file access.conf template to use
 login_access_config_file:
 
-# Role provided alternatives in files/
+# Shadow configuration file login.defs template to use
 login_defs_config_file:
 
-# Role provided alternatives in files/
+# Password quality config file pwquality.conf template to use
+# Role provides alternatives:
+# * pwquality_conf.cis_server_l1.j2 - CIS Server level 1 config
+# * pwquality_conf.local.j2         - role provided basic config
+# * pwquality_conf.rhel8_default.j2 - RHEL 8 default config
+# * pwquality_conf.rhel9_default.j2 - RHEL 9 default config
 pwquality_config_file:
 
 # Either use a default profile (e.g., "minimal")

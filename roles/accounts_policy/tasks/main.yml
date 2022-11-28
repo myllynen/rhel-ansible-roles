@@ -7,47 +7,47 @@
       - distribution_major_version
   when: ansible_facts.distribution_major_version is not defined
 
-- name: Configure system-local login access
-  copy:
+- name: Create system-local login access file
+  template:
     src: "{{ login_access_config_file }}"
     dest: /etc/security/access.conf
     mode: '0644'
   when: login_access_config_file | default(false)
 
-- name: Configure system-local login defaults
-  copy:
+- name: Create system-local login defaults file
+  template:
     src: "{{ login_defs_config_file }}"
     dest: /etc/login.defs
     mode: '0644'
   when: login_defs_config_file | default(false)
 
-- name: Configure system-local password quality requirements (RHEL 7)
-  copy:
+- name: Create system-local password quality requirements file (RHEL 7)
+  template:
     src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf
     mode: '0644'
   when:
     - ansible_facts.distribution_major_version|int < 8
-    - password_quality_policy | default(false)
+    - pwquality_config_file | default(false)
 
-- name: Configure system-local password quality requirements
-  copy:
+- name: Create system-local password quality requirements file
+  template:
     src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf.d/zz-local.conf
     mode: '0644'
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - password_quality_policy | default(false)
+    - pwquality_config_file | default(false)
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2055604
 - name: Ensure system-local password quality requirements
-  copy:
-    src: pwquality_conf.rhel{{ ansible_facts.distribution_major_version }}_default
+  template:
+    src: pwquality_conf.rhel{{ ansible_facts.distribution_major_version }}_default.j2
     dest: /etc/security/pwquality.conf
     mode: '0644'
   when:
     - ansible_facts.distribution_major_version|int >= 8
-    - password_quality_policy | default(false)
+    - pwquality_config_file | default(false)
 
 - name: Install authselect package
   yum:
