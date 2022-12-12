@@ -4,8 +4,8 @@
     gather_subset:
       - '!all'
       - '!min'
-      - network
-  when: ansible_facts.network is not defined
+      - system
+  when: ansible_facts.fqdn is not defined
 
 - name: Check deployment server connection
   wait_for:
