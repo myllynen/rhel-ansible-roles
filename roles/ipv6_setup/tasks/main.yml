@@ -1,8 +1,18 @@
 ---
+- name: Gather package facts
+  package_facts:
+
 - name: Install grubby package
   yum:
     name: grubby
     state: present
+  when: "'grubby' not in ansible_facts.packages"
+
+- name: Install grubby package
+  yum:
+    name: grubby
+    state: present
+  when: "'grubby' not in ansible_facts.packages"
 
 - name: Check IPv6 boot parameter
   lineinfile:
