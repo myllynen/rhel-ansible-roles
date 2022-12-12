@@ -12,6 +12,9 @@
     name: dracut-config-rescue
     autoremove: true
     #cacheonly: true
+    disable_plugin:
+      - product-id
+      - subscription-manager
     state: absent
 
 # For RHEL 7

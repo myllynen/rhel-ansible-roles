@@ -4,4 +4,7 @@
     name: "{{ packages_remove }}"
     autoremove: "{{ packages_remove_autoremove }}"
     #cacheonly: true
+    disable_plugin:
+      - product-id
+      - subscription-manager
     state: absent

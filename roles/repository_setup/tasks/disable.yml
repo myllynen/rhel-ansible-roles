@@ -8,6 +8,9 @@
     name: katello-ca-consumer-*
     autoremove: true
     #cacheonly: true
+    disable_plugin:
+      - product-id
+      - subscription-manager
     state: absent
 
 - name: Remove Katello CA certificates

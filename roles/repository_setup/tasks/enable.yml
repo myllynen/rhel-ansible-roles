@@ -13,6 +13,9 @@
     disable_gpg_check: true
     validate_certs: false
     #cacheonly: true
+    disable_plugin:
+      - product-id
+      - subscription-manager
     state: present
   when:
     - repository_setup_rhsm_parameters.rhsm_baseurl | default(false)

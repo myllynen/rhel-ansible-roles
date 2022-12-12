@@ -45,6 +45,9 @@
     name: katello-ca-consumer-*
     autoremove: true
     #cacheonly: true
+    disable_plugin:
+      - product-id
+      - subscription-manager
     state: absent
   when: registration is changed
 
