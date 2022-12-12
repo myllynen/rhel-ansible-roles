@@ -5,8 +5,9 @@
       - '!all'
       - '!min'
       - distribution_major_version
-      - network
+      - system
   when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.domain is not defined or
         ansible_facts.fqdn is not defined
 
 - name: Install required packages

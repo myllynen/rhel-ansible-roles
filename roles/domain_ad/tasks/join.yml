@@ -33,6 +33,7 @@
     echo '{{ domain_ad_admin_password }}' |
     adcli -v join
     --domain={{ domain_ad_domain }}
+    --host-fqdn={{ ansible_facts.fqdn }}
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
   no_log: true

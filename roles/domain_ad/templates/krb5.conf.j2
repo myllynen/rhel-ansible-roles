@@ -6,15 +6,17 @@
 [libdefaults]
     default_realm = {{ domain_ad_domain | upper }}
 {% if ansible_facts.distribution_major_version|int >= 8 %}
-    dns_canonicalize_hostname = fallback
+    dns_canonicalize_hostname = false
+    qualify_shortname = {{ ansible_facts.domain }}
 {% endif %}
-    dns_lookup_realm = true
+    dns_lookup_realm = false
     dns_lookup_kdc = true
+    dns_uri_lookup = true
     ticket_lifetime = 24h
     renew_lifetime = 7d
     forwardable = true
     renewable = false
-    rdns = true
+    rdns = false
     udp_preference_limit = 0
     spake_preauth_groups = edwards25519
     default_ccache_name = KEYRING:persistent:%{uid}
