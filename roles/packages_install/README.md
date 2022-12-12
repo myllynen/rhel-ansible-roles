@@ -11,6 +11,7 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 packages_install:
+  - acl
   - bash-completion
   - bind-utils
   #- bzip2

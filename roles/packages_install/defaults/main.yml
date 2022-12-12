@@ -1,5 +1,6 @@
 ---
 packages_install:
+  - acl
   - bash-completion
   - bind-utils
   #- bzip2
