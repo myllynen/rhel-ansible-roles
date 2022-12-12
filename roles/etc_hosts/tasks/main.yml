@@ -1,11 +1,45 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - network
+  when:
+    - etc_hosts_self_add | bool
+    - ansible_facts.default_ipv4 is not defined or
+      ansible_facts.default_ipv6 is not defined or
+      ansible_facts.hostname is not defined or
+      ansible_facts.domain is not defined
+
 - name: Create /etc/hosts file
   vars:
+    self_host: "{{ ansible_facts.hostname.split('.')[0] }}"
+    self_domain: "{{ etc_hosts_self_domain | default(ansible_facts.domain, true) }}"
+    self_fqdn: "{{ self_host + '.' + self_domain }}"
+    etc_hosts_self: |
+      {% if etc_hosts_self_add | bool %}
+      {% if self_domain != '' and
+            etc_hosts_omit_hosts != 'ipv4' and
+            ansible_facts.default_ipv4 is defined and
+            ansible_facts.default_ipv4 | length > 0 %}
+      {{ ansible_facts.default_ipv4.address }}  {{ self_fqdn }} {{ self_host }}
+      {% endif %}
+      {% if self_domain != '' and
+            etc_hosts_omit_hosts != 'ipv6' and
+            ansible_facts.default_ipv6 is defined and
+            ansible_facts.default_ipv6 | length > 0 %}
+      {{ ansible_facts.default_ipv6.address }}  {{ self_fqdn }} {{ self_host }}
+      {% endif %}
+      {% endif %}
     etc_hosts_content: |
-      {% for line in etc_hosts_header.split('\n') + etc_hosts_entries | default([], true) %}
-      {% if etc_hosts_omit_hosts == 'none' or
-            etc_hosts_omit_hosts == 'ipv4' and '.' not in line.split(' ')[0] or
-            etc_hosts_omit_hosts == 'ipv6' and ':' not in line.split(' ')[0] %}
+      {% for line in (etc_hosts_header.split('\n') if etc_hosts_header else ['omit']) +
+                     (etc_hosts_self.split('\n') if etc_hosts_self_add | bool else ['omit']) +
+                     (etc_hosts_entries | default(['omit'], true)) %}
+      {% if line !='omit' and
+            (etc_hosts_omit_hosts == 'none' or
+             (etc_hosts_omit_hosts == 'ipv4' and '.' not in line.split(' ')[0]) or
+             (etc_hosts_omit_hosts == 'ipv6' and ':' not in line.split(' ')[0])) %}
       {{ line }}
       {% endif %}
       {% endfor %}

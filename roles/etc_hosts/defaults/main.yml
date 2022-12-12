@@ -7,11 +7,20 @@ etc_hosts_header: |
   127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
   ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
+# Add entry for host itself based on Ansible facts
+# This should be disabled when not using static IP
+etc_hosts_self_add: true
+
+# Force domain name used in host self entry
+# If unset defaults to ansible_facts.domain
+# Required if ansible_facts.domain is empty
+etc_hosts_self_domain:
+
 # List of lines to add to /etc/hosts
 # NB. Other entries will be removed
 etc_hosts_entries:
-#  - 192.168.122.1   gateway.example.com gateway
-#  - 192.168.122.150 bastion.example.com bastion
+#  - 192.168.122.1    gateway.example.com gateway
+#  - 192.168.122.150  bastion.example.com bastion
 
 # /etc/hosts entries to omit
 # none - do not omit entries
