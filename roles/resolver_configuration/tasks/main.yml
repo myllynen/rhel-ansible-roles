@@ -3,7 +3,7 @@
   copy:
     content: |
       [main]
-      dns={{ 'default' if resolver_nm_update | bool else 'none' }}
+      dns={{ 'default' if resolver_use_nm | bool else 'none' }}
     dest: /etc/NetworkManager/conf.d/90-dns-none.conf
     mode: '0644'
   register: nm_config
@@ -17,17 +17,17 @@
 - name: Create /etc/resolv.conf file
   vars:
     etc_resolv_conf_content: |
+      {% for line in resolver_nameservers | default([], true) %}
+      nameserver {{ line }}
+      {% endfor %}
       {% if resolver_search_domains %}
       search {{ resolver_search_domains | join(' ') }}
       {% endif %}
       {% if resolver_options %}
       options {{ resolver_options | join(' ') }}
       {% endif %}
-      {% for line in resolver_nameservers | default([], true) %}
-      nameserver {{ line }}
-      {% endfor %}
   copy:
     content: "{{ etc_resolv_conf_content }}"
     dest: /etc/resolv.conf
     mode: '0644'
-  when: not resolver_nm_update | bool
+  when: not resolver_use_nm | bool

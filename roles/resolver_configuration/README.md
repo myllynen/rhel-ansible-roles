@@ -13,7 +13,7 @@ Below are the role default values from defaults/main.yml:
 # NetworkManager updates /etc/resolv.conf
 # true - use NM and system-roles.network
 # false - for using below configurations
-resolver_nm_update: true
+resolver_use_nm: true
 
 resolver_nameservers:
   - 1.1.1.1
