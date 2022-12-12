@@ -39,22 +39,9 @@
   register: nic_config
   loop: "{{ ifcfg_files.files | map(attribute='path') | list }}"
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=2056891
-- name: Ensure correct /etc/hostname
-  copy:
-    content: "{{ inventory_hostname | lower }}\n"
-    dest: /etc/hostname
-    mode: '0644'
-  register: hostname_config
-  when:
-    - "'.' in inventory_hostname"
-    - "':' not in inventory_hostname"
-    - inventory_hostname | regex_search('[a-zA-Z]')
-
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
-  when: nic_config is changed or
-        hostname_config is changed
+  when: nic_config is changed
 
 - name: Check installer log directory
   stat:
@@ -126,17 +113,24 @@
     state: absent
   loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') | list }}"
 
+- name: Reboot system
+  reboot:
+  when: "'reboot' in system_init_final_actions"
+
+# Use removes: to only run on registered systems
+- name: Update RHSM system facts
+  command:
+    cmd: subscription-manager facts --update
+    removes: /var/lib/rhsm/facts/facts.json
+  failed_when: false
+
 - name: Mark system initialized
   copy:
     content: "This system was initialized on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
     dest: "{{ __system_init_file }}"
     mode: '0644'
 
-- name: Reboot system
-  reboot:
-  when: "'reboot' in system_init_final_actions"
-
 - name: Log initialization message
   syslogger:
-    msg: "System initialized by system_init."
+    msg: "System initialized by system_init role."
   when: "'syslog' in system_init_final_actions"
