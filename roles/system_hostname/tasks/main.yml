@@ -1,11 +1,20 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - system
+  when: ansible_facts.hostname is not defined or
+        ansible_facts.domain is not defined or
+        ansible_facts.fqdn is not defined
+
 - name: Configure system hostname
   hostname:
     name: "{{ system_hostname }}"
     use: systemd
   register: hostname_config
   when:
-    - "'.' in system_hostname"
     - "':' not in system_hostname"
     - system_hostname | regex_search('[a-zA-Z]')
 
