@@ -1,3 +1,4 @@
+---
 galaxy_info:
   role_name: splunk_forwarder
   author: Marko Myllynen <myllynen@redhat.com>
