@@ -60,32 +60,48 @@
 - name: Gather package facts
   package_facts:
 
-- name: Check current system-local authentication profile
+- name: Copy custom authentication profile
+  copy:
+    src: "{{ system_auth_profile.replace('custom/', '') }}"
+    dest: /etc/authselect/custom
+    mode: '0644'
+  register: custom_profile_copy
+  when:
+    - ansible_facts.distribution_major_version|int >= 8
+    - system_auth_profile | default(false)
+    - system_auth_profile.startswith('custom/')
+
+- name: Check current system-local authentication profile in use
   command: authselect current -r
   check_mode: false
-  register: current_profile
-  failed_when: current_profile.rc != 0 and 'No existing configuration' not in current_profile.stdout
+  register: profile_current
+  failed_when: profile_current.rc != 0 and 'No existing configuration' not in profile_current.stdout
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
 
-- name: Copy custom authentication profile template
-  copy:
-    src: "{{ system_auth_profile.replace('custom/', '') }}"
-    dest: /etc/authselect/custom
-    mode: '0644'
-  register: auth_profile_copy
+- name: Check current system-local authentication profile status
+  command: authselect check
+  check_mode: false
+  register: profile_valid
+  failed_when: false
+  changed_when: false
   when:
+    - "'authselect' in ansible_facts.packages"
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
-    - system_auth_profile.startswith('custom/')
+    - "'No existing configuration' not in profile_current.stdout"
 
 - name: Configure system-local authentication profile
+  vars:
+    current_config: "{{ profile_current.stdout }}"
+    wanted_config: "{{ system_auth_profile }} {{ system_auth_select_parameters }}"
   command: authselect select -f {{ system_auth_profile }} {{ system_auth_select_parameters }}
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
-    - system_auth_profile != current_profile.stdout.split()[0] or
-      auth_profile_copy is changed
+    - current_config | trim != wanted_config | trim or
+      'not valid' in profile_valid.stdout or
+      custom_profile_copy is changed
