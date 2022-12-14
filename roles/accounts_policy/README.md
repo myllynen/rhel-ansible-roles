@@ -13,13 +13,16 @@ Below are the role default values from defaults/main.yml:
 # Accounts, login, password, PAM policies and profiles
 # All parameters are optional, unset are left untouched
 
-# Login access control file access.conf template to use
+# Login access control file access.conf template
 login_access_config_file:
 
-# Shadow configuration file login.defs template to use
+# Shadow configuration file login.defs template
 login_defs_config_file:
 
-# Password quality config file pwquality.conf template to use
+# New user defaults file useradd template
+useradd_defaults_file:
+
+# Password quality config file pwquality.conf template
 # Role provides alternatives:
 # * pwquality_conf.cis_server_l1.j2 - CIS Server level 1 config
 # * pwquality_conf.local.j2         - role provided basic config
