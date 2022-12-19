@@ -7,6 +7,19 @@
 - name: Gather package facts
   package_facts:
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=2154804
+- name: Stop rngd service
+  service:
+    name: rngd
+    state: stopped
+  when: "'rng-tools' in ansible_facts.packages"
+
+- name: Disable rngd service
+  service:
+    name: rngd
+    enabled: false
+  when: "'rng-tools' in ansible_facts.packages"
+
 - name: Check FIPS mode
   command: fips-mode-setup --is-enabled
   check_mode: false
