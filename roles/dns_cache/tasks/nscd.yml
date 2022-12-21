@@ -7,9 +7,9 @@
 - name: Gather package facts
   package_facts:
 
-- name: Copy nscd configuration file
-  copy:
-    src: nscd.conf
+- name: Create nscd configuration file
+  template:
+    src: "{{ dns_cache_nscd_config_file | default('nscd.conf', true) }}"
     dest: /etc/nscd.conf
     mode: '0644'
   register: daemon_config

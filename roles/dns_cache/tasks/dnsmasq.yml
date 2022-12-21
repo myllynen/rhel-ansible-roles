@@ -4,9 +4,9 @@
     name: dnsmasq
     state: present
 
-- name: Copy NetworkManager dnsmasq configuration file
-  copy:
-    src: dnsmasq.conf
+- name: Create NetworkManager dnsmasq configuration file
+  template:
+    src: "{{ dns_cache_nm_dnsmasq_config_file | default('dnsmasq.conf', true) }}"
     dest: /etc/NetworkManager/dnsmasq.d/zz-local.conf
     mode: '0644'
   register: dnsmasq_config
