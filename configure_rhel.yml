@@ -140,10 +140,10 @@
     # Enable or disable DNS cache
     dns_cache_enable: true
 
-    # DNS caching component
-    # Allowed values: nscd
+    # DNS caching component (dnsmasq recommended)
+    # Allowed values: dnsmasq, nscd, systemd-resolved
     # See https://access.redhat.com/solutions/2189381
-    dns_cache_component: nscd
+    dns_cache_component: dnsmasq
 
     #
     # domain_ad
@@ -347,7 +347,9 @@
     #  - example.com
 
     resolver_options:
+    #  - ends0
     #  - rotate
+    #  - no-aaaa
     #  - timeout:1
     #  - attempts:1
 
