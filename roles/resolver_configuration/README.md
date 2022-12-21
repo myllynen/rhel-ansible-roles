@@ -24,7 +24,9 @@ resolver_search_domains:
 #  - example.com
 
 resolver_options:
+#  - edns0
 #  - rotate
+#  - no-aaaa
 #  - timeout:1
 #  - attempts:1
 </pre>

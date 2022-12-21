@@ -1,10 +1,12 @@
 ---
-- name: Update NetworkManager resolver configuration
+- name: Update NetworkManager DNS configuration
+  vars:
+    option_prefix: "{{ '#' if resolver_use_nm | bool else '' }}"
   copy:
     content: |
       [main]
-      dns={{ 'default' if resolver_use_nm | bool else 'none' }}
-    dest: /etc/NetworkManager/conf.d/90-dns-none.conf
+      {{ option_prefix }}rc-manager=unmanaged
+    dest: /etc/NetworkManager/conf.d/99-rc-manager.conf
     mode: '0644'
   register: nm_config
 
