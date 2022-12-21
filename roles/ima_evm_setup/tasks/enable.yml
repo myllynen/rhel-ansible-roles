@@ -151,8 +151,15 @@
 - name: Enable tpm2-abrmd service
   service:
     name: tpm2-abrmd
-    state: started
     enabled: true
+  when:
+    - "'tpm2-abrmd' in ansible_facts.packages"
+    - ima_evm_setup_enable_tpm_use | bool
+
+- name: Start tpm2-abrmd service
+  service:
+    name: tpm2-abrmd
+    state: started
   when:
     - "'tpm2-abrmd' in ansible_facts.packages"
     - ima_evm_setup_enable_tpm_use | bool

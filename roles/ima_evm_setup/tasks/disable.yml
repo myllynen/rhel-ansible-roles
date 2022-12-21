@@ -31,16 +31,16 @@
 - name: Gather package facts
   package_facts:
 
-- name: Stop tpm2-abrmd service
-  service:
-    name: tpm2-abrmd
-    state: stopped
-  when: "'tpm2-abrmd' in ansible_facts.packages"
-
 - name: Disable tpm2-abrmd service
   service:
     name: tpm2-abrmd
     enabled: false
+  when: "'tpm2-abrmd' in ansible_facts.packages"
+
+- name: Stop tpm2-abrmd service
+  service:
+    name: tpm2-abrmd
+    state: stopped
   when: "'tpm2-abrmd' in ansible_facts.packages"
 
 - name: Remove RPM IMA plugin package

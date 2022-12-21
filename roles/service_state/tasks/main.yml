@@ -1,15 +1,15 @@
 ---
-- name: Stop service
-  service:
-    name: "{{ item }}"
-    state: stopped
-  failed_when: false
-  loop: "{{ service_state_disable | select() | list }}"
-
 - name: Disable service
   service:
     name: "{{ item }}"
     enabled: false
+  failed_when: false
+  loop: "{{ service_state_disable | select() | list }}"
+
+- name: Stop service
+  service:
+    name: "{{ item }}"
+    state: stopped
   failed_when: false
   loop: "{{ service_state_disable | select() | list }}"
 
