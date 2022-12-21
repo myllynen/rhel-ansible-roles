@@ -1,0 +1,45 @@
+---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+  when: ansible_facts.distribution_major_version is not defined
+
+- name: Install systemd-resolved package
+  yum:
+    name: systemd-resolved
+    state: present
+  when: ansible_facts.distribution_major_version|int != 8
+
+- name: Gather service facts
+  service_facts:
+
+- name: Enable systemd-resolved service
+  service:
+    name: systemd-resolved
+    enabled: true
+  when: "'systemd-resolved.service' in ansible_facts.services"
+
+- name: Start systemd-resolved service
+  service:
+    name: systemd-resolved
+    state: started
+  when: "'systemd-resolved.service' in ansible_facts.services"
+
+- name: Update NetworkManager DNS configuration
+  copy:
+    content: |
+      [main]
+      dns=systemd-resolved
+      rc-manager=symlink
+    dest: /etc/NetworkManager/conf.d/50-dns.conf
+    mode: '0644'
+  register: nm_config
+
+- name: Reload NetworkManager to apply configuration changes
+  service:
+    name: NetworkManager
+    state: reloaded
+  when: nm_config is changed

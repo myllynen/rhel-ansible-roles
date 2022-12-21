@@ -1,15 +1,89 @@
 ---
-- name: Gather package facts
-  package_facts:
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+  when: ansible_facts.distribution_major_version is not defined
 
-- name: Stop nscd service
-  service:
-    name: nscd
-    state: stopped
-  when: "'nscd' in ansible_facts.packages"
+- name: Gather service facts
+  service_facts:
 
 - name: Disable nscd service
   service:
     name: nscd
     enabled: false
-  when: "'nscd' in ansible_facts.packages"
+  when:
+    - "'nscd.service' in ansible_facts.services"
+    - not dns_cache_enable | bool or
+      dns_cache_component != 'nscd'
+
+- name: Stop nscd service
+  service:
+    name: nscd
+    state: stopped
+  when:
+    - "'nscd.service' in ansible_facts.services"
+    - not dns_cache_enable | bool or
+      dns_cache_component != 'nscd'
+
+- name: Check NetworkManager DNS configuration
+  slurp:
+    src: /etc/NetworkManager/conf.d/50-dns.conf
+  register: current_config
+  failed_when: false
+
+- name: Update NetworkManager DNS configuration
+  copy:
+    content:
+      [main]
+      #dns=
+    dest: /etc/NetworkManager/conf.d/50-dns.conf
+    mode: '0644'
+  register: nm_config
+  when:
+    - not dns_cache_enable | bool or
+      (current_config.content is defined and
+       dns_cache_component not in current_config.content|b64decode)
+
+- name: Disable systemd-resolved service
+  service:
+    name: systemd-resolved
+    enabled: false
+  when:
+    - "'systemd-resolved.service' in ansible_facts.services"
+    - not dns_cache_enable | bool or
+      dns_cache_component != 'systemd-resolved'
+
+- name: Stop systemd-resolved service
+  service:
+    name: systemd-resolved
+    state: stopped
+  when:
+    - "'systemd-resolved.service' in ansible_facts.services"
+    - not dns_cache_enable | bool or
+      dns_cache_component != 'systemd-resolved'
+
+# NetworkManager always activates systemd-resolved if present on RHEL 7
+- name: Remove systemd-resolved package (RHEL 7)
+  yum:
+    name: systemd-resolved
+    autoremove: true
+    #cacheonly: true
+    disable_plugin:
+      - product-id
+      - subscription-manager
+    state: absent
+  register: resolved_package
+  when:
+    - ansible_facts.distribution_major_version|int == 7
+    - not dns_cache_enable | bool or
+      dns_cache_component != 'systemd-resolved'
+
+- name: Reload NetworkManager to apply configuration changes
+  service:
+    name: NetworkManager
+    state: reloaded
+  when: nm_config is changed or
+        resolved_package is changed

@@ -1,10 +1,21 @@
 ---
+- name: Disable DNS cache
+  include_tasks: disable.yml
+
+- name: Enable dnsmasq DNS cache
+  include_tasks: dnsmasq.yml
+  when:
+    - dns_cache_enable | bool
+    - dns_cache_component == 'dnsmasq'
+
 - name: Enable nscd DNS cache
   include_tasks: nscd.yml
   when:
     - dns_cache_enable | bool
     - dns_cache_component == 'nscd'
 
-- name: Disable DNS cache
-  include_tasks: disable.yml
-  when: not dns_cache_enable | bool
+- name: Enable systemd-resolved DNS cache
+  include_tasks: systemd_resolved.yml
+  when:
+    - dns_cache_enable | bool
+    - dns_cache_component == 'systemd-resolved'

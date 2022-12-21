@@ -1,0 +1,28 @@
+---
+- name: Install dnsmasq package
+  yum:
+    name: dnsmasq
+    state: present
+
+- name: Copy NetworkManager dnsmasq configuration file
+  copy:
+    src: dnsmasq.conf
+    dest: /etc/NetworkManager/dnsmasq.d/zz-local.conf
+    mode: '0644'
+  register: dnsmasq_config
+
+- name: Update NetworkManager DNS configuration
+  copy:
+    content: |
+      [main]
+      dns=dnsmasq
+    dest: /etc/NetworkManager/conf.d/50-dns.conf
+    mode: '0644'
+  register: nm_config
+
+- name: Reload NetworkManager to apply configuration changes
+  service:
+    name: NetworkManager
+    state: reloaded
+  when: dnsmasq_config is changed or
+        nm_config is changed
