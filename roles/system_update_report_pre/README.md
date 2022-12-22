@@ -19,6 +19,9 @@ system_update_report_pre_default_recipient: root@localhost
 # utilities from enscript and ghostscript packages
 system_update_report_pre_pdf: false
 
+# Directory used to generate PDF files
+system_update_report_pre_pdf_dir: /tmp/.ansible.pdf
+
 # Preamble text to include in all generated PDFs
 # <HOST> will be replaced with inventory hostname
 # <OSREL> will be replaced with OS release name

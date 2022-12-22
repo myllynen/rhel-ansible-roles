@@ -13,6 +13,8 @@ Below are the role default values from defaults/main.yml:
 # Enable or disable firewall
 firewall_enable: true
 
+firewall_default_zone: public
+
 # List of ports (80/tcp, 123/udp, ...) or services (cockpit, https, ...)
 # vars/main.yml lists always open ports/services. ssh is always kept open.
 firewall_open_ports:
@@ -23,8 +25,6 @@ firewall_open_services:
 
 # Close unconfigured ports and services
 firewall_close_unconfigured: true
-
-firewall_default_zone: public
 </pre>
 
 ## License

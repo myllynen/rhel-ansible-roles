@@ -33,7 +33,7 @@ troubleshooting_tools:
   - tcpdump
   - time
 
-# Enable PCP performance metrics when needed
+# Enable PCP performance metrics as needed
 troubleshooting_tools_enable_perf_metrics: true
 </pre>
 

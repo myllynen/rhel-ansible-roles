@@ -145,6 +145,10 @@
     # See https://access.redhat.com/solutions/2189381
     dns_cache_component: dnsmasq
 
+    # NetworkManager dnsmasq configuration template
+    # to use instead of the role provided default one
+    dns_cache_nm_dnsmasq_config_file:
+
     #
     # domain_ad
     #
@@ -303,6 +307,9 @@
     #
     #packages_install:
     #  -
+
+    # Enable or disable yum module 'install_weak_deps' parameter
+    packages_install_weak_deps: true
 
     #
     # packages_remove - default list omitted here for brevity
@@ -540,6 +547,9 @@
     # utilities from enscript and ghostscript packages
     system_update_report_pdf: false
 
+    # Directory used to generate PDF files
+    system_update_report_pdf_dir: /tmp/.ansible.pdf
+
     # Preamble text to include in all generated PDFs
     # <HOST> will be replaced with inventory hostname
     # <OSREL> will be replaced with OS release name
@@ -568,6 +578,9 @@
     # PDFs will be generated on the control host using
     # utilities from enscript and ghostscript packages
     system_update_report_pre_pdf: false
+
+    # Directory used to generate PDF files
+    system_update_report_pre_pdf_dir: /tmp/.ansible.pdf
 
     # Preamble text to include in all generated PDFs
     # <HOST> will be replaced with inventory hostname

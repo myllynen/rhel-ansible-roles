@@ -33,6 +33,9 @@ packages_install:
   #- vim-enhanced
   #- wget
   - yum-utils
+
+# Enable or disable yum module 'install_weak_deps' parameter
+packages_install_weak_deps: true
 </pre>
 
 ## License

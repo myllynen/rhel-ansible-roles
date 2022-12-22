@@ -17,6 +17,10 @@ dns_cache_enable: true
 # Allowed values: dnsmasq, nscd, systemd-resolved
 # See https://access.redhat.com/solutions/2189381
 dns_cache_component: dnsmasq
+
+# NetworkManager dnsmasq configuration template
+# to use instead of the role provided default one
+dns_cache_nm_dnsmasq_config_file:
 </pre>
 
 ## License
