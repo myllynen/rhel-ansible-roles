@@ -36,7 +36,7 @@
 
 - name: Update NetworkManager DNS configuration
   copy:
-    content:
+    content: |
       [main]
       #dns=
     dest: /etc/NetworkManager/conf.d/50-dns.conf
