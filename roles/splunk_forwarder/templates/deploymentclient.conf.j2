@@ -1,5 +1,5 @@
 [deployment-client]
-phoneHomeIntervalInSecs = 600
+phoneHomeIntervalInSecs = {{ splunk_phonehome_secs }}
 
 [target-broker:deploymentServer]
 targetUri = {{ splunk_deployment_server }}:{{ splunk_deployment_server_port }}
