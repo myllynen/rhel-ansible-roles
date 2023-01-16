@@ -10,7 +10,11 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Enable or not FIPS mode
+# NB! It is best to enable FIPS mode during OS
+# installation in order to ensure all keys are
+# being generated with FIPS-compliant algorithms.
+
+# Enable & check or not FIPS mode
 # Disabling FIPS mode is unsupported
 fips_setup_enable: true
 </pre>
