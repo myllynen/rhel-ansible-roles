@@ -24,21 +24,19 @@
   failed_when: "'splunkd' not in server_response.content"
   when: splunk_deployment_server_check | bool
 
-# Create user with the given UID only on fresh VMs,
-# otherwise user creation on old systems will fail.
 - name: Check Splunk user
   getent:
     database: passwd
     key: splunk
+  register: user_status
   failed_when: false
   changed_when: false
-  register: user_status
 
 - name: Create Splunk user
   user:
     name: splunk
     comment: splunk user
-    uid: "{{ splunk_user_uid | default(omit) }}"
+    uid: "{{ splunk_user_uid | default(omit, true) }}"
   when: "'could not be found' not in user_status"
 
 - name: Install Splunk Forwarder package
