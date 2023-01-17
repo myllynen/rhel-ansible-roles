@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - system
+  when: ansible_facts.domain is not defined
+
 - name: Install dnsmasq package
   yum:
     name: dnsmasq
