@@ -1,5 +1,10 @@
 domain-needed
 bogus-priv
-local=/{{ dns_cache_dnsmasq_local | default(ansible_facts.domain, true) }}/
 addn-hosts=/etc/hosts
-local-ttl={{ dns_cache_dnsmasq_local_ttl | default('10', true) }}
+local=/{{ ansible_facts.domain }}/
+
+local-ttl=10
+min-cache-ttl=10
+#max-ttl=3600
+#max-cache-ttl=3600
+neg-ttl=10
