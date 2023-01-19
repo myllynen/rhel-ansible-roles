@@ -9,7 +9,7 @@
   package_facts:
 
 - name: Check need for rebooting
-  command: needs-restarting -r
+  command: needs-restarting --disableplugin=product-id,subscription-manager -r
   check_mode: false
   register: needs_restarting
   failed_when: false
