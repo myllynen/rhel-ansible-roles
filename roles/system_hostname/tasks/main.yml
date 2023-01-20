@@ -9,6 +9,18 @@
         ansible_facts.domain is not defined or
         ansible_facts.fqdn is not defined
 
+- name: Abort if hostname is too long
+  fail:
+    msg: "Maximum hostname length allowed is 63 characters."
+  when: system_hostname | length > 63
+
+- name: Abort if hostname is invalid
+  fail:
+    msg: "The provided hostname is invalid."
+  when: system_hostname | regex_search("[^a-zA-Z0-9-.:]") is not none or
+        system_hostname.startswith('-') or
+        system_hostname.startswith('.')
+
 - name: Configure system hostname
   hostname:
     name: "{{ system_hostname }}"

@@ -15,6 +15,7 @@ Below are the role default values from defaults/main.yml:
 # Should be short name (not FQDN) when using DHCP,
 # FQDN might be better option when using static IP
 # but some software will require using short names
+# Note that maximum allowed length is 63 characters
 system_hostname: "{{ ansible_facts.fqdn | lower }}"
 </pre>
 
