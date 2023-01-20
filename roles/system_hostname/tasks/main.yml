@@ -19,7 +19,9 @@
     msg: "The provided hostname is invalid."
   when: system_hostname | regex_search("[^a-zA-Z0-9-.:]") is not none or
         system_hostname.startswith('-') or
-        system_hostname.startswith('.')
+        system_hostname.startswith('.') or
+        system_hostname.endswith('-') or
+        system_hostname.endswith('.')
 
 - name: Configure system hostname
   hostname:
