@@ -81,7 +81,9 @@
   register: system_reboot
   when: (system_update_reboot_policy == 'always') or
         (system_update_reboot_policy == 'when_updated' and package_install is changed) or
-        (system_update_reboot_policy == 'when_needed' and needs_restarting.rc is defined and needs_restarting.rc != 0)
+        (system_update_reboot_policy == 'when_needed' and
+         needs_restarting.rc is defined and
+         needs_restarting.rc != 0)
 
 - name: Create PDF report
   include_tasks: pdf.yml
