@@ -50,7 +50,6 @@
       - product-id
       - subscription-manager
     state: absent
-  when: registration is changed
 
 - name: Remove Katello CA certificates
   file:
@@ -59,7 +58,6 @@
   loop:
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
-  when: registration is changed
 
 - name: Locate RHSM cache files
   find:
@@ -70,17 +68,13 @@
       - redhat.repo
       - syspurpose.json
   register: rhsm_cache
-  when: registration is changed
 
 - name: Remove RHSM cache files
   file:
     path: "{{ item }}"
     state: absent
   loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
-  when: registration is changed
 
 - name: Clean package manager caches
   command: dnf -C clean all
-  when:
-    - ansible_facts.distribution_major_version|int >= 8
-    - registration is changed
+  when: ansible_facts.distribution_major_version|int >= 8
