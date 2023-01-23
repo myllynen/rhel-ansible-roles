@@ -36,9 +36,10 @@
   when: ansible_facts.distribution_major_version|int < 8
 
 - name: Unregister from Red Hat Subscription Management
-  community.general.redhat_subscription:
-    state: absent
+  command: subscription-manager unregister
   register: registration
+  failed_when: registration.rc != 0 and 'currently not registered' not in registration.stderr
+  changed_when: registration.rc == 0 and 'has been unregistered' in registration.stdout
 
 - name: Remove Katello CA package
   yum:

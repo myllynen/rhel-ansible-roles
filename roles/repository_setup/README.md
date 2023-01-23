@@ -23,12 +23,12 @@ repository_setup_repo_files_remove:
 # If false then rest of the parameters are ignored
 repository_setup_rhsm_configure: true
 
+# Subscribe or unsubscribe to Red Hat or Satellite
+repository_setup_rhsm_subscribe: true
+
 # Install Satellite katello-ca-consumer-latest.rpm
 # This will use the rhsm_baseurl variable defined below
 repository_setup_install_katello_rpm: true
-
-# Subscribe or unsubscribe to Red Hat or Satellite
-repository_setup_rhsm_subscribe: true
 
 # Force updating system facts at RHSM even if no
 # changes made for subscription or repositories
