@@ -24,7 +24,7 @@
 - name: Configure Red Hat Subscription
   community.general.redhat_subscription:
     activationkey: "{{ repository_setup_rhsm_parameters.activationkey | default(omit) }}"
-    orgid: "{{ repository_setup_rhsm_parameters.orgid | default(omit) }}"
+    orgid: "{{ repository_setup_rhsm_parameters.org_id | default(omit) }}"
     username: "{{ repository_setup_rhsm_parameters.username | default(omit) }}"
     password: "{{ repository_setup_rhsm_parameters.password | default(omit) }}"
     auto_attach: "{{ repository_setup_rhsm_parameters.auto_attach | default(omit) }}"
