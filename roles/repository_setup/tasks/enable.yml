@@ -46,6 +46,7 @@
     server_proxy_user: "{{ repository_setup_rhsm_parameters.server_proxy_user | default(omit) }}"
     server_proxy_password: "{{ repository_setup_rhsm_parameters.server_proxy_password | default(omit) }}"
     syspurpose: "{{ repository_setup_rhsm_parameters.syspurpose | default(omit) }}"
+    state: present
   register: subscription_state
   when: repository_setup_rhsm_parameters.activationkey | default(false) or
         repository_setup_rhsm_parameters.username | default(false)
