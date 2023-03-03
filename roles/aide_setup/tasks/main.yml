@@ -10,6 +10,13 @@
     dest: /usr/local/sbin/aide-check
     mode: '0755'
 
+- name: Copy aide configuration file
+  copy:
+    src: "{{ aide_setup_config_file }}"
+    dest: /etc/aide.conf
+    mode: '0600'
+  when: aide_setup_config_file | default(false)
+
 - name: Check aide-check script
   stat:
     path: /usr/local/sbin/aide-check

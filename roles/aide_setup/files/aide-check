@@ -12,7 +12,7 @@ name=aide-check
 # Initialize new aide database if needed, yes or no
 init_db=yes
 # Update aide database after check, yes or no
-update_db=yes
+update_db=no
 # Verbose if check ok, yes or no
 ok_verbose=no
 # Temp file path

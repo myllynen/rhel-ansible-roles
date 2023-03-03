@@ -14,6 +14,9 @@ Below are the role default values from defaults/main.yml:
 # either: hourly, daily, weekly, monthly
 # Use 'disabled' to disable cron checks.
 aide_setup_check_frequency: weekly
+
+# aide config file to copy, if defined
+aide_setup_config_file:
 </pre>
 
 ## License
