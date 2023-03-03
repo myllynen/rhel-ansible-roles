@@ -72,3 +72,11 @@
         subscription_state is changed or
         repos_disabled is changed or
         repos_enabled is changed
+
+- name: Configure subscription-manager package profile update policy
+  vars:
+    option_value: "{{ '1' if repository_setup_package_profile_on_trans|bool else '0' }}"
+  lineinfile:
+    path: /etc/rhsm/rhsm.conf
+    regexp: '^(#|)package_profile_on_trans[ ]?=.*'
+    line: 'package_profile_on_trans = {{ option_value }}'

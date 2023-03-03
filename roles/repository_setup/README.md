@@ -34,6 +34,10 @@ repository_setup_install_katello_rpm: true
 # changes made for subscription or repositories
 repository_setup_rhsm_facts_update_always: false
 
+# Configure subscription-manager to update package
+# profile at RHSM after every dnf/yum transaction
+repository_setup_package_profile_on_trans: true
+
 # Red Hat Subscription Management parameters, see
 # https://docs.ansible.com/ansible/latest/collections/community/general/redhat_subscription_module.html
 # Leave activationkey and username undefined to skip RHSM configuration
