@@ -8,6 +8,10 @@ scap_compliance_profile: cis_server_l1
 # Optional local tailoring file to use
 scap_compliance_tailoring_file_path:
 
+# Optional custom tailoring template to use
+# Needs scap_compliance_tailoring_file_path
+scap_compliance_tailoring_file_template:
+
 # State of OpenSCAP packages on the target
 # Allowed states: present, latest
 scap_compliance_package_state: present

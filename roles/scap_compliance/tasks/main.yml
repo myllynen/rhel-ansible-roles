@@ -21,6 +21,15 @@
     state: directory
     mode: '0700'
 
+- name: Create tailoring file
+  template:
+    src: "{{ scap_compliance_tailoring_file_template }}"
+    dest: "{{ scap_compliance_tailoring_file_path }}"
+    mode: '0600'
+  when:
+    - scap_compliance_tailoring_file_template | default(false)
+    - scap_compliance_tailoring_file_path | default (false)
+
 - name: Display security profile name
   debug:
     var: scap_compliance_profile
