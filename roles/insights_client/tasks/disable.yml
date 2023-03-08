@@ -19,3 +19,10 @@
     cmd: insights-client --unregister
     removes: /etc/insights-client/.registered
   when: "'insights-client' in ansible_facts.packages"
+
+- name: Clear Insights tags configuration
+  copy:
+    content: ''
+    dest: /etc/insights-client/tags.yaml
+    mode: '0644'
+  when: "'insights-client' in ansible_facts.packages"

@@ -14,6 +14,12 @@ Below are the role default values from defaults/main.yml:
 # See https://access.redhat.com/products/red-hat-insights
 insights_client_register: true
 
+# Optional tag/value pairs to apply for the system
+insights_client_tags:
+#  group: prod
+#  security: strict
+#  network_performance: latency
+
 # Enable Red Hat connector (rhc)
 # See https://access.redhat.com/articles/rhc
 insights_client_rhc_enable: true

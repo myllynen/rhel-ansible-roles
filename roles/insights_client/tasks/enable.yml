@@ -5,7 +5,9 @@
       - '!all'
       - '!min'
       - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
+      - system
+  when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.fqdn is not defined
 
 - name: Install required packages
   vars:
@@ -39,8 +41,27 @@
 
 - name: Register system to Red Hat Insights
   command:
-    cmd: insights-client --register
+    cmd: >
+      insights-client
+      --register
+      --ansible-host {{ ansible_facts.fqdn }}
+      --display-name {{ ansible_facts.fqdn }}
     creates: /etc/insights-client/.registered
+
+- name: Create Insights tags configuration file
+  vars:
+    tags_data: "{{ insights_client_tags | default({}, true) }}"
+    tags_content: "{{ tags_data.keys() | zip(tags_data.values()) | map('join', ': ') | sort | unique | join('\n') }}"
+  copy:
+    content: "{{ '' if not tags_content else tags_content + '\n' }}"
+    dest: /etc/insights-client/tags.yaml
+    mode: '0644'
+  register: tags_file
+  when: "'insights-client' in ansible_facts.packages"
+
+- name: Upload new data to Red Hat Insights
+  command: insights-client --silent
+  when: tags_file is changed
 
 - name: Enable rhcd service
   service:
