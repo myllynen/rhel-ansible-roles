@@ -71,9 +71,6 @@
     name: systemd-resolved
     autoremove: true
     #cacheonly: true
-    disable_plugin:
-      - product-id
-      - subscription-manager
     state: absent
   register: resolved_package
   when:

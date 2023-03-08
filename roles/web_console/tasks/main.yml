@@ -20,9 +20,6 @@
     name: "{{ cockpit_remove | select() | list }}"
     autoremove: true
     #cacheonly: true
-    disable_plugin:
-      - product-id
-      - subscription-manager
     state: absent
 
 - name: Gather package facts

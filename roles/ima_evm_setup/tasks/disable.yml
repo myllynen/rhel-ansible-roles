@@ -48,9 +48,6 @@
     name: rpm-plugin-ima
     autoremove: true
     #cacheonly: true
-    disable_plugin:
-      - product-id
-      - subscription-manager
     state: absent
 
 - name: Check current IMA/EVM file attributes
