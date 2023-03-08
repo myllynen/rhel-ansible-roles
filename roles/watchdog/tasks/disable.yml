@@ -4,7 +4,7 @@
     option_value: "{{ 'off' if ansible_facts.distribution_major_version|int >= 9 else '0' }}"
   lineinfile:
     path: /etc/systemd/system.conf
-    regexp: '(#|)RuntimeWatchdogSec=.*'
+    regexp: '^(#|)RuntimeWatchdogSec=.*'
     line: '#RuntimeWatchdogSec={{ option_value }}'
   register: watchdog_runtime
 
@@ -13,7 +13,7 @@
     option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version|int >= 9 else 'ShutdownWatchdogSec' }}"
   lineinfile:
     path: /etc/systemd/system.conf
-    regexp: '(#|){{ option_name }}=.*'
+    regexp: '^(#|){{ option_name }}=.*'
     line: '#{{ option_name }}=10min'
   register: watchdog_reboot
 
@@ -22,7 +22,7 @@
     option_state: "{{ 'present' if ansible_facts.distribution_major_version|int >= 9 else 'absent' }}"
   lineinfile:
     path: /etc/systemd/system.conf
-    regexp: '(#|)KExecWatchdogSec=.*'
+    regexp: '^(#|)KExecWatchdogSec=.*'
     line: '#KExecWatchdogSec=off'
     state: "{{ option_state }}"
   register: watchdog_kexec
@@ -32,7 +32,7 @@
     option_state: "{{ 'present' if ansible_facts.distribution_major_version|int >= 9 else 'absent' }}"
   lineinfile:
     path: /etc/systemd/system.conf
-    regexp: '(#|)WatchdogDevice=.*'
+    regexp: '^(#|)WatchdogDevice=.*'
     line: '#WatchdogDevice='
     state: "{{ option_state }}"
   register: watchdog_device

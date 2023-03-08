@@ -13,7 +13,7 @@
     option_value: "{{ '' if ansible_facts.distribution_major_version|int < 8 else '0:infinity' }}"
   lineinfile:
     path: /etc/systemd/system.conf
-    regexp: '(#|)DefaultLimitCORE=.*'
+    regexp: '^(#|)DefaultLimitCORE=.*'
     line: '{{ option_prefix }}DefaultLimitCORE={{ option_value }}'
   register: core_config
 

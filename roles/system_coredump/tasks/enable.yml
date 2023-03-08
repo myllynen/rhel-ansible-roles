@@ -18,7 +18,7 @@
 - name: Update default coredump limit configuration
   lineinfile:
     path: /etc/systemd/system.conf
-    regexp: '(#|)DefaultLimitCORE=.*'
+    regexp: '^(#|)DefaultLimitCORE=.*'
     line: 'DefaultLimitCORE=infinity'
   register: core_config
 
