@@ -13,9 +13,9 @@ ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-r
 ```
 
 Depending on the environment and requirements separate playbooks and/or
-vars files, group vars, variables defined in an inventory, or some
-other approach might be appropriate for defining configuration
-variables for the roles.
+vars files, group vars, variables defined in an inventory, or some other
+approach might be appropriate for providing configuration variables for
+the roles.
 
 See the example playbook [configure_rhel.yml](configure_rhel.yml) for
 all the configuration variables these roles support and how they could

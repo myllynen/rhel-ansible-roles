@@ -265,6 +265,12 @@
     # See https://access.redhat.com/products/red-hat-insights
     insights_client_register: true
 
+    # Optional tag/value pairs to apply for the system
+    insights_client_tags:
+    #  group: prod
+    #  security: strict
+    #  network_performance: latency
+
     # Enable Red Hat connector (rhc)
     # See https://access.redhat.com/articles/rhc
     insights_client_rhc_enable: true
@@ -393,6 +399,10 @@
 
     # Optional local tailoring file to use
     scap_compliance_tailoring_file_path:
+
+    # Optional custom tailoring template to use
+    # Needs scap_compliance_tailoring_file_path
+    scap_compliance_tailoring_file_template:
 
     # State of OpenSCAP packages on the target
     # Allowed states: present, latest
