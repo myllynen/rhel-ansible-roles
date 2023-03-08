@@ -15,6 +15,13 @@ repository_setup_rhsm_configure: true
 # Subscribe or unsubscribe to Red Hat or Satellite
 repository_setup_rhsm_subscribe: true
 
+# Use new style curl URL to register. If set then
+# the below RHSM parameters will be ignored. This
+# assumes activation key in use. Must include all
+# the curl arguments as a double-quoted string:
+# "-ksS 'https://...' -H '...'"
+repository_setup_rhsm_curl_args: ""
+
 # Install Satellite katello-ca-consumer-latest.rpm
 # This will use the rhsm_baseurl variable defined below
 repository_setup_install_katello_rpm: true
