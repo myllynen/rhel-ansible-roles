@@ -9,7 +9,7 @@ insights_client_tags:
 #  security: strict
 #  network_performance: latency
 
-# Enable Red Hat connector (rhc)
+# Enable Red Hat connector (rhc) when needed
 # See https://access.redhat.com/articles/rhc
 insights_client_rhc_enable: true
 

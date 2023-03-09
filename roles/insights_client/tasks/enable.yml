@@ -15,8 +15,6 @@
       - "{{ 'rhc' if insights_client_rhc_enable | bool else '' }}"
       - "{{ 'rhc-worker-playbook' if ansible_facts.distribution_major_version|int >= 8 else '' }}"
     openscap_packages:
-      - openscap
-      - openscap-scanner
       - scap-security-guide
     required_packages:
       "{{ ['insights-client'] +
@@ -48,7 +46,7 @@
       --display-name {{ ansible_facts.fqdn }}
     creates: /etc/insights-client/.registered
 
-- name: Create Insights tags configuration file
+- name: Create Red Hat Insights tags configuration file
   vars:
     tags_data: "{{ insights_client_tags | default({}, true) }}"
     tags_content: "{{ tags_data.keys() | zip(tags_data.values()) | map('join', ': ') | sort | unique | join('\n') }}"
@@ -63,6 +61,32 @@
   command: insights-client --silent
   when: tags_file is changed
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=2175793
+- name: Check Red Hat Subscription Management configuration
+  lineinfile:
+    path: /etc/rhsm/rhsm.conf
+    regexp: '^hostname\s?=\s?subscription.rhsm.redhat.com'
+    state: absent
+  check_mode: true
+  register: registration_redhat
+  changed_when: false
+
+- name: Disable rhcd service
+  service:
+    name: rhcd
+    enabled: false
+  when:
+    - "'rhc' in ansible_facts.packages"
+    - registration_redhat.found == 0
+
+- name: Stop rhcd service
+  service:
+    name: rhcd
+    state: stopped
+  when:
+    - "'rhc' in ansible_facts.packages"
+    - registration_redhat.found == 0
+
 - name: Enable rhcd service
   service:
     name: rhcd
@@ -70,6 +94,7 @@
   when:
     - "'rhc' in ansible_facts.packages"
     - insights_client_rhc_enable | bool
+    - registration_redhat.found == 1
 
 - name: Start rhcd service
   service:
@@ -78,3 +103,4 @@
   when:
     - "'rhc' in ansible_facts.packages"
     - insights_client_rhc_enable | bool
+    - registration_redhat.found == 1

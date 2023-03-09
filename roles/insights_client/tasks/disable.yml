@@ -20,7 +20,7 @@
     removes: /etc/insights-client/.registered
   when: "'insights-client' in ansible_facts.packages"
 
-- name: Clear Insights tags configuration
+- name: Clear Red Hat Insights tags configuration
   copy:
     content: ''
     dest: /etc/insights-client/tags.yaml
