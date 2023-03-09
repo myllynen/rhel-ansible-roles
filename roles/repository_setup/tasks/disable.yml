@@ -13,6 +13,7 @@
     disable_plugin:
       - product-id
       - subscription-manager
+    disablerepo: '*'
     state: absent
 
 - name: Remove Katello CA certificates
@@ -38,3 +39,21 @@
     path: "{{ item }}"
     state: absent
   loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
+
+- name: Check RHSM configuration backup file
+  stat:
+    path: /etc/rhsm/rhsm.conf.bak
+  register: rhsm_backup
+
+- name: Restore RHSM configuration backup file
+  copy:
+    src: /etc/rhsm/rhsm.conf.bak
+    dest: /etc/rhsm/rhsm.conf
+    remote_src: true
+  when: rhsm_backup.stat.exists
+
+- name: Remove RHSM configuration backup file
+  file:
+    path: /etc/rhsm/rhsm.conf.bak
+    state: absent
+  when: rhsm_backup.stat.exists

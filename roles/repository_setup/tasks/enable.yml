@@ -93,7 +93,7 @@
     option_value: "{{ '1' if repository_setup_package_profile_on_trans|bool else '0' }}"
   lineinfile:
     path: /etc/rhsm/rhsm.conf
-    regexp: '^(#|)package_profile_on_trans[ ]?=.*'
+    regexp: '^(#|)package_profile_on_trans\s?=.*'
     line: 'package_profile_on_trans = {{ option_value }}'
 
 - name: Enable rhsmcertd service
