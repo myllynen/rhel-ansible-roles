@@ -116,7 +116,7 @@
 
 - name: Display failed compliance check items
   debug:
-    msg: "{{ grep_result.stdout }}"
+    msg: "{{ grep_result.stdout_lines }}"
   when: eval_status.rc == 2
 
 - name: Display compliance check complete results
