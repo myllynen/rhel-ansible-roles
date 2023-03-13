@@ -11,7 +11,7 @@
   set_fact:
     sshd: "{{ sshd_options | default({}, true) }}"
 
-- name: Abort if root trying to block root access completely
+- name: Fail if root trying to block root access completely
   fail:
     msg: "Refusing to configure 'PermitRootLogin no' when connected as root."
   when:

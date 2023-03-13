@@ -37,7 +37,7 @@
   changed_when: false
   when: "'adcli' in ansible_facts.packages"
 
-- name: Abort if AD domain controller not usable
+- name: Fail if AD domain controller not usable
   fail:
     msg: "AD domain reports domain controller not usable."
   when:
@@ -61,7 +61,7 @@
     - "'adcli' in ansible_facts.packages"
     - ansible_facts.distribution_major_version|int >= 8
 
-- name: Abort if computer does not exist in AD domain
+- name: Fail if computer does not exist in AD domain
   fail:
     msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
   when:

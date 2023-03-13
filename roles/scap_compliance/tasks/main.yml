@@ -124,7 +124,7 @@
     var: eval_status
   when: scap_compliance_check_result_show_all | bool
 
-- name: Abort on compliance check failure if requested
+- name: Fail on compliance check failure if requested
   fail:
     msg: "{{ scap_compliance_profile }} compliance check failed."
   when:
