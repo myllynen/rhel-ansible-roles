@@ -1,9 +1,9 @@
 ---
-# Enable periodic aide checks from cron,
-# either: hourly, daily, weekly, monthly
-# Use 'disabled' to disable cron checks.
-aide_setup_check_frequency: weekly
-
 # aide config file to copy, if defined
 aide_setup_config_file:
 
+# Initialize aide database if not present
+aide_setup_initialize_database: true
+
+# Enable daily aide check using cron
+aide_setup_cron_setup: true

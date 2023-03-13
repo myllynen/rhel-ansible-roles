@@ -4,12 +4,6 @@
     name: aide
     state: present
 
-- name: Copy aide-check script
-  copy:
-    src: aide-check
-    dest: /usr/local/sbin/aide-check
-    mode: '0755'
-
 - name: Copy aide configuration file
   copy:
     src: "{{ aide_setup_config_file }}"
@@ -17,26 +11,47 @@
     mode: '0600'
   when: aide_setup_config_file | default(false)
 
-- name: Check aide-check script
+- name: Gather package facts
+  package_facts:
+
+- name: Run aide configuration check
+  command: /usr/sbin/aide --config-check
+  check_mode: false
+  changed_when: false
+  when: "'aide' in ansible_facts.packages"
+
+- name: Check aide database
   stat:
-    path: /usr/local/sbin/aide-check
-  register: aide_check_script
-
-# Use loop to display the configuration
-- name: Enable scheduled aide cron check
-  file:
-    src: /usr/local/sbin/aide-check
-    dest: /etc/cron.{{ item }}/aide-check
-    state: link
-  loop: "{{ [aide_setup_check_frequency] }}"
+    path: /var/lib/aide/aide.db.gz
+  register: aide_database
   when:
-    - aide_check_script.stat.exists
-    - aide_setup_check_frequency in ['hourly', 'daily', 'weekly', 'monthly']
+    - "'aide' in ansible_facts.packages"
+    - aide_setup_initialize_database | bool
 
-- name: Disable unscheduled aide cron checks
+- name: Initialize new aide database
+  command: /usr/sbin/aide --init
+  when:
+    - "'aide' in ansible_facts.packages"
+    - not aide_database.stat.exists
+    - aide_setup_initialize_database | bool
+
+- name: Copy new aide database as current aide database
+  copy:
+    src: /var/lib/aide/aide.db.new.gz
+    dest: /var/lib/aide/aide.db.gz
+    mode: '0600'
+    remote_src: true
+  when:
+    - "'aide' in ansible_facts.packages"
+    - not aide_database.stat.exists
+    - aide_setup_initialize_database | bool
+
+# Configure cron in OpenSCAP-compatible manner
+- name: Update aide check cron configuration
   vars:
-    cron_remove: "{{ ['hourly', 'daily', 'weekly', 'monthly'] | difference(aide_setup_check_frequency) }}"
-  file:
-    path: /etc/cron.{{ item }}/aide-check
-    state: absent
-  loop: "{{ cron_remove }}"
+    entry_prefix: "{{ '' if aide_setup_cron_setup|bool else '#' }}"
+  lineinfile:
+    path: /etc/crontab
+    regexp: '^(#|)05 4 \* \* \* root /usr/sbin/aide --check'
+    line: '{{ entry_prefix }}05 4 * * * root /usr/sbin/aide --check'
+  when: "'aide' in ansible_facts.packages"
