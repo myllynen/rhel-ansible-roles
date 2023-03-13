@@ -71,10 +71,10 @@
 
 - name: Store installer leftover files
   copy:
-    remote_src: true
     src: "{{ item }}"
     dest: /var/log/anaconda
     mode: '0700'
+    remote_src: true
   loop: "{{ installer_files }}"
   loop_control:
     label: "{{ item }} -> /var/log/anaconda/{{ item | basename }}"

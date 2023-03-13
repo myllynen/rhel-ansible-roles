@@ -49,6 +49,7 @@
   copy:
     src: /etc/rhsm/rhsm.conf.bak
     dest: /etc/rhsm/rhsm.conf
+    mode: '0644'
     remote_src: true
   when: rhsm_backup.stat.exists
 
