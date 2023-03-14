@@ -13,7 +13,9 @@ boot_parameters_timeout: 1
 # PBKDF2 hash to allow idempotency, use
 # grub2-mkpasswd-pbkdf2(3) to create one
 # Boot loader username is always 'root'
-# This should come from vault
+# This should come from vault. If unset
+# current configuration is not touched,
+# setting to empty will remove password
 #boot_parameters_password:
 
 # Reboot system after parameter changes
