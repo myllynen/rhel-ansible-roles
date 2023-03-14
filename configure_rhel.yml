@@ -86,13 +86,14 @@
     #
     # aide_setup
     #
-    # Enable periodic aide checks from cron,
-    # either: hourly, daily, weekly, monthly
-    # Use 'disabled' to disable cron checks.
-    aide_setup_check_frequency: weekly
-
     # aide config file to copy, if defined
     aide_setup_config_file:
+
+    # Initialize aide database if not present
+    aide_setup_initialize_database: true
+
+    # Enable daily aide check using cron
+    aide_setup_cron_setup: true
 
     #
     # audit_setup
@@ -121,7 +122,9 @@
     # PBKDF2 hash to allow idempotency, use
     # grub2-mkpasswd-pbkdf2(3) to create one
     # Boot loader username is always 'root'
-    # This should come from vault
+    # This should come from vault. If unset
+    # current configuration is not touched,
+    # setting to empty will remove password
     #boot_parameters_password:
 
     # Reboot system after parameter changes
@@ -228,6 +231,10 @@
 
     # fapolicyd trust file to copy, trust default is empty file
     fapolicyd_setup_trust_file: fapolicyd.trust
+
+    #
+    # files_{copy,create,fetch,get,remove} - omitted here for brevity
+    #
 
     #
     # fips_setup
