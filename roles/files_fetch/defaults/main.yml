@@ -1,0 +1,11 @@
+---
+# Dict of files and directories to fetch
+# Uses Ansible built-in fetch module
+# NB. With 'become' this is going to
+#     be very slow with large files!
+# Registers variable: fetch_files
+files_fetch:
+#  - src: /tmp/somefile
+#    dest: /tmp/somefile-{{ inventory_hostname }}
+#    flat: true
+#    validate_checksum: false

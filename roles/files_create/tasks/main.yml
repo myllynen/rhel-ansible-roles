@@ -1,0 +1,40 @@
+---
+- name: Create directories
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    state: directory
+  register: create_directories
+  loop: "{{ files_create | selectattr('state', 'equalto', 'directory') | list }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Create files
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    modification_time: preserve
+    access_time: preserve
+    state: touch
+  register: create_files
+  loop: "{{ files_create | selectattr('state', 'equalto', 'file') | list }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Create symlinks
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    follow: false
+    state: link
+  register: create_links
+  loop: "{{ files_create | selectattr('state', 'equalto', 'link') | list }}"
+  loop_control:
+    label: "{{ item.dest + ' -> ' + item.src }}"

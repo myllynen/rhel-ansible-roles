@@ -1,0 +1,29 @@
+---
+- name: Copy files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+    remote_src: "{{ item.remote_src | default(omit) }}"
+  register: copy_files
+  loop: "{{ files_copy | default([], true) }}"
+  loop_control:
+    label: "{{ item.src + ' -> ' + item.dest }}"
+
+- name: Create files from templates
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+  register: copy_templates
+  loop: "{{ files_copy_templates | default([], true) }}"
+  loop_control:
+    label: "{{ item.src + ' -> ' + item.dest }}"

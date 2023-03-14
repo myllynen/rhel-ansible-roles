@@ -1,0 +1,20 @@
+---
+# Dict of files and directories to copy
+# Uses Ansible built-in copy module
+# Registers variable: copy_files
+files_copy:
+#  - src: /local/path/test.file
+#    dest: /tmp/test.file
+#    mode: '0600'
+  - src: /etc/hosts
+    dest: /etc/hosts.bak
+    mode: '0644'
+    remote_src: true
+
+# Dict of templates to render
+# Uses Ansible built-in template module
+# Registers variable: copy_templates
+files_copy_templates:
+#  - src: settings.conf.j2
+#    dest: /etc/settings.conf
+#    mode: '0644'

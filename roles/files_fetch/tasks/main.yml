@@ -1,0 +1,11 @@
+---
+- name: Fetch files
+  fetch:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    flat: "{{ item.flat | default(omit) }}"
+    validate_checksum: "{{ item.validate_checksum | default(omit) }}"
+  register: fetch_files
+  loop: "{{ files_fetch | default([], true) }}"
+  loop_control:
+    label: "{{ item.src + ' -> ' + item.dest }}"

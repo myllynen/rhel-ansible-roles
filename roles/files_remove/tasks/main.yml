@@ -1,0 +1,26 @@
+---
+- name: Locate globbed files and directories to be removed
+  find:
+    paths: "{{ (item.split('/') | map('trim') | list)[:-1] | join('/') }}"
+    patterns: "{{ item.split('/')[-1] }}"
+    file_type: any
+    hidden: true
+  register: remove_globs
+  loop: "{{ files_remove | select('search', '\\?|\\*|\\[') | list }}"
+
+- name: Set globbed files and directories to remove
+  set_fact:
+    glob_paths: "{{ glob_paths | default([]) + item['files'] | map(attribute='path') | list }}"
+  loop: "{{ remove_globs.results }}"
+  loop_control:
+    label: "{{ item['files'] | map(attribute='path') | list }}"
+
+- name: Remove files and directories
+  vars:
+    plain_paths: "{{ files_remove | select() | reject('search', '\\?|\\*|\\[') | list }}"
+  file:
+    path: "{{ item }}"
+    state: absent
+  register: remove_files
+  loop: "{{ (plain_paths + glob_paths | default([])) | select() | list }}"
+  when: item not in files_remove_exclude | default([], true)

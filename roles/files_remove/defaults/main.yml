@@ -1,0 +1,14 @@
+---
+# List of files and directories to remove
+# Globbing is supported for last element,
+# directories will be removed recursively
+# Registers variable: remove_files
+files_remove:
+#  - /etc/some/file
+#  - /etc/some/dir
+#  - /etc/some/confdir/*.conf
+
+# List of items to exclude from removal
+# Useful with globbing, needs full path
+files_remove_exclude:
+#  - /etc/some/confdir/base.conf
