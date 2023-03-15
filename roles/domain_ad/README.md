@@ -30,6 +30,11 @@ domain_ad_auth_config_update: true
 # Extra parameters for "authselect select" command
 # See the "authselect show sssd" output for details
 domain_ad_auth_select_parameters: without-nullok with-pamaccess with-mkhomedir
+
+# krb5.conf and sssd.conf template files to use
+# if not using the role provided default files
+domain_ad_krb5_config_file:
+domain_ad_sssd_config_file:
 </pre>
 
 ## License
