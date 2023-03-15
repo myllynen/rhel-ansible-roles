@@ -11,3 +11,8 @@ splunk_phonehome_secs: 600
 
 # Allowed states: present, latest
 splunk_forwarder_package_state: present
+
+# Deployment and user configuration templates
+# to use if not using the role provided defaults
+splunk_deployment_config_file:
+splunk_user_config_file:

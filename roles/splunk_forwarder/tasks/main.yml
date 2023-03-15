@@ -50,7 +50,7 @@
 
 - name: Create Splunk deployment configuration file
   template:
-    src: deploymentclient.conf.j2
+    src: "{{ splunk_deployment_config_file | default('deploymentclient.conf.j2', true) }}"
     dest: /opt/splunkforwarder/etc/system/local/deploymentclient.conf
     owner: splunk
     group: splunk
@@ -59,7 +59,7 @@
 
 - name: Create Splunk user configuration file
   template:
-    src: user-seed.conf.j2
+    src: "{{ splunk_user_config_file | default('user-seed.conf.j2', true) }}"
     dest: /opt/splunkforwarder/etc/system/local/user-seed.conf
     owner: splunk
     group: splunk
