@@ -29,7 +29,7 @@ scap_compliance_package_state: present
 
 # Where to store oscap tool execution results
 # NB. Only the most recent results are stored
-scap_compliance_report_dir: /root/oscap-results
+scap_compliance_report_dir: /root/oscap/results
 
 # Remediate compliance issues
 # Warning: Reverting changes is not supported
