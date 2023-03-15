@@ -183,6 +183,11 @@
     # See the "authselect show sssd" output for details
     domain_ad_auth_select_parameters: without-nullok with-pamaccess with-mkhomedir
 
+    # krb5.conf and sssd.conf template files to use
+    # if not using the role provided default files
+    domain_ad_krb5_config_file:
+    domain_ad_sssd_config_file:
+
     #
     # etc_hosts
     #
@@ -417,7 +422,7 @@
 
     # Where to store oscap tool execution results
     # NB. Only the most recent results are stored
-    scap_compliance_report_dir: /root/oscap-results
+    scap_compliance_report_dir: /root/oscap/results
 
     # Remediate compliance issues
     # Warning: Reverting changes is not supported
@@ -485,6 +490,11 @@
 
     # Allowed states: present, latest
     splunk_forwarder_package_state: present
+
+    # Deployment and user configuration templates
+    # to use if not using the role provided defaults
+    splunk_deployment_config_file:
+    splunk_user_config_file:
 
     #
     # sshd_configuration
