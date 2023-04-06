@@ -61,7 +61,7 @@
 
 - name: Display remediation results
   debug:
-    msg: "{{ remediate_status.stdout }}"
+    msg: "{{ remediate_status.stdout_lines }}"
   when: remediate_status is changed
 
 - name: Rebuild initramfs
