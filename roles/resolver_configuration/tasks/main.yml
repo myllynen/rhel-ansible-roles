@@ -6,7 +6,7 @@
     content: |
       [main]
       {{ option_prefix }}rc-manager=unmanaged
-    dest: /etc/NetworkManager/conf.d/99-rc-manager.conf
+    dest: /etc/NetworkManager/conf.d/95-rc-manager.conf
     mode: '0644'
   register: nm_config
 
