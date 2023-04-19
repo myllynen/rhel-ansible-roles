@@ -47,3 +47,8 @@
     content: "{{ etc_hosts_content }}"
     dest: /etc/hosts
     mode: '0644'
+  register: hosts_file
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  when: hosts_file is changed
