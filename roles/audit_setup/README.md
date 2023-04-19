@@ -10,12 +10,17 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# audit rules file to copy
-audit_setup_rules_file:
-
-# audit config file to copy
+# Optional auditd config file to copy
 # If unset default RHEL configuration will be used
 audit_setup_config_file:
+
+# Optional audit rules file to copy
+audit_setup_rules_file:
+
+# Action with locked rules after rules file update
+# NB. A changed rules file is updated only once
+# Allowed values: fail, ignore, reboot
+audit_setup_update_lock: reboot
 </pre>
 
 ## License
