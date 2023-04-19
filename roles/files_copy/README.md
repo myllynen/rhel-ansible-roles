@@ -17,10 +17,6 @@ files_copy:
 #  - src: /local/path/test.file
 #    dest: /tmp/test.file
 #    mode: '0600'
-#  - src: /etc/hosts
-#    dest: /etc/hosts.bak
-#    mode: '0644'
-#    remote_src: true
 
 # Dict of templates to render
 # Uses Ansible built-in template module
