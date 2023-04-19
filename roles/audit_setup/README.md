@@ -18,7 +18,6 @@ audit_setup_config_file:
 audit_setup_rules_file:
 
 # Action with locked rules after rules file update
-# NB. A changed rules file is updated only once
 # Allowed values: fail, ignore, reboot
 audit_setup_update_lock: reboot
 </pre>

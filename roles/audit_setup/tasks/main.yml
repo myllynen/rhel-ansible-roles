@@ -43,8 +43,30 @@
     src: "{{ audit_setup_rules_file }}"
     dest: /etc/audit/rules.d/zz-local.rules
     mode: '0600'
-  register: rules_config
   when: audit_setup_rules_file | default(false)
+
+- name: Check changed audit rules
+  command: augenrules --check
+  check_mode: false
+  register: rules_status
+  changed_when: false
+  when: "'audit' in ansible_facts.packages"
+
+- name: Check locked audit rules
+  command: auditctl -s
+  check_mode: false
+  register: audit_status
+  changed_when: false
+  when: "'audit' in ansible_facts.packages"
+
+- name: Fail if audit rules cannot be updated
+  fail:
+    msg: "Audit rules are locked."
+  when:
+    - "'audit' in ansible_facts.packages"
+    - audit_setup_update_lock == 'fail'
+    - "'enabled 2' in audit_status.stdout"
+    - "'Rules have changed' in rules_status.stdout"
 
 - name: Enable auditd service
   service:
@@ -59,21 +81,6 @@
   register: service_start
   when: "'audit' in ansible_facts.packages"
 
-- name: Check locked audit rules
-  command: auditctl -s
-  check_mode: false
-  register: audit_rules
-  changed_when: false
-  when: "'audit' in ansible_facts.packages"
-
-- name: Fail if audit rules cannot be updated
-  fail:
-    msg: "Audit rules are locked."
-  when:
-    - audit_setup_update_lock == 'fail'
-    - "'enabled 2' in audit_rules.stdout"
-    - rules_config is changed
-
 # auditd is not compatible with the Ansible service module
 # https://github.com/ansible/ansible/issues/22171
 # https://access.redhat.com/solutions/2664811
@@ -81,18 +88,18 @@
   command: service auditd reload
   when:
     - "'audit' in ansible_facts.packages"
-    - "'enabled 2' not in audit_rules.stdout or
-      (auditd_config is changed and rules_config is not changed)"
-    - "'enabled 2' not in audit_rules.stdout or
+    - "'enabled 2' not in audit_status.stdout or
+      (auditd_config is changed and 'Rules have changed' not in rules_status.stdout)"
+    - "'enabled 2' not in audit_status.stdout or
       audit_setup_update_lock != 'reboot'"
     - service_start is not changed
     - auditd_config is changed or
-      rules_config is changed
+      'Rules have changed' in rules_status.stdout
 
 - name: Reboot system
   reboot:
   when:
     - "'audit' in ansible_facts.packages"
     - audit_setup_update_lock == 'reboot'
-    - "'enabled 2' in audit_rules.stdout"
-    - rules_config is changed
+    - "'enabled 2' in audit_status.stdout"
+    - "'Rules have changed' in rules_status.stdout"
