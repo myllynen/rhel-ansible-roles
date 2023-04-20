@@ -17,3 +17,5 @@ galaxy_info:
     - centos
     - configuration
 dependencies: []
+
+allow_duplicates: true
