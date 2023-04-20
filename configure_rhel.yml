@@ -108,7 +108,7 @@
     # Action with locked rules after rules file update
     # NB. A changed rules file is updated only once
     # Allowed values: fail, ignore, reboot
-    audit_setup_update_lock: reboot
+    audit_setup_update_lock: fail
 
     #
     # boot_parameters
