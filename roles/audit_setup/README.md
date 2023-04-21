@@ -17,7 +17,7 @@ audit_setup_config_file:
 # Optional audit rules file to copy
 audit_setup_rules_file:
 
-# Action with locked rules after rules file update
+# Action with locked rules if rules changed
 # Allowed values: fail, ignore, reboot
 audit_setup_update_lock: fail
 </pre>
