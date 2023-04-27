@@ -37,7 +37,7 @@ pwquality_config_file:
 system_auth_profile:
 
 # Extra parameters for "authselect select" command
-# See the "authselect show <profile>" output for details
+# See the "authselect show 'profile'" output for details
 system_auth_select_parameters: without-nullok with-pamaccess
 </pre>
 
