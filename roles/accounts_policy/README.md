@@ -23,7 +23,7 @@ login_defs_config_file:
 useradd_defaults_file:
 
 # Password quality config file pwquality.conf template
-# Role provides alternatives:
+# Role provided alternatives:
 # * pwquality_conf.cis_server_l1.j2 - CIS Server level 1 config
 # * pwquality_conf.local.j2         - role provided basic config
 # * pwquality_conf.rhel8_default.j2 - RHEL 8 default config
