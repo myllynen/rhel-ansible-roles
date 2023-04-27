@@ -1,0 +1,15 @@
+CIS compliant system authentication profile with Centrify support
+=================================================================
+
+Selecting this profile will configure CIS Server Level 1 compliant
+system authentication.
+
+AVAILABLE OPTIONAL FEATURES
+---------------------------
+
+with-centrify::
+    Enable Centrify authentication.
+
+with-mkhomedir::
+    Enable automatic creation of home directories for users on their
+    first login.

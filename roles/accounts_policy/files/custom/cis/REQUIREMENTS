@@ -1,0 +1,7 @@
+- with-centrify is selected, make sure pam_centrifydc module                              {include if "with-centrify"}
+  is present and Centrify is properly setup                                               {include if "with-centrify"}
+                                                                                          {include if "with-centrify"}
+- with-mkhomedir is selected, make sure pam_oddjob_mkhomedir module                       {include if "with-mkhomedir"}
+  is present and oddjobd service is enabled and active                                    {include if "with-mkhomedir"}
+  - systemctl enable --now oddjobd.service                                                {include if "with-mkhomedir"}
+                                                                                          {include if "with-mkhomedir"}
