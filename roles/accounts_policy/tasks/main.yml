@@ -56,9 +56,14 @@
     - ansible_facts.distribution_major_version|int >= 8
     - pwquality_config_file | default(false)
 
-- name: Install authselect package
+- name: Install required packages
+  vars:
+    auth_packages:
+      - authselect
+      - "{{ 'oddjob' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
+      - "{{ 'oddjob-mkhomedir' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
   yum:
-    name: authselect
+    name: "{{ auth_packages | select() | list }}"
     state: present
   when:
     - ansible_facts.distribution_major_version|int >= 8
@@ -67,16 +72,32 @@
 - name: Gather package facts
   package_facts:
 
+- name: Enable oddjobd service
+  service:
+    name: oddjobd
+    enabled: true
+  when:
+    - "'oddjob-mkhomedir' in ansible_facts.packages"
+    - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
+
+- name: Start oddjobd service
+  service:
+    name: oddjobd
+    state: started
+  when:
+    - "'oddjob-mkhomedir' in ansible_facts.packages"
+    - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
+
 - name: Copy custom authentication profile
   copy:
-    src: "{{ system_auth_profile.replace('custom/', '') }}"
+    src: "{{ system_auth_profile }}"
     dest: /etc/authselect/custom
     mode: '0644'
   register: custom_profile_copy
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
-    - system_auth_profile.startswith('custom/')
+    - "'custom/' in system_auth_profile"
 
 - name: Check current system-local authentication profile in use
   command: authselect current -r
@@ -103,12 +124,22 @@
 
 - name: Configure system-local authentication profile
   vars:
+    profile_name: "{{ system_auth_profile | regex_replace('.*custom/', 'custom/') }}"
     current_config: "{{ profile_current.stdout }}"
-    wanted_config: "{{ system_auth_profile }} {{ system_auth_select_parameters }}"
-  command: authselect select -f {{ system_auth_profile }} {{ system_auth_select_parameters }}
+    wanted_config: "{{ profile_name }} {{ system_auth_profile_parameters }}"
+  command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
   when:
     - ansible_facts.distribution_major_version|int >= 8
     - system_auth_profile | default(false)
     - current_config | trim != wanted_config | trim or
       'not valid' in profile_valid.stdout or
       custom_profile_copy is changed
+
+- name: Create PAM su configuration file
+  vars:
+    enable_centrify: "{{ true if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else false }}"
+  template:
+    src: "{{ system_auth_pam_d_su_file }}"
+    dest: /etc/pam.d/su
+    mode: '0644'
+  when: system_auth_pam_d_su_file | default(false)

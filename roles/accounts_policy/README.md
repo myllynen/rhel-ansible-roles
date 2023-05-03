@@ -24,21 +24,31 @@ useradd_defaults_file:
 
 # Password quality config file pwquality.conf template
 # Role provided alternatives:
-# * pwquality_conf.cis_server_l1.j2 - CIS Server level 1 config
-# * pwquality_conf.local.j2         - role provided basic config
+# * pwquality_conf.cis_server_l1.j2 - CIS Server Level 1 config
+# * pwquality_conf.cis.j2           - CIS Server Level 2 config
 # * pwquality_conf.rhel8_default.j2 - RHEL 8 default config
 # * pwquality_conf.rhel9_default.j2 - RHEL 9 default config
 pwquality_config_file:
 
 # Either use a system provided profile (e.g., "minimal")
 # or copy and use a custom one. A custom profile must be
-# prefixed with "custom/". E.g., use "custom/strict" to
-# copy auth profile from the local directory ./strict.
+# named as "custom/name". E.g., use "/srv/custom/strict"
+# to copy the profile custom/strict from local path /srv
+# Role provided alternatives:
+# * custom/cis  -  CIS Server Level 2 compliant profile
+#                  incl. optional support for Centrify.
 system_auth_profile:
 
-# Extra parameters for "authselect select" command
+# Profile parameters for "authselect select" command
 # See the "authselect show 'profile'" output for details
-system_auth_select_parameters: without-nullok with-pamaccess
+# E.g., with "minimal" use without-nullok with-pamaccess
+# With "custom/cis" can use with-centrify with-mkhomedir
+system_auth_profile_parameters:
+
+# Optional PAM su configuration file template
+# Role provides CIS-compliant pam_d_su.j2 which enables
+# Centrify support automatically if using with-centrify
+system_auth_pam_d_su_file:
 </pre>
 
 ## License
