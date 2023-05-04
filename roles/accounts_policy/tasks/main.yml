@@ -7,12 +7,12 @@
       - distribution_major_version
   when: ansible_facts.distribution_major_version is not defined
 
-- name: Create system-local login access file
+- name: Create system-local new user defaults file
   template:
-    src: "{{ login_access_config_file }}"
-    dest: /etc/security/access.conf
+    src: "{{ useradd_defaults_file }}"
+    dest: /etc/default/useradd
     mode: '0644'
-  when: login_access_config_file | default(false)
+  when: useradd_defaults_file | default(false)
 
 - name: Create system-local login defaults file
   template:
@@ -21,12 +21,30 @@
     mode: '0644'
   when: login_defs_config_file | default(false)
 
-- name: Create system-local new user defaults file
+- name: Create system-local login access file
   template:
-    src: "{{ useradd_defaults_file }}"
-    dest: /etc/default/useradd
+    src: "{{ login_access_config_file }}"
+    dest: /etc/security/access.conf
     mode: '0644'
-  when: useradd_defaults_file | default(false)
+  when: login_access_config_file | default(false)
+
+- name: Create system-local faillock configuration file
+  template:
+    src: "{{ faillock_config_file }}"
+    dest: /etc/security/faillock.conf
+    mode: '0644'
+  when:
+    - ansible_facts.distribution_major_version|int > 7
+    - faillock_config_file | default(false)
+
+- name: Create system-local password history requirements file
+  template:
+    src: "{{ pwhistory_config_file }}"
+    dest: /etc/security/pwhistory.conf
+    mode: '0644'
+  when:
+    - ansible_facts.distribution_major_version|int > 7
+    - pwhistory_config_file | default(false)
 
 - name: Create system-local password quality requirements file (RHEL 7)
   template:

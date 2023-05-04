@@ -13,36 +13,58 @@ Below are the role default values from defaults/main.yml:
 # Accounts, login, password, PAM policies and profiles
 # All parameters are optional, unset are left untouched
 
-# Login access control file access.conf template
-login_access_config_file:
-
-# Shadow configuration file login.defs template
-login_defs_config_file:
 
 # New user defaults file useradd template
+# Role provided alternatives:
+# * useradd_cis.j2         - CIS Level 2 - Server compliant config
+# * useradd_rhel.j2        - RHEL default config
 useradd_defaults_file:
 
-# Password quality config file pwquality.conf template
+# Shadow configuration file login.defs template
 # Role provided alternatives:
-# * pwquality_conf.cis_server_l1.j2 - CIS Server Level 1 config
-# * pwquality_conf.cis.j2           - CIS Server Level 2 config
-# * pwquality_conf.rhel8_default.j2 - RHEL 8 default config
-# * pwquality_conf.rhel9_default.j2 - RHEL 9 default config
+# * login.defs_cis.j2      - CIS Level 2 - Server compliant config
+# * login.defs_rhel.j2     - RHEL default config
+login_defs_config_file:
+
+# PAM login access control file access.conf template
+# Role provided alternatives:
+# * access.conf_rhel.j2    - RHEL default config (empty table)
+login_access_config_file:
+
+# PAM faillock configuration file faillock.conf template
+# Role provided alternatives:
+# * faillock_cis.conf      - CIS Level 2 - Server compliant config
+# * faillock_rhel.conf     - RHEL default config
+faillock_config_file:
+
+# PAM password history config file pwhistory.conf template
+# NB. This is supported only since RHEL 8.8 / RHEL 9.2
+# Role provided alternatives:
+# * pwhistory.conf_cis.j2  - CIS Level 2 - Server compliant config
+# * pwhistory.conf_rhel.j2 - RHEL default config
+pwhistory_config_file:
+
+# PAM password quality config file pwquality.conf template
+# Role provided alternatives:
+# * pwquality.conf_cis.j2  - CIS Level 2 - Server compliant config
+# * pwquality.conf_rhel.j2 - RHEL default config
 pwquality_config_file:
+
 
 # Either use a system provided profile (e.g., "minimal")
 # or copy and use a custom one. A custom profile must be
 # named as "custom/name". E.g., use "/srv/custom/strict"
 # to copy the profile custom/strict from local path /srv
 # Role provided alternatives:
-# * custom/cis  -  CIS Server Level 2 compliant profile
+# * custom/cis  -  CIS Level 2 - Server compliant profile
 #                  incl. optional support for Centrify.
 system_auth_profile:
 
 # Profile parameters for "authselect select" command
 # See the "authselect show 'profile'" output for details
 # E.g., with "minimal" use without-nullok with-pamaccess
-# With "custom/cis" can use with-centrify with-mkhomedir
+# With "custom/cis" the following parameters can be used:
+#   with-centrify with-mkhomedir with-pamaccess
 system_auth_profile_parameters:
 
 # Optional PAM su configuration file template
