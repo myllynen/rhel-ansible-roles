@@ -14,8 +14,8 @@ account     required                   pam_unix.so
 
 password    sufficient                 pam_centrifydc.so try_first_pass {include if "with-centrify"}
 password    requisite                  pam_centrifydc.so deny           {include if "with-centrify"}
-password    requisite                  pam_pwquality.so local_users_only
-password    required                   pam_pwhistory.so remember=15
+password    requisite                  pam_pwquality.so enforce_for_root local_users_only retry=3
+password    required                   pam_pwhistory.so enforce_for_root remember=15 retry=3
 password    sufficient                 pam_unix.so sha512 shadow use_authtok
 password    required                   pam_deny.so
 
