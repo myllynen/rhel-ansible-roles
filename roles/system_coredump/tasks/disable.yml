@@ -7,6 +7,20 @@
       - distribution_major_version
   when: ansible_facts.distribution_major_version is not defined
 
+- name: Update coredump process size configuration
+  lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: '^(#|)ProcessSizeMax=.*'
+    line: 'ProcessSizeMax=0'
+  register: process_config
+
+- name: Update coredump storage configuration
+  lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: '^(#|)Storage=.*'
+    line: 'Storage=none'
+  register: storage_config
+
 - name: Restore system default coredump limit configuration
   vars:
     option_prefix: "{{ '#' if ansible_facts.distribution_major_version|int < 8 else '' }}"
@@ -17,10 +31,12 @@
     line: '{{ option_prefix }}DefaultLimitCORE={{ option_value }}'
   register: core_config
 
-- name: Reload systemd to apply coredump limit change
+- name: Reload systemd to apply configuration changes
   systemd:
     daemon_reload: true
-  when: core_config is changed
+  when: process_config is changed or
+        storage_config is changed or
+        core_config is changed
 
 - name: Disallow suid binary coredumps
   ansible.posix.sysctl:
@@ -30,16 +46,18 @@
     sysctl_set: true
   register: suid_config
 
-- name: Restore system default core pattern
+- name: Configure system coredump pattern
   ansible.posix.sysctl:
     name: kernel.core_pattern
-    value: 'core'
+    value: '|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
   register: pattern_config
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
-  when: core_config is changed or
+  when: process_config is changed or
+        storage_config is changed or
+        core_config is changed or
         suid_config is changed or
         pattern_config is changed

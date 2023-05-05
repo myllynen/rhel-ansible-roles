@@ -1,11 +1,19 @@
 ---
-- name: Configure system core dump pattern
+- name: Configure system coredump pattern
   ansible.posix.sysctl:
     name: kernel.core_pattern
-    value: '/var/lib/systemd/coredump/core'
+    value: '|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
   register: pattern_config
+
+- name: Allow parallel coredumps
+  ansible.posix.sysctl:
+    name: kernel.core_pipe_limit
+    value: '16'
+    sysctl_file: /etc/sysctl.d/50-coredump.conf
+    sysctl_set: true
+  register: limit_config
 
 - name: Allow safe suid binary coredumps
   ansible.posix.sysctl:
@@ -22,13 +30,32 @@
     line: 'DefaultLimitCORE=infinity'
   register: core_config
 
-- name: Reload systemd to apply coredump limit change
+- name: Update coredump storage configuration
+  lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: '^Storage=none'
+    line: '#Storage=external'
+  register: storage_config
+
+- name: Update coredump process size configuration
+  lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: '^ProcessSizeMax=0'
+    line: '#ProcessSizeMax=2G'
+  register: process_config
+
+- name: Reload systemd to apply configuration changes
   systemd:
     daemon_reload: true
-  when: core_config is changed
+  when: core_config is changed or
+        storage_config is changed or
+        process_config is changed
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
-  when: core_config is changed or
+  when: pattern_config is changed or
+        limit_config is changed or
         suid_config is changed or
-        pattern_config is changed
+        core_config is changed or
+        storage_config is changed or
+        process_config is changed

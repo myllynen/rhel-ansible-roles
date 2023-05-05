@@ -10,7 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Enable system-wide coredumps
+# Enable or disable system-wide coredumps
 system_coredump_enable: true
 </pre>
 
