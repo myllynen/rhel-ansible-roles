@@ -46,39 +46,17 @@
     - ansible_facts.distribution_major_version|int > 7
     - pwhistory_config_file | default(false)
 
-- name: Create system-local password quality requirements file (RHEL 7)
-  template:
-    src: "{{ pwquality_config_file }}"
-    dest: /etc/security/pwquality.conf
-    mode: '0644'
-  when:
-    - ansible_facts.distribution_major_version|int < 8
-    - pwquality_config_file | default(false)
-
 - name: Create system-local password quality requirements file
   template:
     src: "{{ pwquality_config_file }}"
-    dest: /etc/security/pwquality.conf.d/zz-local.conf
-    mode: '0644'
-  when:
-    - ansible_facts.distribution_major_version|int >= 8
-    - pwquality_config_file | default(false)
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=2055604
-- name: Ensure system-local password quality requirements
-  template:
-    src: pwquality_conf.rhel{{ ansible_facts.distribution_major_version }}_default.j2
     dest: /etc/security/pwquality.conf
     mode: '0644'
-  when:
-    - ansible_facts.distribution_major_version|int >= 8
-    - pwquality_config_file | default(false)
+  when: pwquality_config_file | default(false)
 
 - name: Install required packages
   vars:
     auth_packages:
       - authselect
-      - "{{ 'oddjob' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
       - "{{ 'oddjob-mkhomedir' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
   yum:
     name: "{{ auth_packages | select() | list }}"
@@ -155,7 +133,7 @@
 
 - name: Create PAM su configuration file
   vars:
-    enable_centrify: "{{ true if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else false }}"
+    enable_centrify: "{{ true if 'with-centrify' in system_auth_profile_parameters | default('', true) else false }}"
   template:
     src: "{{ system_auth_pam_d_su_file }}"
     dest: /etc/pam.d/su

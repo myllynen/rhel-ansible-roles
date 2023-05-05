@@ -39,6 +39,7 @@ faillock_config_file:
 
 # PAM password history config file pwhistory.conf template
 # NB. This is supported only since RHEL 8.8 / RHEL 9.2
+# NB. This is currently not compatible with oscap(8)
 # Role provided alternatives:
 # * pwhistory.conf_cis.j2  - CIS Level 2 - Server compliant config
 # * pwhistory.conf_rhel.j2 - RHEL default config
