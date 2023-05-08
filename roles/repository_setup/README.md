@@ -90,6 +90,7 @@ repository_setup_rhsm_repositories_disable:
 repository_setup_rhsm_repositories_enable:
 #  - rhel-{{ ansible_facts.distribution_major_version }}-for-x86_64-baseos-rpms
 #  - rhel-{{ ansible_facts.distribution_major_version }}-for-x86_64-appstream-rpms
+#  - codeready-builder-for-rhel-{{ ansible_facts.distribution_major_version }}-x86_64-rpms
 
 # Disable non-enabled Red Hat / Satellite repositories
 repository_setup_rhsm_repositories_purge: true
