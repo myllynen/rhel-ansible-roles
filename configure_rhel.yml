@@ -33,9 +33,15 @@
     #    uid: 12345
     #    group: testgroup
     #    comment: Test User
+    #    create_home: true
     #    home: /home/testuser
     #    shell: /bin/bash
     #    expires: -1
+    #    # Configures passwordless unlimited sudo
+    #    allow_full_sudo: false
+    #    authorized_keys:
+    #      - ssh-rsa ... user@cloud
+    #    authorized_keys_exclusive: false
 
     # Use true if providing crypted values,
     # false to encrypt cleartext passwords.

@@ -44,8 +44,8 @@
 - name: Add local user to supplementary groups
   user:
     name: "{{ item.name }}"
-    append: "{{ item.append }}"
     groups: "{{ item.groups }}"
+    append: "{{ item.append }}"
     state: present
   loop: "{{ accounts_local_users_groups | select() | list }}"
 
@@ -71,3 +71,13 @@
   loop_control:
     label: "{{ item.name }}"
   when: item.allow_full_sudo | default(false) | bool
+
+- name: Configure local user SSH authorized key
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ item.1 }}"
+    exclusive: "{{ item.0.authorized_keys_exclusive | default(omit) }}"
+    state: present
+  loop: "{{ accounts_local_users_create | subelements('authorized_keys', 'skip_missing=true') }}"
+  loop_control:
+    label: "{{ item.0.name }}"
