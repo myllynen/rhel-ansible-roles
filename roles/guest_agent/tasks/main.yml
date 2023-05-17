@@ -1,0 +1,139 @@
+---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+      - virtualization_role
+      - virtualization_type
+  when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.virtualization_role is not defined or
+        ansible_facts.virtualization_type is not defined
+
+- name: Remove unneeded firmware packages
+  vars:
+    firmware_packages:
+      - 'a*firmware*'
+      - 'i*firmware*'
+      - 'lib*firmware*'
+      - 'n*firmware*'
+      - "{{ 'linux-firmware' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+  yum:
+    name: "{{ firmware_packages | select() | list }}"
+    autoremove: true
+    #cacheonly: true
+    state: absent
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - guest_agent_remove_firmware | bool
+
+- name: Remove all virtual guest packages
+  yum:
+    name:
+      - 'hyperv*'
+      - open-vm-tools
+      - qemu-guest-agent
+      - spice-vdagent
+      - WALinuxAgent
+    autoremove: true
+    #cacheonly: true
+    state: absent
+  register: package_removal
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - not guest_agent_enable | bool
+
+- name: Remove unneeded packages on Azure/Hyper-V
+  yum:
+    name:
+      - open-vm-tools
+      - qemu-guest-agent
+      - spice-vdagent
+    autoremove: true
+    #cacheonly: true
+    state: absent
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type == "VirtualPC"
+    - guest_agent_enable | bool
+
+- name: Remove unneeded packages on KVM
+  yum:
+    name:
+      - 'hyperv*'
+      - open-vm-tools
+      - WALinuxAgent
+    autoremove: true
+    #cacheonly: true
+    state: absent
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type == "kvm"
+    - guest_agent_enable | bool
+
+- name: Remove unneeded packages on VMware
+  yum:
+    name:
+      - 'hyperv*'
+      - qemu-guest-agent
+      - spice-vdagent
+      - WALinuxAgent
+    autoremove: true
+    cacheonly: true
+    state: absent
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type == "VMware"
+    - guest_agent_enable | bool
+
+- name: Install virtual guest package
+  vars:
+    agent_packages:
+      kvm: qemu-guest-agent
+      VirtualPC:
+        - 'hyperv*'
+        - WALinuxAgent
+      VMware: open-vm-tools
+  yum:
+    name: "{{ agent_packages[ansible_facts.virtualization_type] }}"
+    state: present
+  register: package_install
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type in agent_packages
+    - guest_agent_enable | bool
+
+- name: Enable virtual guest agent service
+  vars:
+    agent_services:
+      kvm: qemu-guest-agent
+      VirtualPC: waagent
+      VMware: vmtoolsd
+  service:
+    name: "{{ agent_services[ansible_facts.virtualization_type] }}"
+    enabled: true
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type in agent_services
+    - guest_agent_enable | bool
+
+- name: Start virtual guest agent service
+  vars:
+    agent_services:
+      kvm: qemu-guest-agent
+      VirtualPC: waagent
+      VMware: vmtoolsd
+  service:
+    name: "{{ agent_services[ansible_facts.virtualization_type] }}"
+    state: started
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type in agent_services
+    - guest_agent_enable | bool
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  changed_when: true
+  when: package_install is changed or
+        package_removal is changed

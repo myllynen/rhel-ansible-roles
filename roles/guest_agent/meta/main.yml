@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  role_name: guest_agent
+  author: Marko Myllynen <myllynen@redhat.com>
+  company: Red Hat, Inc.
+  description: guest_agent role
+  license: GPLv3+
+  min_ansible_version: "2.9"
+  platforms:
+    - name: EL
+      versions:
+        - "7"
+        - "8"
+        - "9"
+  galaxy_tags:
+    - rhel
+    - centos
+    - configuration
+dependencies: []
