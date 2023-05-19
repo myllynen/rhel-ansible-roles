@@ -14,10 +14,12 @@ Below are the role default values from defaults/main.yml:
 # This role will detect and enable correct
 # agent and remove other agents if present
 # Will uninstall all agents if set to false
+# NB. Only agents from RHEL repositories
+#     are considered for un/installation
 guest_agent_enable: true
 
 # Remove unneeded firmware packages on VMs
-# Only VMs with device passthrough may need these
+# VMs with device passthrough may need these
 guest_agent_remove_firmware: true
 </pre>
 
