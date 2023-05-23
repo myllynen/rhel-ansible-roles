@@ -10,9 +10,26 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Default recipient email address for the report if no
-# host-specific variable 'email' set in the inventory.
-system_update_report_pre_default_recipient: root@localhost
+# Parameters for the community.general.mail module
+# Subject, reply, and to are mandatory, rest optional
+system_update_report_pre_email_parameters:
+  #host: localhost
+  #port: 25
+  #secure: try
+  #timeout: 20
+
+  #ehlohost:
+  #username:
+  #password:
+
+  charset: us-ascii
+  #headers:
+  #subtype:
+  subject: "[INFO] Upcoming System Update"
+  sender: no-reply@localhost
+  to: root@localhost
+  #cc:
+  #bcc:
 
 # Attach PDF version of the report
 # PDFs will be generated on the control host using
@@ -25,15 +42,11 @@ system_update_report_pre_pdf_dir: /tmp/.ansible.pdf
 # Preamble text to include in all generated PDFs
 # <HOST> will be replaced with inventory hostname
 # <OSREL> will be replaced with OS release name
-system_update_report_pre_pdf_preamble: |
-    Pending System Update Report
-    
-    
-    Server: <HOST>
-    OS version: <OSREL>
-    
-    
-    The following package updates are pending:
+system_update_report_pre_pdf_preamble: "
+  Upcoming System Update Report\n\n\n
+  Server: <HOST>\n
+  OS version: <OSREL>\n\n\n
+  The following package updates will be installed:\n"
 </pre>
 
 ## License

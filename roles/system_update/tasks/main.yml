@@ -8,6 +8,7 @@
   when: ansible_facts.pkg_mgr is not defined
 
 - name: Update all packages
+  # noqa: package-latest
   yum:
     name: '*'
     update_cache: true
@@ -67,7 +68,9 @@
   package_facts:
 
 - name: Check need for rebooting
-  command: needs-restarting --disableplugin=product-id,subscription-manager -r
+  vars:
+    plugin_opt: "{{ '--disableplugin=product-id,subscription-manager' if ansible_facts.pkg_mgr != 'yum' else '' }}"
+  command: needs-restarting {{ plugin_opt }} -r
   check_mode: false
   register: needs_restarting
   failed_when: false
@@ -88,31 +91,39 @@
 - name: Create PDF report
   include_tasks: pdf.yml
   when:
-    - system_update_report | bool
+    - system_update_email_report | bool
     - system_update_report_pdf | bool
     - package_updates is defined
 
-- name: Notify about updated packages
-  environment:
-    EMAIL_PDF: "{{ system_update_report_pdf }}"
-    PDF_DIR: "{{ system_update_report_pdf_dir }}"
-  script: send-notification '{{ hostvars[item].email | default(system_update_report_default_recipient, true) }}' '{{ item }}' '{{ hostvars[item].package_updates }}'
-  register: command_output
+- name: Send email notification about updated packages
+  vars:
+    pdf_file: "{{ system_update_report_pdf_dir }}/{{ inventory_hostname | replace('.', '_') }}.pdf"
+    attachment: "{{ [pdf_file] if system_update_report_pdf | bool else omit }}"
+  throttle: 1
+  community.general.mail:
+    host: "{{ system_update_email_parameters.host | default(omit) }}"
+    port: "{{ system_update_email_parameters.port | default(omit) }}"
+    secure: "{{ system_update_email_parameters.secure | default(omit) }}"
+    timeout: "{{ system_update_email_parameters.timeout | default(omit) }}"
+    ehlohost: "{{ system_update_email_parameters.ehlohost | default(omit) }}"
+    username: "{{ system_update_email_parameters.username | default(omit) }}"
+    password: "{{ system_update_email_parameters.password | default(omit) }}"
+    charset: "{{ system_update_email_parameters.charset | default(omit) }}"
+    headers: "{{ system_update_email_parameters.headers | default(omit) }}"
+    subtype: "{{ system_update_email_parameters.subtype | default(omit) }}"
+    subject: "{{ system_update_email_parameters.subject }}"
+    sender: "{{ system_update_email_parameters.sender }}"
+    to: "{{ system_update_email_parameters.to }}"
+    cc: "{{ system_update_email_parameters.cc | default(omit) }}"
+    bcc: "{{ system_update_email_parameters.bcc | default(omit) }}"
+    body: "{{ package_updates }}"
+    attach: "{{ attachment }}"
   delegate_to: localhost
-  run_once: true
   become: false
-  loop: "{{ ansible_play_batch }}"
   when:
-    - system_update_report | bool
-    - hostvars[item].package_updates is defined
-
-- name: Display notification command debug output
-  debug:
-    msg: "{{ command_output.results | selectattr('item', 'equalto', inventory_hostname) | map(attribute='stdout') | first }}"
-  when:
-    - system_update_report | bool
-    - hostvars[inventory_hostname].package_updates is defined
-    - command_output.stdout is defined
+    - system_update_email_report | bool
+    - system_update_report_pdf | bool
+    - package_updates is defined
 
 - name: Remove local PDF directory
   file:

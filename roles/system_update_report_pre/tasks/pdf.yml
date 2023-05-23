@@ -16,16 +16,16 @@
   run_once: true
   become: false
 
-- name: Set report timestamp
-  set_fact:
-    pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
-
-- name: Set OS release info
+- name: Read OS release info
   slurp:
     src: /etc/redhat-release
   register: os_release
 
-- name: Set report PDF/PS/TXT file names
+- name: Set PDF timestamp
+  set_fact:
+    pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
+
+- name: Set PDF/PS/TXT file names
   set_fact:
     server_pdf: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
     server_ps: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.ps' }}"
@@ -33,30 +33,28 @@
 
 - name: Write report to TXT file
   shell: |
-    printf "{{ system_update_report_pre_pdf_preamble }}\n" > {{ hostvars[item].server_txt }}
-    sed -i -e 's,<HOST>,{{ item }},g' {{ hostvars[item].server_txt }}
-    sed -i -e 's,<OSREL>,{{ hostvars[item].os_release.content|b64decode|trim }},g' {{ hostvars[item].server_txt }}
-    printf "\n{{ hostvars[item].package_updates }}" >> {{ hostvars[item].server_txt }}
-    printf "\n\n\nThis report was automatically generated on {{ pdf_timestamp }}.\n" >> {{ hostvars[item].server_txt }}
+    set -o pipefail
+    printf "{{ system_update_report_pre_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ server_txt }}
+    sed -i -e 's,<HOST>,{{ inventory_hostname }},g' {{ server_txt }}
+    sed -i -e 's,<OSREL>,{{ os_release.content | b64decode | trim }},g' {{ server_txt }}
+    printf "\n{{ package_updates }}" >> {{ server_txt }}
+    printf "\n\n\nThis report was automatically generated on {{ pdf_timestamp }}.\n" >> {{ server_txt }}
   register: command_output
+  changed_when: true
   delegate_to: localhost
-  run_once: true
   become: false
-  loop: "{{ ansible_play_batch }}"
-  when: hostvars[item].package_updates is defined
+  when: package_updates is defined
 
 - name: Convert TXT file to PS file
-  command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ item }} -T 4 -o {{ hostvars[item].server_ps }} {{ hostvars[item].server_txt }}
+  command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ inventory_hostname }} -T 4 -o {{ server_ps }} {{ server_txt }}
+  changed_when: true
   delegate_to: localhost
-  run_once: true
   become: false
-  loop: "{{ ansible_play_batch }}"
-  when: hostvars[item].package_updates is defined
+  when: package_updates is defined
 
 - name: Convert PS file to PDF file
-  command: ps2pdf {{ hostvars[item].server_ps }} {{ hostvars[item].server_pdf }}
+  command: ps2pdf {{ server_ps }} {{ server_pdf }}
+  changed_when: true
   delegate_to: localhost
-  run_once: true
   become: false
-  loop: "{{ ansible_play_batch }}"
-  when: hostvars[item].package_updates is defined
+  when: package_updates is defined
