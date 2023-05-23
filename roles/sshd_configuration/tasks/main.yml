@@ -32,6 +32,11 @@
   set_fact:
     config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-local.conf' }}"
 
+- name: Check sshd configuration file
+  stat:
+    path: "{{ config_file }}"
+  register: file_check
+
 - name: Enable sshd configuration options
   lineinfile:
     path: "{{ config_file }}"
@@ -45,13 +50,16 @@
   when: item.key not in sshd_disable
 
 - name: Disable sshd configuration options
+  vars:
+    main_file: "{{ '/etc/ssh/sshd_config' }}"
+    update_files: "{{ [main_file] + [config_file] if file_check.stat.exists else [main_file] }}"
   replace:
     path: "{{ item.0 }}"
     regexp: '^({{ item.1 }} .*)'
     replace: '#\1'
     validate: /usr/sbin/sshd -tf %s
   register: disable_options
-  loop: "{{ (['/etc/ssh/sshd_config'] + [config_file]) | unique | product(sshd_disable) | list }}"
+  loop: "{{ update_files | unique | product(sshd_disable) | list }}"
 
 - name: Reload sshd to apply configuration changes
   service:

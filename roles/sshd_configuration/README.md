@@ -17,7 +17,7 @@ sshd_options:
 
 # These options will be commented out from config
 sshd_options_disable:
-  - Banner
+  - Protocol
 </pre>
 
 ## License
