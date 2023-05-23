@@ -2,12 +2,7 @@
 - name: Gather package facts
   package_facts:
 
-- name: Install grubby package
-  yum:
-    name: grubby
-    state: present
-  when: "'grubby' not in ansible_facts.packages"
-
+# This role may run before repositories are setup
 - name: Install grubby package
   yum:
     name: grubby
@@ -29,13 +24,14 @@
     --update-kernel=ALL
     --remove-args="ipv6.disable"
   register: boot_config
+  changed_when: true
   when: boot_param_check.found == 1
 
 - name: Update IPv6 sysctl parameters configuration
   vars:
-    disable_ipv6: "{{ '0' if ipv6_setup_enable|bool else '1' }}"
+    disable_ipv6: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
     loopback_disable_ipv6: >
-      {{ '1' if not ipv6_setup_enable|bool and not ipv6_setup_loopback_persist|bool else '0' }}
+      {{ '1' if not ipv6_setup_enable | bool and not ipv6_setup_loopback_persist | bool else '0' }}
   copy:
     content: |
       net.ipv6.conf.all.disable_ipv6 = {{ disable_ipv6 }}
@@ -64,7 +60,7 @@
 
 - name: Update IPv6 configuration in NIC ifcfg files
   vars:
-    disable_ipv6: "{{ 'yes' if ipv6_setup_enable|bool else 'no' }}"
+    disable_ipv6: "{{ 'yes' if ipv6_setup_enable | bool else 'no' }}"
   replace:
     path: "{{ item }}"
     regexp: '^IPV6INIT=.*'
@@ -75,7 +71,7 @@
 
 - name: Update IPv6 configuration in NM connection files
   vars:
-    disable_ipv6: "{{ 'auto' if ipv6_setup_enable|bool else 'disabled' }}"
+    disable_ipv6: "{{ 'auto' if ipv6_setup_enable | bool else 'disabled' }}"
   replace:
     path: "{{ item }}"
     after: '\[ipv6\]'
@@ -88,6 +84,7 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: sysctl_config is changed
 
 - name: Reboot system
