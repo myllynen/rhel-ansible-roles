@@ -3,14 +3,16 @@
 # to apply and / or check for compliance.
 # Switching from one security profile to
 # another may not work and is unsupported
-scap_compliance_profile: cis_server_l1
-
-# Optional local tailoring file to use
-scap_compliance_tailoring_file_path:
+scap_compliance_profile: cis
 
 # Optional custom tailoring template to use
 # Needs scap_compliance_tailoring_file_path
+# This is copied from controller to remote
 scap_compliance_tailoring_file_template:
+
+# Optional remote tailoring file to use
+# This is tailoring file path on remote
+scap_compliance_tailoring_file_path:
 
 # State of OpenSCAP packages on the target
 # Allowed states: present, latest
