@@ -13,11 +13,13 @@ Below are the role default values from defaults/main.yml:
 # Policy to apply to USB devices
 # reject - block and reject all devices
 # custom - custom configuration, see below
-# allow - disable USBGuard and allow all USB devices
+# allow  - disable USBGuard and allow all USB devices
 usbguard_setup_policy: reject
 
 # Custom USBGuard configuration file
-# If unset default RHEL configuration will be used
+# Role provided alternatives:
+# * usbguard-daemon_rhel.conf  - RHEL default config
+# * usbguard-daemon_rhel7.conf - RHEL 7 default config
 usbguard_setup_config_file:
 
 # Custom USBGuard rules file template to use
