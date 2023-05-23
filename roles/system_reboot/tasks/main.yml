@@ -1,4 +1,12 @@
 ---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - pkg_mgr
+  when: ansible_facts.pkg_mgr is not defined
+
 - name: Install yum-utils package
   yum:
     name: yum-utils
@@ -9,7 +17,9 @@
   package_facts:
 
 - name: Check need for rebooting
-  command: needs-restarting --disableplugin=product-id,subscription-manager -r
+  vars:
+    plugin_opt: "{{ '--disableplugin=product-id,subscription-manager' if ansible_facts.pkg_mgr != 'yum' else '' }}"
+  command: needs-restarting {{ plugin_opt }} -r
   check_mode: false
   register: needs_restarting
   failed_when: false
