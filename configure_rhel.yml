@@ -29,6 +29,7 @@
     accounts_local_users_create:
     #  - name: testuser
     #    # This should come from vault
+    #    # Should be encrypted, see below
     #    password: ...
     #    uid: 12345
     #    group: testgroup
@@ -37,7 +38,10 @@
     #    home: /home/testuser
     #    shell: /bin/bash
     #    expires: -1
-    #    # Configures passwordless unlimited sudo
+    #    #password_expire_max: 365
+    #    #password_expire_min: 7
+    #    # Configures passwordless unlimited sudo for user
+    #    # by creating or removing /etc/sudoers.d/username
     #    allow_full_sudo: false
     #    authorized_keys:
     #      - ssh-rsa ... user@cloud
@@ -45,16 +49,23 @@
 
     # Use true if providing crypted values,
     # false to encrypt cleartext passwords.
-    accounts_local_password_encrypted: false
+    accounts_local_password_encrypted: true
     # Seed for password_hash salt value
     accounts_local_password_salt_seed: "{{ inventory_hostname }}"
 
+    # Value for no_log parameter when setting passwords
+    # Recommended to use true and provide encrypted pws
+    accounts_local_no_log: true
+
     # List of supplementary groups for users
     # Mandatory parameters: name, groups, append
+    # Set append to false to make groups explicit
     accounts_local_users_groups:
     #  - name: testuser
-    #    groups: tcpdump,wheel
-    #    append: true
+    #    groups:
+    #      - tcpdump
+    #      - wheel
+    #    append: false
 
     #
     # accounts_policy
@@ -138,9 +149,10 @@
     # audit_setup
     #
     # Optional auditd config file to copy
-    # If unset default RHEL configuration will be used
     # Role provided alternatives:
-    # * auditd_cis.conf - CIS Level 2 - Server compliant config
+    # * auditd_cis.conf   - CIS Level 2 - Server compliant config
+    # * auditd_rhel.conf  - RHEL default config
+    # * auditd_rhel7.conf - RHEL 7 default config
     audit_setup_config_file:
 
     # Optional audit rules file to copy
@@ -209,7 +221,7 @@
     #
     # Allowed actions: join, leave
     domain_ad_action: join
-    domain_ad_domain: example.com
+    domain_ad_domain:
 
     # These should come from vault
     #domain_ad_admin_username:
@@ -218,7 +230,8 @@
     domain_ad_computer_precreated: false
     domain_ad_computer_delete_on_leave: true
 
-    #domain_ad_allow_groups: GROUP@example.com
+    domain_ad_allow_groups:
+    #  - GROUP@example.com
 
     # Enable or disable running authconfig/authselect
     # If false then setup by this role is not complete
@@ -236,7 +249,7 @@
     #
     # etc_hosts
     #
-    # /etc/hosts header to always apply (subject to etc_hosts_omit_hosts)
+    # /etc/hosts header to always apply (subject to etc_hosts_omit_entries)
     # This default header matches the most recent Fedora/upstream headers
     etc_hosts_header: |
       # Loopback entries; do not change.
@@ -263,7 +276,7 @@
     # none - do not omit entries
     # ipv4 - omit all IPv4 entries
     # ipv6 - omit all IPv6 entries
-    etc_hosts_omit_hosts: none
+    etc_hosts_omit_entries: none
 
     #
     # fapolicyd_setup
@@ -273,14 +286,23 @@
     # NB. See ima_evm_setup if planning to use IMA.
     fapolicyd_setup_enable_service: false
 
-    # fapolicyd config file to copy, role default ~ RHEL default
-    fapolicyd_setup_config_file: fapolicyd.conf
+    # fapolicyd config file to copy
+    # Role provided alternatives:
+    # * fapolicyd.conf  - RHEL default config file
+    fapolicyd_setup_config_file:
 
-    # fapolicyd rules file to copy, rules default ~ RHEL default
-    fapolicyd_setup_rules_file: fapolicyd.rules
+    # fapolicyd rules file to copy
+    fapolicyd_setup_rules_file:
 
-    # fapolicyd trust file to copy, trust default is empty file
-    fapolicyd_setup_trust_file: fapolicyd.trust
+    # fapolicyd trust file to copy
+    # Role provided alternatives:
+    # * fapolicyd.trust - RHEL default trust file
+    fapolicyd_setup_trust_file:
+
+    # fapolicyd RPM filter file to copy
+    # Role provided alternatives:
+    # * rpm-filter.conf - RHEL default trust file
+    fapolicyd_setup_rpm_filter_file:
 
     #
     # files_{copy,create,fetch,get,remove} - omitted here for brevity
@@ -295,30 +317,51 @@
 
     # Enable & check or not FIPS mode
     # Disabling FIPS mode is unsupported
-    fips_setup_enable: true
+    fips_setup_enable: false
 
     #
     # firewall
     #
-    firewall_enable: true
+    # This role provides only very basic firewall setup
+    # Use system_roles.firewall for more complete setups
 
+    # Enable or disable firewall
+    # Set to null to leave untouched
+    firewall_enable: null
+
+    # Firewall default zone to set and configure
     firewall_default_zone: public
 
-    # List of ports (80/tcp, 123/udp, ...) or services (cockpit, https, ...)
-    # vars/main.yml lists always open ports/services. ssh is always kept open.
+    # List of ports to open
     firewall_open_ports:
     #  - 321/udp
 
+    # List of services to open
     firewall_open_services:
     #  - samba
 
     # Close unconfigured ports and services
-    firewall_close_unconfigured: true
+    # The ssh service will not be closed by
+    # this role regardless of configuration
+    firewall_close_unconfigured: false
+
+    #
+    # guest_agent
+    #
+    # Install or remove server VM guest agents
+    # This role will detect and enable correct
+    # agent and remove other agents if present
+    # Will uninstall all agents if set to false
+    guest_agent_enable: true
+
+    # Remove unneeded firmware packages on VMs
+    # VMs with device passthrough may need these
+    guest_agent_remove_firmware: true
 
     #
     # insights_client
     #
-    # Register or unregister the system for Red Hat Insights
+    # Register or unregister the system with Red Hat Insights
     # See https://access.redhat.com/products/red-hat-insights
     insights_client_register: true
 
@@ -328,7 +371,7 @@
     #  security: strict
     #  network_performance: latency
 
-    # Enable Red Hat connector (rhc) when needed
+    # Enable remote host configuration (rhc)
     # See https://access.redhat.com/articles/rhc
     insights_client_rhc_enable: true
 
@@ -401,15 +444,15 @@
     tuned_profile: "{{ 'virtual-guest' if ansible_facts.virtualization_role == 'guest' else 'throughput-performance' }}"
 
     #
+    # repository_setup - config omitted here for brevity
+    #
+
+    #
     # rescue_image
     #
     # Enable or disable rescue image
     # NB. Rescue images will be created on next kernel install
     rescue_image_enable: false
-
-    #
-    # repository_setup - config omitted here for brevity
-    #
 
     #
     # resolver_configuration
@@ -439,9 +482,11 @@
     #
     # Use true if providing crypted value,
     # false to encrypt cleartext password.
-    root_password_encrypted: false
+    root_password_encrypted: true
+
     # Seed for password_hash salt value
     root_password_salt_seed: "{{ inventory_hostname }}"
+
     # This should come from vault
     #root_password:
 
@@ -452,14 +497,16 @@
     # to apply and / or check for compliance.
     # Switching from one security profile to
     # another may not work and is unsupported
-    scap_compliance_profile: cis_server_l1
-
-    # Optional local tailoring file to use
-    scap_compliance_tailoring_file_path:
+    scap_compliance_profile: cis
 
     # Optional custom tailoring template to use
     # Needs scap_compliance_tailoring_file_path
+    # This is copied from controller to remote
     scap_compliance_tailoring_file_template:
+
+    # Optional local tailoring file to use
+    # This is tailoring file path on remote
+    scap_compliance_tailoring_file_path:
 
     # State of OpenSCAP packages on the target
     # Allowed states: present, latest
@@ -494,36 +541,48 @@
     # NB. Enabling lockdown will prevent using kdump
     kernel_lockdown: disabled
 
+    # SELinux state
     selinux: enforcing
 
+    # System-wide crypto policy
     crypto_policy: DEFAULT
 
     #
     # service_state
     #
-    # List of services to stop and disable
-    # Missing services will be ignored
-    service_state_disable:
-      - mlocate-updatedb.timer
-      - nfs-client.target
-      - rpcbind.service
-      - rpcbind.socket
+    # List of services/units to mask
+    service_state_mask:
+    #  - dnf-makecache.timer
 
-    # List of services to enable and start
-    # Missing services will be ignored
+    # List of services/units to unmask
+    service_state_unmask:
+    #  - httpd.service
+
+    # List of services/units to disable and stop
+    service_state_disable:
+    #  - mlocate-updatedb.timer
+    #  - nfs-client.target
+    #  - rpcbind.service
+    #  - rpcbind.socket
+
+    # List of services/units to enable and start
     service_state_enable:
-      - irqbalance.service
+    #  - irqbalance.service
+
+    # Skip missing services/units instead of
+    # failing when trying to start/stop them
+    service_state_skip_missing: false
 
     #
     # shell_profile
     #
     # Shell profile template to use
-    shell_profile_file: local.sh.j2
+    shell_profile_file:
 
     #
     # splunk_forwarder
     #
-    splunk_deployment_server: splunk.example.com
+    splunk_deployment_server:
     splunk_deployment_server_port: 8089
     splunk_deployment_server_check: true
 
@@ -551,13 +610,13 @@
 
     # These options will be commented out from config
     sshd_options_disable:
-      - Banner
+      - Protocol
 
     #
     # system_coredump
     #
     # Enable or disable system-wide coredumps
-    system_coredump_enable: true
+    system_coredump_enable: false
 
     #
     # system_hostname
@@ -623,19 +682,36 @@
     # always - always reboot even if no updates were installed
     system_update_reboot_policy: when_needed
 
-    # Set true to send a report after updating packages
-    system_update_report: true
+    # Send an email report after updating packages
+    system_update_email_report: true
 
-    # Default recipient email address for the report if no
-    # host-specific variable 'email' set in the inventory.
-    system_update_report_default_recipient: root@localhost
+    # Parameters for the community.general.mail module
+    # Subject, reply, and to are mandatory, rest optional
+    system_update_email_parameters:
+      #host: localhost
+      #port: 25
+      #secure: try
+      #timeout: 20
+
+      #ehlohost:
+      #username:
+      #password:
+
+      charset: us-ascii
+      #headers:
+      #subtype:
+      subject: "[INFO] System Update"
+      sender: no-reply@localhost
+      to: root@localhost
+      #cc:
+      #bcc:
 
     # Attach PDF version of the report
     # PDFs will be generated on the control host using
     # utilities from enscript and ghostscript packages
     system_update_report_pdf: false
 
-    # Directory used to generate PDF files
+    # Local directory to use for generating PDF files
     system_update_report_pdf_dir: /tmp/.ansible.pdf
 
     # Preamble text to include in all generated PDFs
@@ -643,24 +719,37 @@
     # <OSREL> will be replaced with OS release name
     # <DATE> will be replaced with patching date/time
     # <REBOOT> will be indicate reboot, true or false
-    system_update_report_pdf_preamble: |
-        System Update Report
-        
-        
-        Server: <HOST>
-        Patch date: <DATE>
-        OS version: <OSREL>
-        Server rebooted: <REBOOT>
-        
-        
-        The following packages were updated:
+    system_update_report_pdf_preamble: "
+      System Update Report\n\n\n
+      Server: <HOST>\n
+      Patch date: <DATE>\n
+      OS version: <OSREL>\n
+      Server rebooted: <REBOOT>\n\n\n
+      The following packages were updated:\n"
 
     #
     # system_update_report_pre
     #
-    # Default recipient email address for the report if no
-    # host-specific variable 'email' set in the inventory.
-    system_update_report_pre_default_recipient: root@localhost
+    # Parameters for the community.general.mail module
+    # Subject, reply, and to are mandatory, rest optional
+    system_update_report_pre_email_parameters:
+      #host: localhost
+      #port: 25
+      #secure: try
+      #timeout: 20
+
+      #ehlohost:
+      #username:
+      #password:
+
+      charset: us-ascii
+      #headers:
+      #subtype:
+      subject: "[INFO] Upcoming System Update"
+      sender: no-reply@localhost
+      to: root@localhost
+      #cc:
+      #bcc:
 
     # Attach PDF version of the report
     # PDFs will be generated on the control host using
@@ -673,15 +762,11 @@
     # Preamble text to include in all generated PDFs
     # <HOST> will be replaced with inventory hostname
     # <OSREL> will be replaced with OS release name
-    system_update_report_pre_pdf_preamble: |
-        Pending System Update Report
-        
-        
-        Server: <HOST>
-        OS version: <OSREL>
-        
-        
-        The following package updates are pending:
+    system_update_report_pre_pdf_preamble: "
+      Upcoming System Update Report\n\n\n
+      Server: <HOST>\n
+      OS version: <OSREL>\n\n\n
+      The following package updates will be installed:\n"
 
     #
     # timesync
@@ -713,11 +798,13 @@
     # Policy to apply to USB devices
     # reject - block and reject all devices
     # custom - custom configuration, see below
-    # allow - disable USBGuard and allow all USB devices
+    # allow  - disable USBGuard and allow all USB devices
     usbguard_setup_policy: reject
 
     # Custom USBGuard configuration file
-    # If unset default RHEL configuration will be used
+    # Role provided alternatives:
+    # * usbguard-daemon_rhel.conf  - RHEL default config
+    # * usbguard-daemon_rhel7.conf - RHEL 7 default config
     usbguard_setup_config_file:
 
     # Custom USBGuard rules file template to use
@@ -739,19 +826,15 @@
     watchdog_kexec_sec: #'off'
     watchdog_device: #/dev/watchdog0
 
-    #
-    # web_console
-    #
-    web_console_enable_perf_metrics: true
-
   roles:
     #- system_hostname
-    - etc_hosts
-    - resolver_configuration
     - ipv6_setup
+    - etc_hosts
     #- repository_setup
+    - guest_agent
     #- rhel-system-roles.network
-    #- rescue_image
+    #- dns_cache
+    - resolver_configuration
     #- timezone
     - timesync
     - packages_remove
@@ -769,17 +852,18 @@
     #- accounts_policy
     #- accounts_local
     - certificates
-    #- dns_cache
     #- { role: domain_ad, when: domain_ad_admin_username is defined }
     #- { role: ipaclient, state: present, when: ipaclient_domain is defined }
     ##- ima_evm_setup
     #- fapolicyd_setup
     #- fips_setup
     - firewall
+    #- rhel-system-roles.firewall
     - watchdog
     #- motd_issue
     - packages_install
     - performance_tuning
+    #- rescue_image
     - root_password
     - security_hardening
     - service_state
@@ -787,10 +871,10 @@
     - sshd_configuration
     #- troubleshooting_tools
     #- usbguard_setup
-    #- web_console
+    #- rhel-system-roles.cockpit
     #- rhel-system-roles.logging
     #- rhel-system-roles.metrics
-    #- splunk_forwarder
+    #- { role: splunk_forwarder, when: splunk_user_password_hash is defined }
     #- system_coredump
     - system_init
     #- scap_compliance
