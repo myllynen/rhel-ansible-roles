@@ -17,6 +17,7 @@
     group: fapolicyd
     mode: '0644'
   register: daemon_config
+  when: fapolicyd_setup_config_file | default(false)
 
 - name: Copy fapolicyd rules file
   copy:
@@ -26,11 +27,13 @@
     group: fapolicyd
     mode: '0644'
   register: rules_config
+  when: fapolicyd_setup_rules_file | default(false)
 
 - name: Remove old fapolicyd rules file
   file:
     path: /etc/fapolicyd/fapolicyd.rules
     state: absent
+  when: fapolicyd_setup_rules_file | default(false)
 
 - name: Copy fapolicyd trust file
   copy:
@@ -40,6 +43,17 @@
     group: fapolicyd
     mode: '0644'
   register: trust_config
+  when: fapolicyd_setup_trust_file | default(false)
+
+- name: Copy fapolicyd RPM filter file
+  copy:
+    src: "{{ fapolicyd_setup_rpm_filter_file }}"
+    dest: /etc/fapolicyd/rpm-filter.conf
+    owner: root
+    group: fapolicyd
+    mode: '0644'
+  register: rpm_filter_config
+  when: fapolicyd_setup_rpm_filter_file | default(false)
 
 - name: Run fapolicyd configuration check
   command: fapolicyd-cli --check-config
@@ -74,4 +88,5 @@
     - service_start is not changed
     - daemon_config is changed or
       rules_config is changed or
-      trust_config is changed
+      trust_config is changed or
+      rpm_filter_config is changed

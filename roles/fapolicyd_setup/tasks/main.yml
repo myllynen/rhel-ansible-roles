@@ -9,4 +9,4 @@
 
 - name: Enable fapolicyd
   include_tasks: enable.yml
-  when: ansible_facts.distribution_major_version|int >= 8
+  when: ansible_facts.distribution_major_version | int >= 8

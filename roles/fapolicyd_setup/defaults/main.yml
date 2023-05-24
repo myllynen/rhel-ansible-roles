@@ -4,11 +4,20 @@
 # NB. See ima_evm_setup if planning to use IMA.
 fapolicyd_setup_enable_service: false
 
-# fapolicyd config file to copy, role default ~ RHEL default
-fapolicyd_setup_config_file: fapolicyd.conf
+# fapolicyd config file to copy
+# Role provided alternatives:
+# * fapolicyd.conf  - RHEL default config file
+fapolicyd_setup_config_file:
 
-# fapolicyd rules file to copy, rules default ~ RHEL default
-fapolicyd_setup_rules_file: fapolicyd.rules
+# fapolicyd rules file to copy
+fapolicyd_setup_rules_file:
 
-# fapolicyd trust file to copy, trust default is empty file
-fapolicyd_setup_trust_file: fapolicyd.trust
+# fapolicyd trust file to copy
+# Role provided alternatives:
+# * fapolicyd.trust - RHEL default trust file
+fapolicyd_setup_trust_file:
+
+# fapolicyd RPM filter file to copy
+# Role provided alternatives:
+# * rpm-filter.conf - RHEL default trust file
+fapolicyd_setup_rpm_filter_file:
