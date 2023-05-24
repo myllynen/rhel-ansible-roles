@@ -22,6 +22,9 @@ files_get:
 #    mode: '0600'
 #    timeout: 5
 #    validate_certs: false
+
+# Value for no_log parameter when getting files
+files_get_no_log: false
 </pre>
 
 ## License

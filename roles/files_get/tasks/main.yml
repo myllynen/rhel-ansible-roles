@@ -12,6 +12,7 @@
     headers: "{{ item.headers | default(omit) }}"
     timeout: "{{ item.timeout | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
+  no_log: "{{ files_get_no_log }}"
   register: get_files
   loop: "{{ files_get | default([], true) }}"
   loop_control:
