@@ -19,7 +19,30 @@
     state: present
   loop: "{{ accounts_local_groups_create | select() | list }}"
 
+- name: Create passwordless list of local users to create
+  set_fact:
+    create_users: "{{ create_users | default([]) + [item | dict2items | rejectattr('key', 'equalto', 'password') | list | items2dict] }}"
+  no_log: "{{ accounts_local_no_log }}"
+  loop: "{{ accounts_local_users_create | select() | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
 - name: Create local user
+  user:
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    group: "{{ item.group | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+    create_home: "{{ item.create_home | default(omit) }}"
+    expires: "{{ item.expires | default(omit) }}"
+    home: "{{ item.home | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    state: present
+  loop: "{{ create_users | default([]) | select() | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Update local user password
   vars:
     salt_seed: "{{ accounts_local_password_salt_seed }}"
     encrypted: "{{ accounts_local_password_encrypted }}"
@@ -29,17 +52,15 @@
   user:
     name: "{{ item.name }}"
     password: "{{ pw_encrypted | default(omit) }}"
-    uid: "{{ item.uid }}"
-    group: "{{ item.group | default(omit) }}"
-    comment: "{{ item.comment | default(omit) }}"
-    create_home: "{{ item.create_home | default(omit) }}"
-    home: "{{ item.home | default(omit) }}"
-    shell: "{{ item.shell | default(omit) }}"
-    expires: "{{ item.expires | default(omit) }}"
     state: present
-  loop: "{{ accounts_local_users_create | select() | list }}"
+  no_log: "{{ accounts_local_no_log }}"
+  loop: "{{ accounts_local_users_create | select() | selectattr('password', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"
+
+- name: Get local users
+  getent:
+    database: passwd
 
 - name: Add local user to supplementary groups
   user:
@@ -48,12 +69,13 @@
     append: "{{ item.append }}"
     state: present
   loop: "{{ accounts_local_users_groups | select() | list }}"
+  when: item.name in getent_passwd
 
 - name: Delete local user sudo configuration
   file:
     path: /etc/sudoers.d/{{ item.name }}
     state: absent
-  loop: "{{ accounts_local_users_create | select() | list }}"
+  loop: "{{ create_users | default([]) | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
   when: not item.allow_full_sudo | default(false) | bool
@@ -67,7 +89,7 @@
     group: root
     mode: '0440'
     validate: /usr/sbin/visudo -csf %s
-  loop: "{{ accounts_local_users_create | select() | list }}"
+  loop: "{{ create_users | default([]) | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
   when: item.allow_full_sudo | default(false) | bool
@@ -78,6 +100,7 @@
     key: "{{ item.1 }}"
     exclusive: "{{ item.0.authorized_keys_exclusive | default(omit) }}"
     state: present
-  loop: "{{ accounts_local_users_create | subelements('authorized_keys', 'skip_missing=true') }}"
+  loop: "{{ create_users | default([]) | subelements('authorized_keys', 'skip_missing=true') }}"
   loop_control:
     label: "{{ item.0.name }}"
+  when: item.0.name in getent_passwd

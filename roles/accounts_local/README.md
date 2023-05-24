@@ -30,6 +30,7 @@ accounts_local_groups_create:
 accounts_local_users_create:
 #  - name: testuser
 #    # This should come from vault
+#    # Should be encrypted, see below
 #    password: ...
 #    uid: 12345
 #    group: testgroup
@@ -38,7 +39,10 @@ accounts_local_users_create:
 #    home: /home/testuser
 #    shell: /bin/bash
 #    expires: -1
-#    # Configures passwordless unlimited sudo
+#    #password_expire_max: 365
+#    #password_expire_min: 7
+#    # Configures passwordless unlimited sudo for user
+#    # by creating or removing /etc/sudoers.d/username
 #    allow_full_sudo: false
 #    authorized_keys:
 #      - ssh-rsa ... user@cloud
@@ -46,16 +50,23 @@ accounts_local_users_create:
 
 # Use true if providing crypted values,
 # false to encrypt cleartext passwords.
-accounts_local_password_encrypted: false
+accounts_local_password_encrypted: true
 # Seed for password_hash salt value
 accounts_local_password_salt_seed: "{{ inventory_hostname }}"
 
+# Value for no_log parameter when setting passwords
+# Recommended to use true and provide encrypted pws
+accounts_local_no_log: true
+
 # List of supplementary groups for users
 # Mandatory parameters: name, groups, append
+# Set append to false to make groups explicit
 accounts_local_users_groups:
 #  - name: testuser
-#    groups: tcpdump,wheel
-#    append: true
+#    groups:
+#      - tcpdump
+#      - wheel
+#    append: false
 </pre>
 
 ## License
