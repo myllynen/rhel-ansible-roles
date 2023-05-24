@@ -3,25 +3,26 @@ packages_install:
   - acl
   - bash-completion
   - bind-utils
-  #- bzip2
   - curl
   - man-pages
   #- mlocate
   - nano
   - openssh-clients
   - psmisc
-  - "{{ 'python3' if ansible_facts.distribution_major_version|int >= 8 else 'python' }}"
-  - "{{ 'python3-libselinux' if ansible_facts.distribution_major_version|int >= 8 else 'libselinux-utils' }}"
-  - "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version|int >= 8 else 'policycoreutils-python' }}"
+  - "{{ 'python3' if ansible_facts.distribution_major_version | int >= 8 else 'python' }}"
+  - "{{ 'python3-libselinux' if ansible_facts.distribution_major_version | int >= 8 else 'libselinux-utils' }}"
+  - "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version | int >= 8 else 'policycoreutils-python' }}"
   #- redhat-lsb-core
   - setools-console
   #- sos
   - tar
-  #- "{{ 'tmux' if ansible_facts.distribution_major_version|int >= 8 else 'screen' }}"
+  #- "{{ 'tmux' if ansible_facts.distribution_major_version | int >= 8 else 'screen' }}"
   #- unzip
   #- vim-enhanced
   #- wget
+  - xz
   - yum-utils
+  - "{{ 'zstd' if ansible_facts.distribution_major_version | int >= 8 else '' }}"
 
 # Enable or disable yum module 'install_weak_deps' parameter
 packages_install_weak_deps: true
