@@ -1,3 +1,3 @@
 ---
 # Shell profile template to use
-shell_profile_file: local.sh.j2
+shell_profile_file:

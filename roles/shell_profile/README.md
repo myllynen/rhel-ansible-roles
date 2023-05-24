@@ -11,7 +11,7 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # Shell profile template to use
-shell_profile_file: local.sh.j2
+shell_profile_file:
 </pre>
 
 ## License
