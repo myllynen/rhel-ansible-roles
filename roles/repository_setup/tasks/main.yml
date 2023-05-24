@@ -2,13 +2,13 @@
 - name: Copy repository configuration files
   copy:
     src: "{{ item }}"
-    dest: /etc/yum.repos.d/{{ item }}
+    dest: /etc/yum.repos.d/{{ item | basename }}
     mode: '0644'
   loop: "{{ repository_setup_repo_files_copy | select() | list }}"
 
 - name: Remove repository configuration files
   file:
-    path: /etc/yum.repos.d/{{ item }}
+    path: /etc/yum.repos.d/{{ item | basename }}
     state: absent
   loop: "{{ repository_setup_repo_files_remove | select() | list }}"
 
