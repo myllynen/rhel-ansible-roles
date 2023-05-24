@@ -34,7 +34,7 @@
     dest: /etc/security/faillock.conf
     mode: '0644'
   when:
-    - ansible_facts.distribution_major_version|int > 7
+    - ansible_facts.distribution_major_version | int > 7
     - faillock_config_file | default(false)
 
 - name: Create system-local password history requirements file
@@ -43,7 +43,7 @@
     dest: /etc/security/pwhistory.conf
     mode: '0644'
   when:
-    - ansible_facts.distribution_major_version|int > 7
+    - ansible_facts.distribution_major_version | int > 7
     - pwhistory_config_file | default(false)
 
 - name: Create system-local password quality requirements file
@@ -62,7 +62,7 @@
     name: "{{ auth_packages | select() | list }}"
     state: present
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - system_auth_profile | default(false)
 
 - name: Gather package facts
@@ -91,7 +91,7 @@
     mode: '0644'
   register: custom_profile_copy
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - system_auth_profile | default(false)
     - "'custom/' in system_auth_profile"
 
@@ -103,7 +103,7 @@
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - system_auth_profile | default(false)
 
 - name: Check current system-local authentication profile status
@@ -114,9 +114,23 @@
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - system_auth_profile | default(false)
     - "'No existing configuration' not in profile_current.stdout"
+
+- name: Prevent Centrify updating NSS configuration
+  lineinfile:
+    path: /etc/centrifydc/centrifydc.conf
+    regexp: '^(|#|# )adclient.autoedit.nss:.*'
+    line: 'adclient.autoedit.nss: false'
+  when: "'with-centrify' in system_auth_profile_parameters | default('', true)"
+
+- name: Prevent Centrify updating PAM configuration
+  lineinfile:
+    path: /etc/centrifydc/centrifydc.conf
+    regexp: '^(|#|# )adclient.autoedit.pam:.*'
+    line: 'adclient.autoedit.pam: false'
+  when: "'with-centrify' in system_auth_profile_parameters | default('', true)"
 
 - name: Configure system-local authentication profile
   vars:
@@ -124,8 +138,9 @@
     current_config: "{{ profile_current.stdout }}"
     wanted_config: "{{ profile_name }} {{ system_auth_profile_parameters }}"
   command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
+  changed_when: true
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - system_auth_profile | default(false)
     - current_config | trim != wanted_config | trim or
       'not valid' in profile_valid.stdout or
