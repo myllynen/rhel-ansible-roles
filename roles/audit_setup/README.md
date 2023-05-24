@@ -11,9 +11,10 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # Optional auditd config file to copy
-# If unset default RHEL configuration will be used
 # Role provided alternatives:
-# * auditd_cis.conf - CIS Level 2 - Server compliant config
+# * auditd_cis.conf   - CIS Level 2 - Server compliant config
+# * auditd_rhel.conf  - RHEL default config
+# * auditd_rhel7.conf - RHEL 7 default config
 audit_setup_config_file:
 
 # Optional audit rules file to copy

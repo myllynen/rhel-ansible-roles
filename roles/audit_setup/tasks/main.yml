@@ -9,6 +9,12 @@
   when: ansible_facts.cmdline is not defined or
         ansible_facts.distribution_major_version is not defined
 
+- name: Verify correct role configuration
+  assert:
+    that:
+      - audit_setup_update_lock in ['fail', 'ignore', 'reboot']
+    quiet: true
+
 - name: Fail if audit disabled in kernel
   fail:
     msg: "Audit disabled on kernel command line."
@@ -25,18 +31,12 @@
   package_facts:
 
 - name: Copy auditd configuration file
-  vars:
-    config_files:
-      rhel7: auditd_rhel7.conf
-      default: auditd_rhel.conf
-    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
-    config_id: "{{ 'default' if distro_id not in config_files else distro_id }}"
-    config_file: "{{ config_files[config_id] }}"
   copy:
-    src: "{{ audit_setup_config_file | default(config_file, true) }}"
+    src: "{{ audit_setup_config_file }}"
     dest: /etc/audit/auditd.conf
     mode: '0640'
   register: auditd_config
+  when: audit_setup_config_file | default(false)
 
 - name: Copy audit rules configuration file
   copy:
@@ -85,7 +85,9 @@
 # https://github.com/ansible/ansible/issues/22171
 # https://access.redhat.com/solutions/2664811
 - name: Reload auditd to apply configuration changes
+  # noqa: command-instead-of-module
   command: service auditd reload
+  changed_when: true
   when:
     - "'audit' in ansible_facts.packages"
     - "'enabled 2' not in audit_status.stdout or
