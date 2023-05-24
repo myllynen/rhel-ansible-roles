@@ -12,7 +12,7 @@ Below are the role default values from defaults/main.yml:
 ---
 # Allowed actions: join, leave
 domain_ad_action: join
-domain_ad_domain: example.com
+domain_ad_domain:
 
 # These should come from vault
 #domain_ad_admin_username:
@@ -21,7 +21,8 @@ domain_ad_domain: example.com
 domain_ad_computer_precreated: false
 domain_ad_computer_delete_on_leave: true
 
-#domain_ad_allow_groups: GROUP@example.com
+domain_ad_allow_groups:
+#  - GROUP@example.com
 
 # Enable or disable running authconfig/authselect
 # If false then setup by this role is not complete

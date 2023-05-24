@@ -3,6 +3,7 @@
   vars:
     leave_action: "{{ 'delete-computer' if domain_ad_computer_delete_on_leave else 'reset-computer' }}"
   shell: >
+    set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
     adcli -v {{ leave_action }}
     --domain={{ domain_ad_domain }}
@@ -10,6 +11,7 @@
     --stdin-password
     {{ ansible_facts.fqdn }}
   no_log: true
+  changed_when: true
   when: krb5_keytab.stat.exists
 
 - name: Disable sssd service

@@ -1,0 +1,72 @@
+---
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+      - system
+  when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.domain is not defined or
+        ansible_facts.fqdn is not defined
+
+- name: Install required packages
+  yum:
+    name:
+      - adcli
+      - "{{ 'authselect' if ansible_facts.distribution_major_version | int >= 8 else 'authconfig' }}"
+      - krb5-workstation
+      - oddjob-mkhomedir
+      - sssd
+      - sssd-tools
+    state: present
+
+- name: Gather package facts
+  package_facts:
+
+- name: Check Kerberos keytab file
+  stat:
+    path: /etc/krb5.keytab
+  register: krb5_keytab
+
+- name: Discover AD domain information
+  shell: >
+    adcli info -v {{ domain_ad_domain }}
+  check_mode: false
+  register: domain_info
+  changed_when: false
+  when: "'adcli' in ansible_facts.packages"
+
+- name: Fail if AD domain controller not usable
+  fail:
+    msg: "AD domain reports domain controller not usable."
+  when:
+    - "'adcli' in ansible_facts.packages"
+    - "'domain-controller-usable = yes' not in domain_info.stdout"
+
+- name: Check computer status in AD domain
+  shell: >
+    set -o pipefail ;
+    echo '{{ domain_ad_admin_password }}' |
+    adcli -v show-computer
+    --domain={{ domain_ad_domain }}
+    --login-user={{ domain_ad_admin_username }}
+    --stdin-password
+    {{ ansible_facts.fqdn }}
+  no_log: true
+  check_mode: false
+  register: computer_info
+  failed_when: computer_info.rc != 0 and computer_info.rc != 5
+  changed_when: false
+  when:
+    - "'adcli' in ansible_facts.packages"
+    - ansible_facts.distribution_major_version | int >= 8
+
+- name: Fail if computer does not exist in AD domain
+  fail:
+    msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
+  when:
+    - "'adcli' in ansible_facts.packages"
+    - ansible_facts.distribution_major_version | int >= 8
+    - domain_ad_computer_precreated | bool
+    - computer_info.rc != 0

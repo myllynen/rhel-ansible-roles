@@ -46,6 +46,6 @@ default_shell = /bin/bash
 fallback_homedir = /home/%u
 use_fully_qualified_names = False
 
-{% if domain_ad_allow_groups is defined %}
-simple_allow_groups = {{ domain_ad_allow_groups }}
+{% if domain_ad_allow_groups %}
+simple_allow_groups = {{ domain_ad_allow_groups | join(',') }}
 {% endif %}

@@ -30,6 +30,7 @@
 
 - name: Join AD domain
   shell: >
+    set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
     adcli -v join
     --domain={{ domain_ad_domain }}
@@ -37,6 +38,7 @@
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
   no_log: true
+  changed_when: true
   when: not krb5_keytab.stat.exists
 
 - name: Enable oddjobd service
@@ -77,14 +79,16 @@
 
 - name: Configure system-wide authentication (RHEL 7)
   command: authconfig --enablemkhomedir --enablesssd --enablesssdauth --update
+  changed_when: true
   when:
-    - ansible_facts.distribution_major_version|int < 8
+    - ansible_facts.distribution_major_version | int < 8
     - domain_ad_auth_config_update | bool
     - auth_config.found == 0
 
 - name: Configure system-wide authentication
   command: authselect select -f sssd {{ domain_ad_auth_select_parameters }}
+  changed_when: true
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - domain_ad_auth_config_update | bool
     - auth_config.found == 0
