@@ -1,28 +1,50 @@
 ---
+# https://github.com/ansible/ansible/issues/78107
+- name: Get list of known systemd units
+  # noqa: command-instead-of-module
+  command: systemctl list-unit-files
+  check_mode: false
+  register: unit_files
+  changed_when: false
+
+- name: Mask service
+  systemd:
+    name: "{{ item }}"
+    masked: true
+  loop: "{{ service_state_mask | select() | list }}"
+
+- name: Unmask service
+  systemd:
+    name: "{{ item }}"
+    masked: false
+  loop: "{{ service_state_unmask | select() | list }}"
+
 - name: Disable service
-  service:
+  systemd:
     name: "{{ item }}"
     enabled: false
-  failed_when: false
   loop: "{{ service_state_disable | select() | list }}"
+  when: item in unit_files.stdout
 
 - name: Stop service
-  service:
+  systemd:
     name: "{{ item }}"
     state: stopped
-  failed_when: false
   loop: "{{ service_state_disable | select() | list }}"
+  when: item in unit_files.stdout
 
 - name: Enable service
-  service:
+  systemd:
     name: "{{ item }}"
     enabled: true
-  failed_when: false
   loop: "{{ service_state_enable | select() | list }}"
+  when: not service_state_skip_missing | bool or
+        item in unit_files.stdout
 
 - name: Start service
-  service:
+  systemd:
     name: "{{ item }}"
     state: started
-  failed_when: false
   loop: "{{ service_state_enable | select() | list }}"
+  when: not service_state_skip_missing | bool or
+        item in unit_files.stdout
