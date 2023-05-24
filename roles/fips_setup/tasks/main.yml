@@ -10,5 +10,5 @@
 - name: Enable FIPS mode
   include_tasks: enable.yml
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - fips_setup_enable | bool

@@ -16,7 +16,7 @@ Below are the role default values from defaults/main.yml:
 
 # Enable & check or not FIPS mode
 # Disabling FIPS mode is unsupported
-fips_setup_enable: true
+fips_setup_enable: false
 </pre>
 
 ## License
