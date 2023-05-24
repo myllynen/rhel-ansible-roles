@@ -11,8 +11,10 @@ license:
   - GPL-3.0-or-later
 tags:
   - rhel
+  - linux
   - centos
   - configuration
+  - infrastructure
 dependencies:
   ansible.posix: ">=1.4.0"
   community.general: ">=5.5.0"

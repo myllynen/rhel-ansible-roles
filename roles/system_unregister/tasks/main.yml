@@ -30,10 +30,11 @@
 
 # Use removes: to only run on registered systems
 - name: Clean package manager caches (RHEL 7)
+  # noqa: command-instead-of-module
   command:
     cmd: yum -C clean all
     removes: /etc/rhsm/ca/katello-server-ca.pem
-  when: ansible_facts.distribution_major_version|int < 8
+  when: ansible_facts.distribution_major_version | int < 8
 
 - name: Unregister from Red Hat Subscription Management
   command: subscription-manager unregister
@@ -78,7 +79,8 @@
 
 - name: Clean package manager caches
   command: dnf -C clean all
-  when: ansible_facts.distribution_major_version|int >= 8
+  changed_when: true
+  when: ansible_facts.distribution_major_version | int >= 8
 
 - name: Check RHSM configuration backup file
   stat:

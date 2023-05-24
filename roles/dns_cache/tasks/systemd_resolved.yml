@@ -11,7 +11,7 @@
   yum:
     name: systemd-resolved
     state: present
-  when: ansible_facts.distribution_major_version|int != 8
+  when: ansible_facts.distribution_major_version | int != 8
 
 - name: Gather service facts
   service_facts:

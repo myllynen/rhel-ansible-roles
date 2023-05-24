@@ -19,6 +19,7 @@
 - name: Configure system keyboard
   command: localectl set-keymap {{ system_keyboard }}
   register: keyboard_config
+  changed_when: true
   when: not keyboard_check.found
 
 - name: Check system console font configuration
@@ -40,10 +41,12 @@
 
 - name: Configure system console font
   command: setfont {{ system_font }}
+  changed_when: true
   when: font_config is changed
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: package_install is changed or
         keyboard_config is changed or
         font_config is changed

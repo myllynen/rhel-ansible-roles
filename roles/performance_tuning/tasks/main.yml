@@ -27,7 +27,7 @@
     state: started
   when: "'tuned' in ansible_facts.packages"
 
-- name: Check current tuned profile
+- name: Read current tuned profile
   slurp:
     src: /etc/tuned/active_profile
   register: active_profile
@@ -35,6 +35,7 @@
 
 - name: Configure tuned profile
   command: tuned-adm profile {{ tuned_profile }}
+  changed_when: true
   when:
     - "'tuned' in ansible_facts.packages"
-    - active_profile.content|b64decode|trim != tuned_profile
+    - active_profile.content | b64decode | trim != tuned_profile

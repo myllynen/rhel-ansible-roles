@@ -17,4 +17,5 @@
 
 - name: Write trusted certificate bundles
   command: update-ca-trust extract
+  changed_when: true
   when: ca_files is changed

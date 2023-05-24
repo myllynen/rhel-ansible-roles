@@ -28,7 +28,7 @@
     - not dns_cache_enable | bool or
       dns_cache_component != 'nscd'
 
-- name: Check NetworkManager DNS configuration
+- name: Read NetworkManager DNS configuration
   slurp:
     src: /etc/NetworkManager/conf.d/50-dns.conf
   register: current_config
@@ -45,7 +45,7 @@
   when:
     - not dns_cache_enable | bool or
       (current_config.content is defined and
-       dns_cache_component not in current_config.content|b64decode)
+       dns_cache_component not in current_config.content | b64decode)
 
 - name: Disable systemd-resolved service
   service:
@@ -74,7 +74,7 @@
     state: absent
   register: resolved_package
   when:
-    - ansible_facts.distribution_major_version|int == 7
+    - ansible_facts.distribution_major_version | int == 7
     - not dns_cache_enable | bool or
       dns_cache_component != 'systemd-resolved'
 

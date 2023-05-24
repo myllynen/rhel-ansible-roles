@@ -1,7 +1,7 @@
 ---
 - name: Remove unwanted packages
   yum:
-    name: "{{ packages_remove }}"
+    name: "{{ packages_remove | select() | list }}"
     autoremove: "{{ packages_remove_autoremove }}"
     #cacheonly: true
     state: absent

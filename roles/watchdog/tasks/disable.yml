@@ -1,7 +1,7 @@
 ---
 - name: Disable system runtime watchdog configuration
   vars:
-    option_value: "{{ 'off' if ansible_facts.distribution_major_version|int >= 9 else '0' }}"
+    option_value: "{{ 'off' if ansible_facts.distribution_major_version | int >= 9 else '0' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)RuntimeWatchdogSec=.*'
@@ -10,7 +10,7 @@
 
 - name: Restore system reboot watchdog default configuration
   vars:
-    option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version|int >= 9 else 'ShutdownWatchdogSec' }}"
+    option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version | int >= 9 else 'ShutdownWatchdogSec' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|){{ option_name }}=.*'
@@ -19,7 +19,7 @@
 
 - name: Disable system kexec watchdog configuration
   vars:
-    option_state: "{{ 'present' if ansible_facts.distribution_major_version|int >= 9 else 'absent' }}"
+    option_state: "{{ 'present' if ansible_facts.distribution_major_version | int >= 9 else 'absent' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)KExecWatchdogSec=.*'
@@ -29,7 +29,7 @@
 
 - name: Restore system watchdog device default configuration
   vars:
-    option_state: "{{ 'present' if ansible_facts.distribution_major_version|int >= 9 else 'absent' }}"
+    option_state: "{{ 'present' if ansible_facts.distribution_major_version | int >= 9 else 'absent' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)WatchdogDevice=.*'
@@ -47,6 +47,7 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: watchdog_runtime is changed or
         watchdog_reboot is changed or
         watchdog_kexec is changed or

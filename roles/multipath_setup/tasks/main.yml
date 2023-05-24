@@ -38,6 +38,7 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: multipath_config is changed
 
 - name: Reboot system

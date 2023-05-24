@@ -12,12 +12,14 @@
 
 - name: Remove old kernel packages (RHEL 7)
   command: package-cleanup -C --oldkernels --count=1 -y
+  changed_when: true
   when:
     - ansible_facts.pkg_mgr == 'yum'
     - ansible_facts.packages['kernel'] | length > 1
 
 - name: Remove old kernel packages
   command: dnf -C remove --oldinstallonly -y
+  changed_when: true
   when:
     - ansible_facts.pkg_mgr == 'dnf'
     - ansible_facts.packages['kernel'] | length > 1
@@ -41,6 +43,7 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: nic_config is changed
 
 - name: Check installer log directory
@@ -123,6 +126,7 @@
     cmd: subscription-manager facts --update
     removes: /var/lib/rhsm/facts/facts.json
   failed_when: false
+  changed_when: true
 
 - name: Mark system initialized
   copy:
@@ -131,6 +135,6 @@
     mode: '0644'
 
 - name: Log initialization message
-  syslogger:
+  community.general.syslogger:
     msg: "System initialized by system_init role."
   when: "'syslog' in system_init_final_actions"

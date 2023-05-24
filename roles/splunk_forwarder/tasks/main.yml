@@ -73,10 +73,12 @@
 
 - name: Stop Splunk legacy service
   command: /opt/splunkforwarder/bin/splunk stop
+  changed_when: true
   when: legacy_init.stat.exists
 
 - name: Disable Splunk legacy service
   command: /opt/splunkforwarder/bin/splunk disable boot-start
+  changed_when: true
   when: legacy_init.stat.exists
 
 - name: Check Splunk Forwarder systemd service file
@@ -89,6 +91,7 @@
     /opt/splunkforwarder/bin/splunk enable boot-start
     -systemd-managed 1 -user splunk -group splunk
     --accept-license --no-prompt --answer-yes
+  changed_when: true
   when: not systemd_service.stat.exists
 
 - name: Enable Splunk Forwarder service

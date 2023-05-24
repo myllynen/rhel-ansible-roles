@@ -10,7 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-splunk_deployment_server: splunk.example.com
+splunk_deployment_server:
 splunk_deployment_server_port: 8089
 splunk_deployment_server_check: true
 

@@ -9,7 +9,7 @@
 
 - name: Install troubleshooting tools
   yum:
-    name: "{{ troubleshooting_tools }}"
+    name: "{{ troubleshooting_tools | select() | list }}"
     state: present
 
 - name: Gather package facts
@@ -22,8 +22,8 @@
     enabled: true
   when:
     - "'pcp' in ansible_facts.packages"
-    - troubleshooting_tools_enable_perf_metrics | bool
     - "'pcp-system-tools' in troubleshooting_tools"
+    - troubleshooting_tools_enable_perf_metrics | bool
 
 - name: Enable performance metrics archiving
   service:
@@ -32,5 +32,5 @@
     enabled: true
   when:
     - "'pcp' in ansible_facts.packages"
-    - troubleshooting_tools_enable_perf_metrics | bool
     - "'pcp-system-tools' in troubleshooting_tools"
+    - troubleshooting_tools_enable_perf_metrics | bool

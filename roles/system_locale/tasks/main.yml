@@ -9,11 +9,11 @@
 
 - name: Check langpack support
   set_fact:
-    langpacks: "{{ true if ansible_facts.distribution_major_version|int >= 8 else false }}"
+    langpacks: "{{ true if ansible_facts.distribution_major_version | int >= 8 else false }}"
 
 - name: Check C.UTF-8 support
   set_fact:
-    c_utf_8: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
+    c_utf_8: "{{ true if ansible_facts.distribution_major_version | int >= 9 else false }}"
 
 - name: Install locale packages
   vars:
@@ -36,6 +36,7 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: locale_config is changed
 
 - name: Reboot system

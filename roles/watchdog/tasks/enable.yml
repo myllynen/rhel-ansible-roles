@@ -8,7 +8,7 @@
 
 - name: Update system reboot watchdog configuration
   vars:
-    option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version|int >= 9 else 'ShutdownWatchdogSec' }}"
+    option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version | int >= 9 else 'ShutdownWatchdogSec' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|){{ option_name }}=.*'
@@ -23,7 +23,7 @@
     line: 'KExecWatchdogSec={{ watchdog_kexec_sec }}'
   register: watchdog_kexec
   when:
-    - ansible_facts.distribution_major_version|int >= 9
+    - ansible_facts.distribution_major_version | int >= 9
     - watchdog_kexec_sec | default(false)
 
 - name: Update system watchdog device configuration
@@ -33,7 +33,7 @@
     line: 'WatchdogDevice={{ watchdog_device }}'
   register: watchdog_device
   when:
-    - ansible_facts.distribution_major_version|int >= 9
+    - ansible_facts.distribution_major_version | int >= 9
     - watchdog_device | default(false)
 
 - name: Reload systemd to apply watchdog configuration changes
@@ -46,6 +46,7 @@
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: watchdog_runtime is changed or
         watchdog_reboot is changed or
         watchdog_kexec is changed or

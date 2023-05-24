@@ -13,7 +13,7 @@
   vars:
     rhc_packages:
       - "{{ 'rhc' if insights_client_rhc_enable | bool else '' }}"
-      - "{{ 'rhc-worker-playbook' if ansible_facts.distribution_major_version|int >= 8 else '' }}"
+      - "{{ 'rhc-worker-playbook' if ansible_facts.distribution_major_version | int >= 8 else '' }}"
     openscap_packages:
       - scap-security-guide
     required_packages:
@@ -59,6 +59,7 @@
 
 - name: Upload new data to Red Hat Insights
   command: insights-client --silent
+  changed_when: true
   when: tags_file is changed
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2175793

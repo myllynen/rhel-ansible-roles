@@ -10,7 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Register or unregister the system for Red Hat Insights
+# Register or unregister the system with Red Hat Insights
 # See https://access.redhat.com/products/red-hat-insights
 insights_client_register: true
 
@@ -20,7 +20,7 @@ insights_client_tags:
 #  security: strict
 #  network_performance: latency
 
-# Enable Red Hat connector (rhc) when needed
+# Enable remote host configuration (rhc)
 # See https://access.redhat.com/articles/rhc
 insights_client_rhc_enable: true
 

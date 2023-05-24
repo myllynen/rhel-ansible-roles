@@ -30,10 +30,12 @@
 
 - name: Initialize new aide database
   command: /usr/sbin/aide --init
+  register: aide_database
+  changed_when: true
   when:
     - "'aide' in ansible_facts.packages"
-    - not aide_database.stat.exists
     - aide_setup_initialize_database | bool
+    - not aide_database.stat.exists
 
 - name: Copy new aide database as current aide database
   copy:
@@ -43,13 +45,13 @@
     remote_src: true
   when:
     - "'aide' in ansible_facts.packages"
-    - not aide_database.stat.exists
     - aide_setup_initialize_database | bool
+    - aide_database is changed
 
 # Configure cron in OpenSCAP-compatible manner
 - name: Update aide check cron configuration
   vars:
-    entry_prefix: "{{ '' if aide_setup_cron_setup|bool else '#' }}"
+    entry_prefix: "{{ '' if aide_setup_cron_setup | bool else '#' }}"
   lineinfile:
     path: /etc/crontab
     regexp: '^(#|)05 4 \* \* \* root /usr/sbin/aide --check'

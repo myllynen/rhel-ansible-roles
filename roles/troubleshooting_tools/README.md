@@ -23,7 +23,7 @@ troubleshooting_tools:
   #- numactl
   - pcp-system-tools
   #- perf
-  - "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version|int >= 8 else 'policycoreutils-python' }}"
+  - "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version | int >= 8 else 'policycoreutils-python' }}"
   - procps-ng
   - psmisc
   #- setroubleshoot-server

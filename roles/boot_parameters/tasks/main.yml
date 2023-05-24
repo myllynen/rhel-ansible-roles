@@ -39,15 +39,18 @@
     --args="{{ boot_parameters_enable | join(' ') }}"
     --remove-args="{{ boot_parameters_disable | join(' ') }}"
   register: boot_config
+  changed_when: true
   when: (0 in enable_check.results | map(attribute='found') | list) or
         (1 in disable_check.results | map(attribute='found') | list)
 
 - name: Fix default kernel boot parameters (RHEL 7)
   shell: |
+    set -o pipefail
     eval $(grubby --info=DEFAULT | awk '/^args/ {print $0}')
     sed -i -e "s,^GRUB_CMDLINE_LINUX=.*,GRUB_CMDLINE_LINUX=\"$args\"," /etc/default/grub
+  changed_when: true
   when:
-    - ansible_facts.distribution_major_version|int == 7
+    - ansible_facts.distribution_major_version | int == 7
     - boot_config is changed
 
 - name: Update boot loader timeout configuration
@@ -55,10 +58,10 @@
     path: /etc/default/grub
     regexp: '^GRUB_TIMEOUT=.*'
     replace: 'GRUB_TIMEOUT={{ boot_parameters_timeout }}'
+  register: boot_timeout
   when:
     - boot_parameters_timeout is integer
     - boot_parameters_timeout | int >= 1
-  register: boot_timeout
 
 - name: Determine platform type
   stat:
@@ -67,7 +70,7 @@
 
 - name: Set boot loader configuration files
   vars:
-    old_rhel: "{{ true if ansible_facts.distribution_major_version|int < 9 else false }}"
+    old_rhel: "{{ true if ansible_facts.distribution_major_version | int < 9 else false }}"
     efi_path: "{{ true if old_rhel and efi_dir.stat.exists else false }}"
   set_fact:
     grub_config: "{{ '/boot/grub2/grub.cfg' if not efi_path else '/boot/efi/EFI/redhat/grub.cfg' }}"
@@ -91,6 +94,7 @@
 
 - name: Write boot loader configuration
   command: grub2-mkconfig -o {{ grub_config }}
+  changed_when: true
   when: boot_timeout is changed or
         password_remove is changed or
         password_update is changed
