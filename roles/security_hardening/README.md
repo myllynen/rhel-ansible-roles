@@ -18,8 +18,10 @@ secure_boot_verify: false
 # NB. Enabling lockdown will prevent using kdump
 kernel_lockdown: disabled
 
+# SELinux state
 selinux: enforcing
 
+# System-wide crypto policy
 crypto_policy: DEFAULT
 </pre>
 

@@ -71,6 +71,7 @@
   yum:
     name: crypto-policies-scripts
     state: present
+  when: ansible_facts.distribution_major_version | int >= 8
 
 - name: Gather package facts
   package_facts:
@@ -82,13 +83,14 @@
   changed_when: false
   when:
     - "'crypto-policies-scripts' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
 
 - name: Configure crypto policy
-  command: update-crypto-policies --set {{ crypto_policy }}
+  command: update-crypto-policies --no-reload --set {{ crypto_policy }}
   register: crypto_policy_config
+  changed_when: true
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
     - "'crypto-policies-scripts' in ansible_facts.packages"
     - current_crypto_policy.stdout != crypto_policy
 
@@ -96,7 +98,7 @@
   yum:
     name: grubby
     state: present
-  when: ansible_facts.distribution_major_version|int >= 9
+  when: ansible_facts.distribution_major_version | int >= 9
 
 - name: Check kernel lockdown configuration
   vars:
@@ -108,7 +110,7 @@
   check_mode: true
   register: lockdown_check
   changed_when: false
-  when: ansible_facts.distribution_major_version|int >= 9
+  when: ansible_facts.distribution_major_version | int >= 9
 
 - name: Configure kernel lockdown
   command: >
@@ -117,8 +119,9 @@
     --remove-args=lockdown
     "{{ '--args=lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else '' }}"
   register: lockdown_config
+  changed_when: true
   when:
-    - ansible_facts.distribution_major_version|int >= 9
+    - ansible_facts.distribution_major_version | int >= 9
     - (kernel_lockdown == 'disabled' and lockdown_check.found != 0) or
       (kernel_lockdown != 'disabled' and lockdown_check.found == 0)
 
