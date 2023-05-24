@@ -10,7 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# /etc/hosts header to always apply (subject to etc_hosts_omit_hosts)
+# /etc/hosts header to always apply (subject to etc_hosts_omit_entries)
 # This default header matches the most recent Fedora/upstream headers
 etc_hosts_header: |
   # Loopback entries; do not change.
@@ -37,7 +37,7 @@ etc_hosts_entries:
 # none - do not omit entries
 # ipv4 - omit all IPv4 entries
 # ipv6 - omit all IPv6 entries
-etc_hosts_omit_hosts: none
+etc_hosts_omit_entries: none
 </pre>
 
 ## License
