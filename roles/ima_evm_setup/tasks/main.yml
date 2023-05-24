@@ -11,16 +11,20 @@
   yum:
     name: grubby
     state: present
-  when: ansible_facts.distribution_major_version|int >= 8
+  when:
+    - ansible_facts.distribution_major_version | int >= 8
+    - ima_evm_setup_enable is not none
 
 - name: Enable IMA/EVM
   include_tasks: enable.yml
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
+    - ima_evm_setup_enable is not none
     - ima_evm_setup_enable | bool
 
 - name: Disable IMA/EVM
   include_tasks: disable.yml
   when:
-    - ansible_facts.distribution_major_version|int >= 8
+    - ansible_facts.distribution_major_version | int >= 8
+    - ima_evm_setup_enable is not none
     - not ima_evm_setup_enable | bool

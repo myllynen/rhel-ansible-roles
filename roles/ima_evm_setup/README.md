@@ -4,8 +4,6 @@
 
 Please see the collection main page for a higher level description.
 
-Note: This role is experimental and should not be used in production yet.
-
 ## Configuration
 
 Below are the role default values from defaults/main.yml:
@@ -13,9 +11,11 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # NB. This role is experimental!
+# NB. This role is not ready for use in production!
 
 # Enable or disable IMA/EVM
-ima_evm_setup_enable: false
+# Set to null to leave untouched
+ima_evm_setup_enable: null
 
 
 # Enable or disable TPM with IMA/EVM

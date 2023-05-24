@@ -110,7 +110,7 @@
 
 # Assume IMA/EVM attributes if newest executable has them
 - name: Check current file IMA/EVM attributes
-  shell: getfattr -m - -d $(ls -1rt /usr/bin/* | tail -n 1)
+  shell: set -o pipefail ; getfattr -m - -d $(ls -1rt /usr/bin/* | tail -n 1)
   check_mode: false
   register: fattr_info
   changed_when: false
@@ -130,6 +130,7 @@
     --update-kernel=ALL
     --remove-args="{{ __ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="evm=fix ima_appraise=fix ima_policy=appraise_tcb ima_hash={{ ima_evm_setup_ima_hash }}"
+  changed_when: true
   when:
     - "'sig' not in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -140,6 +141,7 @@
     --update-kernel=ALL
     --remove-args="{{ __ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="ima_hash={{ ima_evm_setup_ima_hash }}"
+  changed_when: true
   when:
     - "'sig' in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -176,6 +178,7 @@
     modprobe encrypted-keys
     keyctl padd user kmk @u < /etc/keys/kmk
     keyctl add encrypted evm-key "load $(cat /etc/keys/evm-key)" @u
+  changed_when: true
   when:
     - "'evm' in ima_evm_setup_method"
     - "'sig' not in ima_evm_setup_method"
@@ -195,6 +198,7 @@
     keyctl add encrypted evm-key "new trusted:kmk 32" @u
     keyctl pipe $(keyctl search @u encrypted evm-key) > /etc/keys/evm-key
     chmod 0400 /etc/keys/kmk /etc/keys/evm-key
+  changed_when: true
   when:
     - ima_evm_setup_enable_tpm_use | bool
     - "'evm' in ima_evm_setup_method"
@@ -212,6 +216,7 @@
     keyctl add encrypted evm-key "new user:kmk 32" @u
     keyctl pipe $(keyctl search @u encrypted evm-key) > /etc/keys/evm-key
     chmod 0400 /etc/keys/kmk /etc/keys/evm-key
+  changed_when: true
   when:
     - not ima_evm_setup_enable_tpm_use | bool
     - "'evm' in ima_evm_setup_method"
@@ -219,7 +224,7 @@
     - ima_evm_setup_sign_files | bool
     - not evm_key.stat.exists
 
-- name: Check EVM status
+- name: Read EVM status
   slurp:
     src: /sys/kernel/security/evm
   register: evm_status
@@ -228,16 +233,22 @@
   shell: |
     echo 1 > /sys/kernel/security/evm
     sync ; echo 3 > /proc/sys/vm/drop_caches ;
+  changed_when: true
   when:
     - "'evm' in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
-    - evm_status.content|b64decode|trim == '0'
+    - evm_status.content | b64decode | trim == '0'
 
 - name: Perform IMA/EVM measurement of files (this will take a while)
   shell: |
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -exec dd if='{}' of=/dev/null count=0 status=none \;
+    set -o pipefail
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+      xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+      xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 \
+      -exec dd if='{}' of=/dev/null count=0 status=none \;
+  changed_when: true
   when:
     - "'sig' not in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -256,6 +267,7 @@
       -keyout /etc/keys/privkey_evm.pem
     openssl rsa -pubout -in /etc/keys/privkey_evm.pem -out /etc/keys/pubkey_evm.pem
     chmod 0400 /etc/keys/x509_evm.der /etc/keys/privkey_evm.pem /etc/keys/pubkey_evm.pem
+  changed_when: true
   when:
     - "'sig' in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -264,26 +276,33 @@
 - name: Add IMA/EVM cert signature to files (this will take a while)
   vars:
     q: "'"
-    env_pw: "{{ true if ansible_facts.distribution_major_version|int >= 9 else false }}"
+    env_pw: "{{ true if ansible_facts.distribution_major_version | int >= 9 else false }}"
     key_opt: "{{ '' if env_pw or ima_evm_setup_key_password is not defined else '-p' + q + ima_evm_setup_key_password + q }}"
     sign_opt: "{{ 'ima_sign' if 'evm' not in ima_evm_setup_method else 'sign --imasig' }}"
   shell: |
     export EVMCTL_KEY_PASSWORD='{{ ima_evm_setup_key_password | default("", true) }}'
     set -e
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm  > /dev/null 2>&1 || :
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima  > /dev/null 2>&1 || :
+    set -o pipefail
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+      xargs -0 setfattr -x security.evm  > /dev/null 2>&1 || :
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+      xargs -0 setfattr -x security.ima  > /dev/null 2>&1 || :
     echo Sign everything
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 \
+      -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
     exit 0
     echo Sign kernel modules
     find /lib/modules -type f -uid 0 -name '*.ko.xz' -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
     echo Sign firmware files
     find /lib/firmware -type f -uid 0 -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
     echo Sign executable files
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -executable -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -executable \
+      -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
     echo Sign non-executable libraries
-    find /usr/lib /usr/lib64 -type f -uid 0 -\! -executable -name '*.so*' -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
+    find /usr/lib /usr/lib64 -type f -uid 0 -\! -executable -name '*.so*' \
+      -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
   no_log: true
+  changed_when: true
   when:
     - "'sig' in ima_evm_setup_method"
     - ima_evm_setup_sign_files | bool
@@ -318,6 +337,7 @@
 
 - name: Check current IMA/EVM boot paramaters (unwanted)
   shell: |
+    set -o pipefail
     for p in $(grep '^GRUB_CMDLINE_LINUX' /etc/default/grub | grep -Eo 'ima_policy=[a-z_]*'); do
       echo $p | grep -q {{ '-e ' + ' -e '.join(ima_policies) }} || exit 1
     done
@@ -332,6 +352,7 @@
     --update-kernel=ALL
     --remove-args="integrity_audit"
     --args="integrity_audit={{ ima_evm_setup_audit_log_all | bool | int }}"
+  changed_when: true
   when: boot_check_audit.found == 0
 
 - name: Configure IMA/EVM boot parameters
@@ -341,12 +362,14 @@
     --remove-args="{{ __ima_boot_params | difference('integrity_audit') | join(' ') }}"
     --args="{{ ima_params | join(' ') + ' ' + ima_policies | join(' ') }}"
   register: boot_config
+  changed_when: true
   when: (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
         (0 in boot_check_ima_params.results | map(attribute='found') | list) or
         boot_check_unwanted_policies.rc == 1
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: ima_evm_setup_sign_files | bool
 
 - name: Reboot system

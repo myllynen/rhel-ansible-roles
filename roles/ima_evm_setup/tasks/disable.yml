@@ -21,6 +21,7 @@
     --update-kernel=ALL
     --remove-args="{{ __ima_boot_params | join(' ') }}"
   register: boot_config
+  changed_when: true
   when: 1 in boot_params_check.results | map(attribute='found') | list
 
 - name: Reboot system
@@ -59,21 +60,28 @@
 
 - name: Remove EVM file security attributes
   shell: |
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
+    set -o pipefail
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+      xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
   register: evm_attrs
   failed_when: false
+  changed_when: true
   when: ima_evm_setup_sign_files | bool or
         (fattr_info.stdout is defined and 'security.evm' in fattr_info.stdout)
 
 - name: Remove IMA file security attributes
   shell: |
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
+    set -o pipefail
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+      xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
   register: ima_attrs
   failed_when: false
+  changed_when: true
   when: ima_evm_setup_sign_files | bool or
         (fattr_info.stdout is defined and 'security.ima' in fattr_info.stdout)
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
+  changed_when: true
   when: evm_attrs is changed or
         ima_attrs is changed
