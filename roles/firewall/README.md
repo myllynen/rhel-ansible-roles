@@ -10,21 +10,28 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Enable or disable firewall
-firewall_enable: true
+# This role provides only very basic firewall setup
+# Use system_roles.firewall for more complete setups
 
+# Enable or disable firewall
+# Set to null to leave untouched
+firewall_enable: null
+
+# Firewall default zone to set and configure
 firewall_default_zone: public
 
-# List of ports (80/tcp, 123/udp, ...) or services (cockpit, https, ...)
-# vars/main.yml lists always open ports/services. ssh is always kept open.
+# List of ports to open
 firewall_open_ports:
 #  - 321/udp
 
+# List of services to open
 firewall_open_services:
 #  - samba
 
 # Close unconfigured ports and services
-firewall_close_unconfigured: true
+# The ssh service will not be closed by
+# this role regardless of configuration
+firewall_close_unconfigured: false
 </pre>
 
 ## License

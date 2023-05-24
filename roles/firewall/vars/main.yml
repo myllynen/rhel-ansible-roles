@@ -1,6 +1,0 @@
----
-__firewall_always_open_ports:
-#  -
-
-__firewall_always_open_services:
-#  -

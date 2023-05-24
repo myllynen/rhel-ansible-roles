@@ -47,7 +47,7 @@
 
 - name: Set list of ports to open
   set_fact:
-    ports_to_open: "{{ (__firewall_always_open_ports | default([], true) + firewall_open_ports | default([], true)) | select() | list | unique }}"
+    ports_to_open: "{{ firewall_open_ports | default([], true) | select() | list | unique }}"
 
 - name: Open configured ports in firewall
   ansible.posix.firewalld:
@@ -89,11 +89,12 @@
     msg: "{{ unclosed_ports | join(' ') }}"
   when:
     - not firewall_close_unconfigured | bool
-    - unclosed_ports
+    - open_ports.stdout is defined
+    - unclosed_ports | length > 0
 
 - name: Set list of services to open
   set_fact:
-    services_to_open: "{{ (__firewall_always_open_services | default([], true) + firewall_open_services | default([], true)) | select() | list | unique }}"
+    services_to_open: "{{ firewall_open_services | default([], true) | select() | list | unique }}"
 
 - name: Open configured services in firewall
   ansible.posix.firewalld:
@@ -136,4 +137,5 @@
     msg: "{{ unclosed_services | join(' ') }}"
   when:
     - not firewall_close_unconfigured | bool
-    - unclosed_services
+    - open_services.stdout is defined
+    - unclosed_services | length > 0
