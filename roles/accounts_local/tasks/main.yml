@@ -51,14 +51,14 @@
     pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', 1234567890 | random(seed=salt_seed) | string) }}"
   user:
     name: "{{ item.name }}"
-    password: "{{ pw_encrypted | default(omit) }}"
+    password: "{{ pw_encrypted }}"
     state: present
   no_log: "{{ accounts_local_no_log }}"
   loop: "{{ accounts_local_users_create | select() | selectattr('password', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"
 
-- name: Get local users
+- name: Get local user information
   getent:
     database: passwd
 
