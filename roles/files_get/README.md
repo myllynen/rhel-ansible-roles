@@ -23,8 +23,9 @@ files_get:
 #    timeout: 5
 #    validate_certs: false
 
-# Value for no_log parameter when getting files
-files_get_no_log: false
+# Value for no_log parameter when getting
+# files and using passwords, unset otherwise
+files_get_no_log: true
 </pre>
 
 ## License
