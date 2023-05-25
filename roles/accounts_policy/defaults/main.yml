@@ -54,7 +54,7 @@ system_auth_profile:
 # See the "authselect show 'profile'" output for details
 # E.g., with "minimal" use without-nullok with-pamaccess
 # With "custom/cis" the following parameters can be used:
-#   with-centrify with-mkhomedir with-pamaccess
+#   with-centrify with-mkhomedir with-pamaccess with-systemd
 system_auth_profile_parameters:
 
 # Optional PAM su configuration file template
