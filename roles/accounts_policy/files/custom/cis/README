@@ -16,3 +16,6 @@ with-mkhomedir::
 
 with-pamaccess::
     Check access.conf during account authorization.
+
+with-systemd::
+    Enable using systemd for user/group lookups.
