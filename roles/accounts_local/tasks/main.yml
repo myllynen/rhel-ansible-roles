@@ -45,10 +45,12 @@
 - name: Update local user password
   vars:
     salt_seed: "{{ accounts_local_password_salt_seed }}"
+    salt_rand: "{{ 1234567890 | random(start=1000000000, seed=salt_seed) }}"
+    rand_salt: "{{ ((salt_rand + inventory_hostname) | hash('sha512'))[:16] }}"
     encrypted: "{{ accounts_local_password_encrypted }}"
     pw_string: "{{ item.password | string if item.password is defined and item.password is not none else omit }}"
     pw_omitted: "{{ pw_string.startswith('__omit') }}"
-    pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', 1234567890 | random(seed=salt_seed) | string) }}"
+    pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', rand_salt) }}"
   user:
     name: "{{ item.name }}"
     password: "{{ pw_encrypted }}"

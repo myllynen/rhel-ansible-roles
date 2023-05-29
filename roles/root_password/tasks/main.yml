@@ -2,9 +2,11 @@
 - name: Update root password
   vars:
     salt_seed: "{{ root_password_salt_seed }}"
+    salt_rand: "{{ 1234567890 | random(start=1000000000, seed=salt_seed) }}"
+    rand_salt: "{{ ((salt_rand + inventory_hostname) | hash('sha512'))[:16] }}"
     encrypted: "{{ root_password_encrypted }}"
     pw_string: "{{ root_password | string }}"
-    pw_encrypted: "{{ pw_string if encrypted else pw_string | password_hash('sha512', 1234567890 | random(seed=salt_seed) | string) }}"
+    pw_encrypted: "{{ pw_string if encrypted else pw_string | password_hash('sha512', rand_salt) }}"
   user:
     name: root
     password: "{{ pw_encrypted }}"
