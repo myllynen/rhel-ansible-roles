@@ -194,7 +194,7 @@
     certificates_ca_files:
     #  - local-ca-bundle.pem
 
-    # Copy CA certs also to /etc/pki/tls/cert
+    # Copy CA certs also to /etc/pki/tls/certs
     certificates_copy_certs: false
 
     #
@@ -352,6 +352,8 @@
     # This role will detect and enable correct
     # agent and remove other agents if present
     # Will uninstall all agents if set to false
+    # NB. Only agents from RHEL repositories
+    #     are considered for un/installation
     guest_agent_enable: true
 
     # Remove unneeded firmware packages on VMs
@@ -416,7 +418,7 @@
     multipath_setup_config_file:
 
     # Reboot system after changes
-    # multipathd will be restarted if no reboot
+    # Config file will be reloaded if no reboot
     multipath_setup_reboot: true
 
     #
@@ -471,7 +473,7 @@
     #  - example.com
 
     resolver_options:
-    #  - ends0
+    #  - edns0
     #  - rotate
     #  - no-aaaa
     #  - timeout:1
@@ -504,7 +506,7 @@
     # This is copied from controller to remote
     scap_compliance_tailoring_file_template:
 
-    # Optional local tailoring file to use
+    # Optional remote tailoring file to use
     # This is tailoring file path on remote
     scap_compliance_tailoring_file_path:
 
@@ -570,7 +572,7 @@
     #  - irqbalance.service
 
     # Skip missing services/units instead of
-    # failing when trying to start/stop them
+    # failing when trying to enable/start them
     service_state_skip_missing: false
 
     #
