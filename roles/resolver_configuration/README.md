@@ -27,6 +27,7 @@ resolver_options:
 #  - edns0
 #  - rotate
 #  - no-aaaa
+#  - trust-ad
 #  - timeout:1
 #  - attempts:1
 </pre>
