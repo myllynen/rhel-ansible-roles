@@ -2,8 +2,10 @@ addn-hosts=/etc/hosts
 domain-needed
 bogus-priv
 
-local=/{{ ansible_facts.domain }}/
+{% if dns_cache_dnsmasq_local_domain and dns_cache_dnsmasq_local_domain != '' %}
+local=/{{ dns_cache_dnsmasq_local_domain }}/
 
+{% endif %}
 local-ttl={{ dns_cache_dnsmasq_ttl }}
 min-cache-ttl={{ dns_cache_dnsmasq_ttl }}
 #max-ttl=3600

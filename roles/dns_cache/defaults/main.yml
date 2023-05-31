@@ -11,6 +11,9 @@ dns_cache_component: dnsmasq
 # to use in case none is provided in upstream reply
 dns_cache_dnsmasq_ttl: 10
 
+# Optional value for dnsmasq 'local' config option
+dns_cache_dnsmasq_local_domain:
+
 # NetworkManager dnsmasq configuration template
 # to use instead of the role provided default one
 dns_cache_nm_dnsmasq_config_file:
