@@ -12,7 +12,6 @@ packages_install:
   - "{{ 'python3' if ansible_facts.distribution_major_version | int >= 8 else 'python' }}"
   - "{{ 'python3-libselinux' if ansible_facts.distribution_major_version | int >= 8 else 'libselinux-utils' }}"
   - "{{ 'policycoreutils-python-utils' if ansible_facts.distribution_major_version | int >= 8 else 'policycoreutils-python' }}"
-  #- redhat-lsb-core
   - setools-console
   #- sos
   - tar
