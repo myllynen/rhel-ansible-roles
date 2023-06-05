@@ -401,8 +401,8 @@
     # This option has effect only when disabling IPv6
     ipv6_setup_loopback_persist: false
 
-    # Either use system-roles.network to configure
-    # NetworkManager or allow this role to update NM
+    # Set to true to configure NetworkManager/IPv6 with this role
+    # When using system-roles.network to configure NM set to false
     ipv6_setup_configure_nm: true
 
     #
@@ -462,9 +462,8 @@
     #
     # resolver_configuration
     #
-    # NetworkManager updates /etc/resolv.conf
-    # true - use NM and system-roles.network
-    # false - for using below configurations
+    # When set to true NetworkManager manages /etc/resolv.conf
+    # To use the below configuration set this option to false
     resolver_use_nm: true
 
     resolver_nameservers:

@@ -21,8 +21,8 @@ ipv6_setup_enable: true
 # This option has effect only when disabling IPv6
 ipv6_setup_loopback_persist: false
 
-# Either use system-roles.network to configure
-# NetworkManager or allow this role to update NM
+# Set to true to configure NetworkManager/IPv6 with this role
+# When using system-roles.network to configure NM set to false
 ipv6_setup_configure_nm: true
 </pre>
 
