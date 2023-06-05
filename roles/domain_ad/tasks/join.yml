@@ -11,14 +11,14 @@
 - name: Create Kerberos configuration file
   template:
     src: "{{ domain_ad_krb5_config_file | default('krb5.conf.j2', true) }}"
-    dest: /etc/krb5.conf.d/zz-local.conf
+    dest: /etc/krb5.conf.d/zz-ansible.conf
     mode: '0644'
   register: krb5_config
 
 - name: Create SSSD configuration file
   template:
     src: "{{ domain_ad_sssd_config_file | default('sssd.conf.j2', true) }}"
-    dest: /etc/sssd/conf.d/zz-local.conf
+    dest: /etc/sssd/conf.d/zz-ansible.conf
     mode: '0600'
   register: sssd_config
 

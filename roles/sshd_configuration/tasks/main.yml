@@ -30,7 +30,7 @@
 
 - name: Set sshd configuration file
   set_fact:
-    config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-local.conf' }}"
+    config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-ansible.conf' }}"
 
 - name: Check sshd configuration file
   stat:

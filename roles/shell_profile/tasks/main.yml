@@ -2,6 +2,6 @@
 - name: Create shell profile file
   template:
     src: "{{ shell_profile_file }}"
-    dest: /etc/profile.d/zz-local.sh
+    dest: /etc/profile.d/zz-ansible.sh
     mode: '0644'
   when: shell_profile_file | default(false)

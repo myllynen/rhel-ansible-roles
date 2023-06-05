@@ -18,7 +18,7 @@
 
 - name: Create issue file
   vars:
-    issue_path: "{{ '/etc/issue.d/zz-local.issue' if ansible_facts.distribution_major_version | int >= 8 else '/etc/issue' }}"
+    issue_path: "{{ '/etc/issue.d/zz-ansible.issue' if ansible_facts.distribution_major_version | int >= 8 else '/etc/issue' }}"
   template:
     src: "{{ issue_template }}"
     dest: "{{ issue_path }}"
@@ -43,7 +43,7 @@
 
 - name: Create motd file
   vars:
-    motd_path: "{{ '/etc/motd.d/zz-local.motd' if ansible_facts.distribution_major_version | int >= 9 else '/etc/motd' }}"
+    motd_path: "{{ '/etc/motd.d/zz-ansible.motd' if ansible_facts.distribution_major_version | int >= 9 else '/etc/motd' }}"
   template:
     src: "{{ motd_template }}"
     dest: "{{ motd_path }}"

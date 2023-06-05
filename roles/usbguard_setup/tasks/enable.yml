@@ -53,7 +53,7 @@
 - name: Create custom USBGuard rules file
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version | int < 8 else false }}"
-    rules_file: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-local.conf' }}"
+    rules_file: "{{ 'rules.conf' if old_rhel else 'rules.d/zz-ansible.conf' }}"
   template:
     src: "{{ usbguard_setup_rules_file }}"
     dest: /etc/usbguard/{{ rules_file }}

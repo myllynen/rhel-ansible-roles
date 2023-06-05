@@ -15,7 +15,7 @@
 - name: Create NetworkManager dnsmasq configuration file
   template:
     src: "{{ dns_cache_nm_dnsmasq_config_file | default('dnsmasq.conf.j2', true) }}"
-    dest: /etc/NetworkManager/dnsmasq.d/zz-local.conf
+    dest: /etc/NetworkManager/dnsmasq.d/95-ansible.conf
     mode: '0644'
   register: dnsmasq_config
 

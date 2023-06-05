@@ -22,7 +22,7 @@
 - name: Copy fapolicyd rules file
   copy:
     src: "{{ fapolicyd_setup_rules_file }}"
-    dest: /etc/fapolicyd/rules.d/zz-local.rules
+    dest: /etc/fapolicyd/rules.d/zz-ansible.rules
     owner: root
     group: fapolicyd
     mode: '0644'
@@ -38,7 +38,7 @@
 - name: Copy fapolicyd trust file
   copy:
     src: "{{ fapolicyd_setup_trust_file }}"
-    dest: /etc/fapolicyd/trust.d/zz-local.trust
+    dest: /etc/fapolicyd/trust.d/zz-ansible.trust
     owner: root
     group: fapolicyd
     mode: '0644'

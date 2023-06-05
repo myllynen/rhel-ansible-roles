@@ -41,7 +41,7 @@
 - name: Copy audit rules configuration file
   copy:
     src: "{{ audit_setup_rules_file }}"
-    dest: /etc/audit/rules.d/zz-local.rules
+    dest: /etc/audit/rules.d/zz-ansible.rules
     mode: '0600'
   when: audit_setup_rules_file | default(false)
 
