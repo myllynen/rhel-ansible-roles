@@ -25,7 +25,7 @@ network and storage), see
 (available also as _rhel-system-roles_ RPM on RHEL).
 
 These roles have been tested and verified to work against RHEL 7/8/9
-using Ansible 2.9 - 2.14.
+using Ansible 2.9 - 2.15.
 
 The roles will gather the minimum set of facts as needed meaning that
 they can be used in setups where fact gathering is disabled.
