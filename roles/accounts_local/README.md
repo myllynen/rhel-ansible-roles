@@ -45,7 +45,7 @@ accounts_local_users_create:
 #    # creates or removes /etc/sudoers.d/username
 #    sudo_allow_all: false
 #    # Require password or not for the above
-#    sudo_no_passwd: false
+#    sudo_passwordless: false
 #    authorized_keys:
 #      - ssh-rsa ... user@cloud
 #    authorized_keys_exclusive: false

@@ -84,7 +84,7 @@
 
 - name: Create local user sudo configuration
   vars:
-    pw_require: "{{ 'NOPASSWD' if item.sudo_no_passwd | default(false) | bool else 'PASSWD' }}"
+    pw_require: "{{ 'NOPASSWD' if item.sudo_passwordless | default(false) | bool else 'PASSWD' }}"
   copy:
     content: |
       {{ item.name }} ALL=(ALL) {{ pw_require }}: ALL
