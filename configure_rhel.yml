@@ -38,11 +38,13 @@
     #    home: /home/testuser
     #    shell: /bin/bash
     #    expires: -1
-    #    #password_expire_max: 365
     #    #password_expire_min: 7
-    #    # Configures passwordless unlimited sudo for user
-    #    # by creating or removing /etc/sudoers.d/username
-    #    allow_full_sudo: false
+    #    #password_expire_max: 365
+    #    # Allow or not unlimited sudo for user, this
+    #    # creates or removes /etc/sudoers.d/username
+    #    sudo_allow_all: false
+    #    # Require password or not for the above
+    #    sudo_no_passwd: false
     #    authorized_keys:
     #      - ssh-rsa ... user@cloud
     #    authorized_keys_exclusive: false

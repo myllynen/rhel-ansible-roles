@@ -80,12 +80,14 @@
   loop: "{{ create_users | default([]) | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
-  when: not item.allow_full_sudo | default(false) | bool
+  when: not item.sudo_allow_all | default(false) | bool
 
 - name: Create local user sudo configuration
+  vars:
+    pw_require: "{{ 'NOPASSWD' if item.sudo_no_passwd | default(false) | bool else 'PASSWD' }}"
   copy:
     content: |
-      {{ item.name }} ALL=(ALL) NOPASSWD: ALL
+      {{ item.name }} ALL=(ALL) {{ pw_require }}: ALL
     dest: /etc/sudoers.d/{{ item.name }}
     owner: root
     group: root
@@ -94,7 +96,7 @@
   loop: "{{ create_users | default([]) | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
-  when: item.allow_full_sudo | default(false) | bool
+  when: item.sudo_allow_all | default(false) | bool
 
 - name: Configure local user SSH authorized key
   ansible.posix.authorized_key:
