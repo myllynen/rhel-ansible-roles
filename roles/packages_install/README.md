@@ -15,10 +15,12 @@ packages_install:
   - bash-completion
   - bind-utils
   - curl
+  #-git-core
   - man-pages
   #- mlocate
   - nano
   - openssh-clients
+  #- perl-interpreter
   - psmisc
   - "{{ 'python3' if ansible_facts.distribution_major_version | int >= 8 else 'python' }}"
   - "{{ 'python3-libselinux' if ansible_facts.distribution_major_version | int >= 8 else 'libselinux-utils' }}"

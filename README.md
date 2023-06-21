@@ -17,10 +17,12 @@ vars files, group vars, variables defined in an inventory, or some other
 approach might be appropriate for providing configuration variables for
 the roles.
 
-See the example playbook [configure_rhel.yml](configure_rhel.yml) for
-all the configuration variables these roles support and how they could
-be used together. For additional roles to configure RHEL (such as
-network and storage), see
+See the READMEs of [each role](roles) for descriptions of the parameters
+they support.
+
+See the example playbook [configure_rhel.yml](configure_rhel.yml) how
+these roles could be used together. For additional roles to configure
+RHEL functionality (such as network and storage), see
 [Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
