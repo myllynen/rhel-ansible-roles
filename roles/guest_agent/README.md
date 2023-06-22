@@ -16,6 +16,10 @@ Below are the role default values from defaults/main.yml:
 # Will uninstall all agents if set to false
 # NB. Only agents from RHEL repositories
 #     are considered for un/installation
+#     Currently recognized platforms are:
+#       - Azure
+#       - KVM/Qemu
+#       - VMware
 guest_agent_enable: true
 
 # Remove unneeded firmware packages on VMs
