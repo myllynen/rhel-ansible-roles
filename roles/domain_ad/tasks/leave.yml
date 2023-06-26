@@ -1,7 +1,7 @@
 ---
 - name: Leave AD domain
   vars:
-    leave_action: "{{ 'delete-computer' if domain_ad_computer_delete_on_leave else 'reset-computer' }}"
+    leave_action: "{{ 'delete-computer' if domain_ad_leave_computer_delete | bool else 'reset-computer' }}"
   shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
@@ -13,6 +13,12 @@
   no_log: true
   changed_when: true
   when: krb5_keytab.stat.exists
+
+- name: Disable sssd-kcm socket
+  service:
+    name: sssd-kcm.socket
+    enabled: false
+  when: "'sssd-kcm' in ansible_facts.packages"
 
 - name: Disable sssd service
   service:
@@ -42,3 +48,15 @@
   file:
     path: /etc/krb5.keytab
     state: absent
+
+- name: Remove SSSD cache files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/lib/sss/db/cache_{{ domain_ad_domain }}.ldb
+    - /var/lib/sss/db/config.ldb
+    - /var/lib/sss/db/sssd.ldb
+    - /var/lib/sss/db/timestamps_{{ domain_ad_domain }}.ldb
+    - /var/lib/sss/secrets/secrets.ldb
+  when: domain_ad_leave_sssd_cache_delete | bool

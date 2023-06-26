@@ -232,8 +232,12 @@
     #domain_ad_admin_username:
     #domain_ad_admin_password:
 
-    domain_ad_computer_precreated: false
-    domain_ad_computer_delete_on_leave: true
+    # Set these to false if AD computer objects are
+    # created and deleted separately, without adcli
+    domain_ad_join_computer_create: true
+    domain_ad_leave_computer_delete: true
+    # Remove cached users and secrets when leaving
+    domain_ad_leave_sssd_cache_delete: true
 
     domain_ad_allow_groups:
     #  - GROUP@example.com

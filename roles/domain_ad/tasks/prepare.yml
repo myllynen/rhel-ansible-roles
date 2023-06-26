@@ -18,6 +18,8 @@
       - krb5-workstation
       - oddjob-mkhomedir
       - sssd
+      - sssd-ad
+      - sssd-kcm
       - sssd-tools
     state: present
 
@@ -62,11 +64,11 @@
     - "'adcli' in ansible_facts.packages"
     - ansible_facts.distribution_major_version | int >= 8
 
-- name: Fail if computer does not exist in AD domain
+- name: Fail if expected computer does not exist in AD domain
   fail:
     msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
   when:
     - "'adcli' in ansible_facts.packages"
     - ansible_facts.distribution_major_version | int >= 8
-    - domain_ad_computer_precreated | bool
+    - not domain_ad_join_computer_create | bool
     - computer_info.rc != 0

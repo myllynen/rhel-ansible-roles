@@ -53,6 +53,12 @@
     state: started
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
+- name: Enable sssd-kcm socket
+  service:
+    name: sssd-kcm.socket
+    enabled: true
+  when: "'sssd-kcm' in ansible_facts.packages"
+
 - name: Enable sssd service
   service:
     name: sssd
