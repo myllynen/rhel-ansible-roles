@@ -28,18 +28,18 @@
     - not dns_cache_enable | bool or
       dns_cache_component != 'nscd'
 
-- name: Read NetworkManager DNS configuration
+- name: Read NetworkManager DNS cache configuration
   slurp:
-    src: /etc/NetworkManager/conf.d/50-dns.conf
+    src: /etc/NetworkManager/conf.d/50-dns-cache.conf
   register: current_config
   failed_when: false
 
-- name: Update NetworkManager DNS configuration
+- name: Update NetworkManager DNS cache configuration
   copy:
     content: |
       [main]
       #dns=
-    dest: /etc/NetworkManager/conf.d/50-dns.conf
+    dest: /etc/NetworkManager/conf.d/50-dns-cache.conf
     mode: '0644'
   register: nm_config
   when:
