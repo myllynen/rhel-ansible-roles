@@ -34,7 +34,7 @@
       [main]
       dns=systemd-resolved
       rc-manager=symlink
-    dest: /etc/NetworkManager/conf.d/50-dns-cache.conf
+    dest: /etc/NetworkManager/conf.d/95-dns-cache.conf
     mode: '0644'
   register: nm_config
 
