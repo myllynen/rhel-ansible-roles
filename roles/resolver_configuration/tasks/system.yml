@@ -1,0 +1,39 @@
+---
+- name: Remove NetworkManager resolver configuration options file
+  file:
+    path: /etc/NetworkManager/conf.d/50-resolver.conf
+    state: absent
+  register: nm_resolver_config
+
+- name: Update NetworkManager resolver management configuration
+  copy:
+    content: |
+      [main]
+      rc-manager=unmanaged
+    dest: /etc/NetworkManager/conf.d/90-rc-manager.conf
+    mode: '0644'
+  register: nm_rc_manager_config
+
+- name: Reload NetworkManager to apply configuration changes
+  service:
+    name: NetworkManager
+    state: reloaded
+  when: nm_resolver_config is changed or
+        nm_rc_manager_config is changed
+
+- name: Create /etc/resolv.conf file
+  vars:
+    etc_resolv_conf_content: |
+      {% for server in resolver_nameservers %}
+      nameserver {{ server }}
+      {% endfor %}
+      {% if resolver_search_domains %}
+      search {{ resolver_search_domains | join(' ') }}
+      {% endif %}
+      {% if resolver_options %}
+      options {{ resolver_options | join(' ') }}
+      {% endif %}
+  copy:
+    content: "{{ etc_resolv_conf_content }}"
+    dest: /etc/resolv.conf
+    mode: '0644'

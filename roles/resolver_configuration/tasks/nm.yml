@@ -1,0 +1,35 @@
+---
+- name: Create NetworkManager resolver configuration options file
+  vars:
+    nm_resolver_conf_content: |
+      [global-dns-domain-*]
+      servers={{ resolver_nameservers | join(',') }}
+
+      [global-dns]
+      {% if resolver_search_domains %}
+      searches={{ resolver_search_domains | join(',') }}
+      {% endif %}
+      {% if resolver_options %}
+      options={{ resolver_options | join(',') }}
+      {% endif %}
+  copy:
+    content: "{{ nm_resolver_conf_content }}"
+    dest: /etc/NetworkManager/conf.d/50-resolver.conf
+    mode: '0644'
+  register: nm_resolver_config
+
+- name: Update NetworkManager resolver management configuration
+  copy:
+    content: |
+      [main]
+      rc-manager=file
+    dest: /etc/NetworkManager/conf.d/90-rc-manager.conf
+    mode: '0644'
+  register: nm_rc_manager_config
+
+- name: Reload NetworkManager to apply configuration changes
+  service:
+    name: NetworkManager
+    state: reloaded
+  when: nm_resolver_config is changed or
+        nm_rc_manager_config is changed

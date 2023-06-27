@@ -472,10 +472,18 @@
     #
     # resolver_configuration
     #
-    # When set to true NetworkManager manages /etc/resolv.conf
-    # To use the below configuration set this option to false
-    resolver_use_nm: true
+    # Method for configuring resolver, /etc/resolv.conf
+    # nm - configure resolver with NetworkManager
+    #      global options overriding connection
+    #      profile file configuration options
+    # system - prevent NM updating resolver and update
+    #          /etc/resolv.conf directly
+    # remove - remove NM configurations by this role,
+    #          leave /etc/resolv.conf untouched
+    # nothing - do nothing
+    resolver_configuration_method: nothing
 
+    # At least one nameserver must be specified
     resolver_nameservers:
       - 1.1.1.1
       - 8.8.8.8
