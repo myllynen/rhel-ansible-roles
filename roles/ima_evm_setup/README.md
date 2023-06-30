@@ -12,7 +12,8 @@ Below are the role default values from defaults/main.yml:
 ---
 # NB. This role is experimental!
 # NB. This role is not ready for use in production!
-
+# NB. Applicable RHEL versions: RHEL 9+
+#
 # Enable or disable IMA/EVM
 # Set to null to leave untouched
 ima_evm_setup_enable: null

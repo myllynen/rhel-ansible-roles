@@ -10,6 +10,8 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
+# NB. Supported RHEL versions: RHEL 8+
+#
 # Enable or disable service after configuration
 # to allow testing and verification before use.
 # NB. See ima_evm_setup if planning to use IMA.
