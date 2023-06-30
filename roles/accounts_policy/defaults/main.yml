@@ -21,6 +21,7 @@ login_defs_config_file:
 login_access_config_file:
 
 # PAM faillock configuration file faillock.conf template
+# NB. Supported RHEL versions: RHEL 8+
 # Role provided alternatives:
 # * faillock_cis.conf      - CIS Level 2 - Server compliant config
 # * faillock_rhel.conf     - RHEL default config
@@ -45,6 +46,7 @@ pwquality_config_file:
 # or copy and use a custom one. A custom profile must be
 # named as "custom/name". E.g., use "/srv/custom/strict"
 # to copy the profile custom/strict from local path /srv
+# NB. Supported RHEL versions: RHEL 8+
 # Role provided alternatives:
 # * custom/cis  -  CIS Level 2 - Server compliant profile
 #                  incl. optional support for Centrify.

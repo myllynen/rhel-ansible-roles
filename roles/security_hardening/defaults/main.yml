@@ -5,10 +5,12 @@ secure_boot_verify: false
 
 # One of: disabled, integrity, confidentiality
 # NB. Enabling lockdown will prevent using kdump
+# NB. Supported RHEL versions: RHEL 9+
 kernel_lockdown: disabled
 
 # SELinux state
 selinux: enforcing
 
 # System-wide crypto policy
+# NB. Supported RHEL versions: RHEL 8+
 crypto_policy: DEFAULT
