@@ -6,10 +6,18 @@ Ansible roles for RHEL configuration.
 
 ## Quick Intro
 
-To install this collection from GitHub:
+To install this collection from GitHub with Ansible 2.10 and newer:
 
 ```
 ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-roles,master
+```
+
+To install this collection with Ansible 2.9:
+
+```
+git clone https://github.com/myllynen/rhel-ansible-roles.git
+ansible-galaxy collection build rhel-ansible-roles
+ansible-galaxy collection install myllynen-rhel_ansible_roles-$version.tar.gz
 ```
 
 Depending on the environment and requirements separate playbooks and/or
