@@ -5,9 +5,7 @@
       - '!all'
       - '!min'
       - cmdline
-      - distribution_major_version
-  when: ansible_facts.cmdline is not defined or
-        ansible_facts.distribution_major_version is not defined
+  when: ansible_facts.cmdline is not defined
 
 - name: Verify correct role configuration
   assert:
