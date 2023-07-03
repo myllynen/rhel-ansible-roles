@@ -2,7 +2,7 @@
 - name: Verify correct role configuration
   assert:
     that:
-      - resolver_configuration_method in ['nm', 'system', 'remove', 'nothing']
+      - resolver_configuration_method in ['nm', 'direct', 'remove', 'nothing']
       - resolver_configuration_method in ['remove', 'nothing'] or
         resolver_nameservers | default([], true) | length > 0
     quiet: true
@@ -12,8 +12,8 @@
   when: resolver_configuration_method == 'remove'
 
 - name: Configure resolver without NetworkManager
-  include_tasks: system.yml
-  when: resolver_configuration_method == 'system'
+  include_tasks: direct.yml
+  when: resolver_configuration_method == 'direct'
 
 - name: Configure resolver using NetworkManager
   include_tasks: nm.yml

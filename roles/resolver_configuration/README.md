@@ -14,8 +14,8 @@ Below are the role default values from defaults/main.yml:
 # nm - configure resolver with NetworkManager
 #      global options overriding connection
 #      profile file configuration options
-# system - prevent NM updating resolver and update
-#          /etc/resolv.conf directly
+# direct - prevent NM updating resolver and update
+#          the /etc/resolv.conf file directly
 # remove - remove NM configurations by this role,
 #          leave /etc/resolv.conf untouched
 # nothing - do nothing
