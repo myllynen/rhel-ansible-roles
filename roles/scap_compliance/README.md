@@ -12,6 +12,7 @@ Below are the role default values from defaults/main.yml:
 ---
 # RHEL provided OpenSCAP security profile
 # to apply and / or check for compliance.
+# Profile will be applied using oscap(8).
 # Switching from one security profile to
 # another may not work and is unsupported
 scap_compliance_profile: cis
