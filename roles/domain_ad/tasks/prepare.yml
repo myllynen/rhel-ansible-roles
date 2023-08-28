@@ -47,6 +47,7 @@
     - "'domain-controller-usable = yes' not in domain_info.stdout"
 
 - name: Check computer status in AD domain
+  no_log: true
   shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
@@ -55,7 +56,6 @@
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
     {{ ansible_facts.fqdn }}
-  no_log: true
   check_mode: false
   register: computer_info
   failed_when: computer_info.rc != 0 and computer_info.rc != 5

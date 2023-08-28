@@ -279,6 +279,7 @@
     env_pw: "{{ true if ansible_facts.distribution_major_version | int >= 9 else false }}"
     key_opt: "{{ '' if env_pw or ima_evm_setup_key_password is not defined else '-p' + q + ima_evm_setup_key_password + q }}"
     sign_opt: "{{ 'ima_sign' if 'evm' not in ima_evm_setup_method else 'sign --imasig' }}"
+  no_log: true
   shell: |
     export EVMCTL_KEY_PASSWORD='{{ ima_evm_setup_key_password | default("", true) }}'
     set -e
@@ -301,7 +302,6 @@
     echo Sign non-executable libraries
     find /usr/lib /usr/lib64 -type f -uid 0 -\! -executable -name '*.so*' \
       -exec evmctl -a {{ ima_evm_setup_ima_hash }} {{ sign_opt }} {{ key_opt }} '{}' \; > /dev/null 2>&1
-  no_log: true
   changed_when: true
   when:
     - "'sig' in ima_evm_setup_method"

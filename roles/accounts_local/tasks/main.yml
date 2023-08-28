@@ -20,9 +20,9 @@
   loop: "{{ accounts_local_groups_create | select() | list }}"
 
 - name: Create passwordless list of local users to create
+  no_log: "{{ accounts_local_no_log }}"
   set_fact:
     create_users: "{{ create_users | default([]) + [item | dict2items | rejectattr('key', 'equalto', 'password') | list | items2dict] }}"
-  no_log: "{{ accounts_local_no_log }}"
   loop: "{{ accounts_local_users_create | select() | list }}"
   loop_control:
     label: "{{ item.name }}"
@@ -51,11 +51,11 @@
     pw_string: "{{ item.password | string if item.password is defined and item.password is not none else omit }}"
     pw_omitted: "{{ pw_string.startswith('__omit') }}"
     pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', rand_salt) }}"
+  no_log: "{{ accounts_local_no_log }}"
   user:
     name: "{{ item.name }}"
     password: "{{ pw_encrypted }}"
     state: present
-  no_log: "{{ accounts_local_no_log }}"
   loop: "{{ accounts_local_users_create | select() | selectattr('password', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"

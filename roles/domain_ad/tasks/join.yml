@@ -29,6 +29,7 @@
   when: "'sssd' in ansible_facts.packages"
 
 - name: Join AD domain
+  no_log: true
   shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
@@ -37,7 +38,6 @@
     --host-fqdn={{ ansible_facts.fqdn }}
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
-  no_log: true
   changed_when: true
   when: not krb5_keytab.stat.exists
 

@@ -2,6 +2,7 @@
 - name: Get files
   vars:
     passwords_used: "{{ files_get | default([], true) | selectattr('url_password', 'defined') | list | length > 0 }}"
+  no_log: "{{ passwords_used and files_get_no_log }}"
   get_url:
     url: "{{ item.url }}"
     url_username: "{{ item.username | default(omit) }}"
@@ -14,7 +15,6 @@
     headers: "{{ item.headers | default(omit) }}"
     timeout: "{{ item.timeout | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
-  no_log: "{{ passwords_used and files_get_no_log }}"
   register: get_files
   loop: "{{ files_get | default([], true) }}"
   loop_control:

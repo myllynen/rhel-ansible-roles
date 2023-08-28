@@ -2,6 +2,7 @@
 - name: Leave AD domain
   vars:
     leave_action: "{{ 'delete-computer' if domain_ad_leave_computer_delete | bool else 'reset-computer' }}"
+  no_log: true
   shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
@@ -10,7 +11,6 @@
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
     {{ ansible_facts.fqdn }}
-  no_log: true
   changed_when: true
   when: krb5_keytab.stat.exists
 
