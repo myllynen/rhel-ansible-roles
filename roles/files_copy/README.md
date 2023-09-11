@@ -10,7 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Dict of files and directories to copy
+# List of files and directories to copy
 # Uses Ansible built-in copy module
 # Registers variable: copy_files
 files_copy:
@@ -18,7 +18,7 @@ files_copy:
 #    dest: /tmp/test.file
 #    mode: '0600'
 
-# Dict of templates to render
+# List of templates to render
 # Uses Ansible built-in template module
 # Registers variable: copy_templates
 files_copy_templates:

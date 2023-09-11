@@ -15,7 +15,7 @@
     label: "{{ item.src + ' -> ' + item.dest }}"
 
 - name: Create files from templates
-  copy:
+  template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: "{{ item.owner | default(omit) }}"
