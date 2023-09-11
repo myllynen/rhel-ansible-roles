@@ -6,7 +6,7 @@
 
 - name: Configure timesync
   include_role:
-    name: rhel-system-roles.timesync
+    name: redhat.rhel_system_roles.timesync
 
 - name: Apply timesync configuration changes
   meta: flush_handlers

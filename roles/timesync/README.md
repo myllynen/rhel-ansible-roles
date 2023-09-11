@@ -9,6 +9,9 @@ Please see the collection main page for a higher level description.
 Below are the role default values from defaults/main.yml:
 
 <pre>
+# This role is a wrapper for redhat.rhel_system_roles.timesync
+# that takes a list of NTP servers as input and after running
+# the system role flushes handlers to update time immediately
 ---
 ntp_servers:
   - 0.rhel.pool.ntp.org
