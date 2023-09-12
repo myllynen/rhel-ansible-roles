@@ -10,6 +10,11 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
+# Perform minor cleanups after system
+# initial installation. See the tasks
+# for details. Using this role is by
+# no means mandatory or required.
+
 # Actions to take after initialization
 # reboot - reboot after initialization
 # syslog - write message to system log
