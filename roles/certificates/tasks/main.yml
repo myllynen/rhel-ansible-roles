@@ -1,21 +1,61 @@
 ---
-- name: Copy CA bundle files to CA trust directory
+- name: Gather needed facts
+  setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+  when: ansible_facts.distribution_major_version is not defined
+
+- name: Copy certificate anchor files
   copy:
     src: "{{ item }}"
-    dest: /etc/pki/ca-trust/source/anchors/{{ item }}
+    dest: /etc/pki/ca-trust/source/anchors/{{ item | basename }}
     mode: '0644'
-  register: ca_files
-  loop: "{{ certificates_ca_files | select() | list }}"
+  register: anchor_files
+  loop: "{{ certificates_files_anchors | default([], true) }}"
 
-- name: Copy CA bundle files to certs directory
+- name: Copy certificate blocklist files
+  vars:
+    block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
   copy:
     src: "{{ item }}"
-    dest: /etc/pki/tls/certs/{{ item }}
+    dest: /etc/pki/ca-trust/source/{{ block_dir }}/{{ item | basename }}
     mode: '0644'
-  loop: "{{ certificates_ca_files | select() | list }}"
-  when: certificates_copy_certs | bool
+  register: blocklist_files
+  loop: "{{ certificates_files_blocklist | default([], true) }}"
 
-- name: Write trusted certificate bundles
+- name: Copy certificate extended format files
+  copy:
+    src: "{{ item }}"
+    dest: /etc/pki/ca-trust/source/{{ item | basename }}
+    mode: '0644'
+  register: ext_files
+  loop: "{{ certificates_files_ext_format | default([], true) }}"
+
+- name: Remove unrecognized certificate files
+  vars:
+    block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
+    system_files:
+      - /etc/pki/ca-trust/source/README
+      - /etc/pki/ca-trust/source/anchors
+      - /etc/pki/ca-trust/source/{{ block_dir }}
+      - /etc/pki/ca-trust/source/ca-bundle.legacy.crt
+    files_remove:
+      - /etc/pki/ca-trust/source/anchors/*
+      - /etc/pki/ca-trust/source/{{ block_dir }}/*
+      - /etc/pki/ca-trust/source/*
+    files_remove_exclude: "{{ system_files +
+                              certificates_files_known | default([], true) +
+                              anchor_files.results | map(attribute='invocation.module_args.dest') | list +
+                              blocklist_files.results | map(attribute='invocation.module_args.dest') | list +
+                              ext_files.results | map(attribute='invocation.module_args.dest') | list }}"
+  include_role:
+    name: files_remove
+  when: certificates_exclusive | bool
+
+- name: Write extracted certificate configuration files
   command: update-ca-trust extract
   changed_when: true
-  when: ca_files is changed
+  when: (anchor_files is changed or blocklist_files is changed or ext_files is changed) or
+        (certificates_exclusive | bool and remove_files is changed)
