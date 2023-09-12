@@ -32,10 +32,11 @@
   set_fact:
     config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-ansible.conf' }}"
 
-- name: Check sshd configuration file
-  stat:
-    path: "{{ config_file }}"
-  register: file_check
+- name: Locate other sshd configuration files
+  find:
+    paths: /etc/ssh/sshd_config.d
+    patterns: '*.conf'
+  register: config_files
 
 - name: Enable sshd configuration options
   lineinfile:
@@ -51,19 +52,32 @@
 
 - name: Disable sshd configuration options
   vars:
-    main_file: "{{ '/etc/ssh/sshd_config' }}"
-    update_files: "{{ [main_file] + [config_file] if file_check.stat.exists else [main_file] }}"
+    main_file: /etc/ssh/sshd_config
+    update_files: "{{ [main_file] + config_files.files | map(attribute='path') | list }}"
   replace:
     path: "{{ item.0 }}"
     regexp: '^({{ item.1 }} .*)'
     replace: '#\1'
     validate: /usr/sbin/sshd -tf %s
   register: disable_options
-  loop: "{{ update_files | unique | product(sshd_disable) | list }}"
+  loop: "{{ update_files | sort | unique | product(sshd_disable) | list }}"
+
+- name: Remove unrecognized sshd configuration files
+  vars:
+    self_config: ['/etc/ssh/sshd_config.d/0-ansible.conf']
+    files_remove:
+      - /etc/ssh/sshd_config.d/*
+    files_remove_exclude: "{{ self_config + sshd_configuration_files_known | default([], true) }}"
+  include_role:
+    name: files_remove
+  when:
+    - config_dir.stat.exists
+    - sshd_configuration_exclusive | bool
 
 - name: Reload sshd to apply configuration changes
   service:
     name: sshd
     state: reloaded
   when: enable_options is changed or
-        disable_options is changed
+        disable_options is changed or
+        (config_dir.stat.exists and sshd_configuration_exclusive | bool and remove_files is changed)

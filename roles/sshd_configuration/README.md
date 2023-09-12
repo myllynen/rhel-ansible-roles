@@ -18,6 +18,18 @@ sshd_options:
 # These options will be commented out from config
 sshd_options_disable:
   - Protocol
+
+# Remove unrecognized sshd configuration files
+# On systems without sshd_config.d does nothing
+sshd_configuration_exclusive: false
+
+# List of recognized sshd configuration files
+# in addition to the role created 0-ansible.conf
+# Other files in sshd_config.d will be removed
+sshd_configuration_files_known:
+  - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
+  - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
+  - /etc/ssh/sshd_config.d/50-redhat.conf
 </pre>
 
 ## License
