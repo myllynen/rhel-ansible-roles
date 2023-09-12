@@ -166,6 +166,16 @@
     # Allowed values: fail, ignore, reboot
     audit_setup_update_lock: fail
 
+    # Remove unrecognized audit rules files
+    audit_setup_exclusive: false
+
+    # List of recognized audit rules files
+    # in addition to the role created zz-ansible.rules
+    # Other files in /etc/audit/rules.d will be removed
+    # NB. This list must be updated for use with OpenSCAP!
+    audit_setup_files_known:
+      - /etc/audit/rules.d/audit.rules
+
     #
     # boot_parameters
     #
@@ -194,12 +204,35 @@
     #
     # certificates
     #
-    # List of CA bundle files in PEM format
-    certificates_ca_files:
+    # See update-ca-trust(8) for descriptions of
+    # different source formats and subdirectories
+
+    # List of certificate files to be copied
+    # to /etc/pki/ca-trust/source/anchors/
+    certificates_files_anchors:
     #  - local-ca-bundle.pem
 
-    # Copy CA certs also to /etc/pki/tls/certs
-    certificates_copy_certs: false
+    # List of certificate files to be copied
+    # to /etc/pki/ca-trust/source/blocklist/
+    # (or blacklist on older RHEL versions)
+    certificates_files_blocklist:
+    #  - local-blocklist.pem
+
+    # List of certificate files to be copied
+    # to /etc/pki/ca-trust/source/
+    certificates_files_ext_format:
+    #  - local-trusts.pem
+
+    # Remove unrecognized certificate files
+    # This will remove all files from the above
+    # directories except for the ones listed in
+    # the configurations above and below - this
+    # should be done only after careful testing
+    certificates_exclusive: false
+
+    # List of additionally recognized cert files
+    certificates_files_known:
+    #  - /etc/pki/ca-trust/source/anchors/old.pem
 
     #
     # dns_cache
@@ -317,6 +350,18 @@
     # * rpm-filter.conf - RHEL default trust file
     fapolicyd_setup_rpm_filter_file:
 
+    # Remove unrecognized rules and trust files
+    fapolicyd_setup_exclusive: false
+
+    # List of recognized rules and trust files
+    # in addition to the role created ones
+    # (zz-ansible.rules and zz-ansible.trust)
+    # Other files in rules.d and trust.d will
+    # be removed meaning this MUST be tested!
+    fapolicyd_setup_files_known:
+    #  - /etc/fapolicyd/rules.d/50-os.rules
+    #  - /etc/fapolicyd/trust.d/50-os.trust
+
     #
     # files_{copy,create,fetch,get,remove} - omitted here for brevity
     #
@@ -418,7 +463,7 @@
     ipv6_setup_loopback_persist: false
 
     # Set to true to configure NetworkManager/IPv6 with this role
-    # When using system-roles.network to configure NM set to false
+    # When using system_roles.network to configure NM set to false
     ipv6_setup_configure_nm: true
 
     #
@@ -524,6 +569,7 @@
     #
     # RHEL provided OpenSCAP security profile
     # to apply and / or check for compliance.
+    # Profile will be applied using oscap(8).
     # Switching from one security profile to
     # another may not work and is unsupported
     scap_compliance_profile: cis
@@ -645,6 +691,18 @@
     sshd_options_disable:
       - Protocol
 
+    # Remove unrecognized sshd configuration files
+    # On systems without sshd_config.d does nothing
+    sshd_configuration_exclusive: false
+
+    # List of recognized sshd configuration files
+    # in addition to the role created 0-ansible.conf
+    # Other files in sshd_config.d will be removed
+    sshd_configuration_files_known:
+      - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
+      - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
+      - /etc/ssh/sshd_config.d/50-redhat.conf
+
     #
     # system_coredump
     #
@@ -665,6 +723,11 @@
     #
     # system_init
     #
+    # Perform minor cleanups after system
+    # initial installation. See the tasks
+    # for details. Using this role is by
+    # no means mandatory or required.
+
     # Actions to take after initialization
     # reboot - reboot after initialization
     # syslog - write message to system log
@@ -804,6 +867,9 @@
     #
     # timesync
     #
+    # This role is a wrapper for redhat.rhel_system_roles.timesync
+    # that takes a list of NTP servers as input and after running
+    # the system role flushes handlers to update time immediately
     ntp_servers:
       - 0.rhel.pool.ntp.org
       - 1.rhel.pool.ntp.org
@@ -828,6 +894,10 @@
     #
     # usbguard_setup
     #
+    # To completely disable the USB subsystem
+    # use the usbcore.nousb boot parameter,
+    # also see usbcore.authorized_default.
+
     # Policy to apply to USB devices
     # reject - block and reject all devices
     # custom - custom configuration, see below
@@ -843,9 +913,17 @@
     # Custom USBGuard rules file template to use
     usbguard_setup_rules_file:
 
-    # To completely disable the USB subsystem
-    # use the usbcore.nousb boot parameter,
-    # also see usbcore.authorized_default.
+    # Custom USBGuard IPC access control template to use
+    usbguard_setup_ipc_access_file:
+
+    # Remove unrecognized rules and IPC access control files
+    usbguard_setup_exclusive: false
+
+    # List of recognized rules and IPC files
+    # in addition to the role created ones
+    # Other such config files will be removed
+    usbguard_setup_files_known:
+    #  - /etc/usbguard/rules.d/50-os.conf
 
     #
     # watchdog
@@ -865,7 +943,7 @@
     - etc_hosts
     #- repository_setup
     - guest_agent
-    #- rhel-system-roles.network
+    #- redhat.rhel_system_roles.network
     #- dns_cache
     - resolver_configuration
     #- timezone
@@ -876,9 +954,9 @@
     - system_locale
     - audit_setup
     #- { role: multipath_setup, when: ansible_facts.virtualization_role != 'guest' }
-    #- rhel-system-roles.kernel_settings
-    #- rhel-system-roles.storage
-    #- rhel-system-roles.kdump
+    #- redhat.rhel_system_roles.kernel_settings
+    #- redhat.rhel_system_roles.storage
+    #- redhat.rhel_system_roles.kdump
     #- system_update_report_pre
     #- system_update
     #- aide_setup
@@ -891,7 +969,7 @@
     #- fapolicyd_setup
     #- fips_setup
     - firewall
-    #- rhel-system-roles.firewall
+    #- redhat.rhel_system_roles.firewall
     - watchdog
     #- motd_issue
     - packages_install
@@ -904,9 +982,9 @@
     - sshd_configuration
     #- troubleshooting_tools
     #- usbguard_setup
-    #- rhel-system-roles.cockpit
-    #- rhel-system-roles.logging
-    #- rhel-system-roles.metrics
+    #- redhat.rhel_system_roles.cockpit
+    #- redhat.rhel_system_roles.logging
+    #- redhat.rhel_system_roles.metrics
     #- { role: splunk_forwarder, when: splunk_user_password_hash is defined }
     #- system_coredump
     - system_init
