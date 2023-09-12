@@ -63,6 +63,26 @@
     - usbguard_setup_policy == 'custom'
     - usbguard_setup_rules_file | default(false)
 
+- name: Create custom USBGuard IPC access control file
+  template:
+    src: "{{ usbguard_setup_ipc_access_file }}"
+    dest: /etc/usbguard/IPCAccessControl.d/zz-ansible.conf
+    mode: '0600'
+  register: ipc_access_custom
+  when: usbguard_setup_ipc_access_file | default(false)
+
+- name: Remove unrecognized rules and IPC access control files
+  vars:
+    files_remove:
+      - /etc/usbguard/rules.d/*
+      - /etc/usbguard/IPCAccessControl.d/*
+    files_remove_exclude: "{{ ['/etc/usbguard/rules.d/zz-ansible.conf'] +
+                              ['/etc/usbguard/IPCAccessControl.d/zz-ansible.conf'] +
+                              usbguard_setup_files_known | default([], true) }}"
+  include_role:
+    name: files_remove
+  when: usbguard_setup_exclusive | bool
+
 - name: Enable usbguard service
   service:
     name: usbguard
@@ -86,4 +106,6 @@
     - daemon_config_reject is changed or
       daemon_config_custom is changed or
       rules_config_default is changed or
-      rules_config_custom is changed
+      rules_config_custom is changed or
+      ipc_access_custom is changed or
+      (usbguard_setup_exclusive | bool and remove_files is changed)
