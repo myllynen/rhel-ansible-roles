@@ -12,3 +12,13 @@ audit_setup_rules_file:
 # Action with locked rules if rules changed
 # Allowed values: fail, ignore, reboot
 audit_setup_update_lock: fail
+
+# Remove unrecognized audit rules files
+audit_setup_exclusive: false
+
+# List of recognized audit rules files
+# in addition to the role created zz-ansible.rules
+# Other files in /etc/audit/rules.d will be removed
+# NB. This list must be updated for use with OpenSCAP!
+audit_setup_files_known:
+  - /etc/audit/rules.d/audit.rules
