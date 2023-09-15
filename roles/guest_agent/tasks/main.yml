@@ -18,7 +18,7 @@
       - 'i*firmware*'
       - 'lib*firmware*'
       - 'n*firmware*'
-      - "{{ 'linux-firmware' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+      - "{{ 'linux-firmware-whence' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
   yum:
     name: "{{ firmware_packages | select() | list }}"
     autoremove: true
