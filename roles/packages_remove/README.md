@@ -16,6 +16,29 @@ packages_remove:
   - puppet-agent
   - telnet-server
 
+  #- '*desktop*'
+  #- '*fonts*'
+  #- '*icons*'
+
+  #- cloud-init
+  #- flashrom
+  #- fwupd*
+  #- geolite*
+  #- gawk-all-langpacks
+  #- glibc-gconv-extra
+  #- kernel-tools
+  #- libicu
+  #- libjpeg*
+  #- lshw
+  #- '*nfs*'
+  #- parted
+  #- rpc*
+  #- slang
+  #- '*sss*'
+  #- tcpdump
+  #- teamd
+  #- webkit*
+
 # Enable or disable yum module 'autoremove' parameter
 # to remove all "leaf" packages no longer required
 packages_remove_autoremove: true
