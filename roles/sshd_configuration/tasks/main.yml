@@ -5,7 +5,9 @@
       - '!all'
       - '!min'
       - env
-  when: ansible_facts.env is not defined
+      - distribution_major_version
+  when: ansible_facts.env is not defined or
+        ansible_facts.distribution_major_version is not defined
 
 - name: Set sshd options to enable
   set_fact:
@@ -28,7 +30,7 @@
     path: /etc/ssh/sshd_config.d
   register: config_dir
 
-- name: Set sshd configuration file
+- name: Set sshd configuration file to use
   set_fact:
     config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-ansible.conf' }}"
 
@@ -37,6 +39,65 @@
     paths: /etc/ssh/sshd_config.d
     patterns: '*.conf'
   register: config_files
+
+- name: Reset sshd configuration files to RPM defaults
+  vars:
+    reset_files:
+      - ssh/sshd_config
+      - ssh/sshd_config.d/50-redhat.conf
+      - "{{ 'sysconfig/sshd' if not sshd_sysconfig_file | default(false) else '' }}"
+  copy:
+    src: "{{ item | basename }}"
+    dest: /etc/{{ item }}
+    mode: "{{ '0640' if item == 'sysconfig/sshd' else '0600' }}"
+    validate: "{{ omit if item == 'sysconfig/sshd' else '/usr/sbin/sshd -tf %s' }}"
+  register: files_reset
+  loop: "{{ reset_files | select() | list }}"
+  loop_control:
+    label: /etc/{{ item }}
+  when:
+    - config_dir.stat.exists
+    - sshd_configuration_config_reset | bool
+    - ansible_facts.distribution_major_version | int >= 9
+
+- name: Copy sshd sysconfig file
+  copy:
+    src: "{{ sshd_sysconfig_file }}"
+    dest: /etc/sysconfig/sshd
+    mode: '0640'
+  register: sysconfig_copy
+  when:
+    - sshd_sysconfig_file | default(false)
+    - ansible_facts.distribution_major_version | int >= 9
+
+- name: Create sshd configuration file
+  vars:
+    file_content: |
+      {% for item in sshd | dict2items | select() | list if item.key not in sshd_disable %}
+      {% if item.value is not string and item.value is not number %}
+      {% if item.key.startswith('Match') %}
+      {{ item.key }}
+      {% for value in item.value %}
+          {{ value }}
+      {% endfor %}
+      {% else %}
+      {% for value in item.value %}
+      {{ item.key }} {{ value }}
+      {% endfor %}
+      {% endif %}
+      {% else %}
+      {{ item.key }} {{ item.value }}
+      {% endif %}
+      {% endfor %}
+  copy:
+    content: "{{ file_content }}"
+    dest: "{{ config_file }}"
+    mode: '0600'
+    validate: /usr/sbin/sshd -tf %s
+  register: config_create
+  when:
+    - config_dir.stat.exists
+    - ansible_facts.distribution_major_version | int >= 9
 
 - name: Enable sshd configuration options
   lineinfile:
@@ -48,7 +109,9 @@
     validate: /usr/sbin/sshd -tf %s
   register: enable_options
   loop: "{{ sshd | dict2items | select() | list }}"
-  when: item.key not in sshd_disable
+  when:
+    - item.key not in sshd_disable
+    - item.key.split(' ')[0] not in ['HostKey', 'ListenAddress', 'Match']
 
 - name: Disable sshd configuration options
   vars:
@@ -78,6 +141,9 @@
   service:
     name: sshd
     state: reloaded
-  when: enable_options is changed or
+  when: files_reset is changed or
+        sysconfig_copy is changed or
+        config_create is changed or
+        enable_options is changed or
         disable_options is changed or
         (config_dir.stat.exists and sshd_configuration_exclusive | bool and remove_files is changed)
