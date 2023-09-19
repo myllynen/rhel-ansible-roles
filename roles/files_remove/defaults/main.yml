@@ -13,6 +13,12 @@ files_remove:
 #  - /etc/some/confdir/*.conf
 #  - /etc/some/file
 #  - /etc/some/dir
+#  - /etc/*.old
+
+# Use recursive find for above patterns,
+# be extremely careful with this option,
+# /etc/*.old will also remove /etc/x/y.old!
+files_remove_recursive: false
 
 # List of items to exclude from removal
 # Useful with globbing, optional to use

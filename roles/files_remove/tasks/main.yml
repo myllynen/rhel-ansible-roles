@@ -28,6 +28,7 @@
     patterns: "{{ item | basename }}"
     file_type: any
     hidden: true
+    recurse: "{{ files_remove_recursive | bool }}"
   register: remove_globs
   loop: "{{ files_remove | select('search', '\\?|\\*|\\[') | list }}"
 
