@@ -14,6 +14,7 @@ packages_remove:
   - gofer
   - katello-agent
   - puppet-agent
+  - rhn*
   - telnet-server
 
   #- '*desktop*'
@@ -23,18 +24,20 @@ packages_remove:
   #- cloud-init
   #- flashrom
   #- fwupd*
-  #- geolite*
   #- gawk-all-langpacks
+  #- geolite*
   #- glibc-gconv-extra
   #- kernel-tools
   #- libicu
   #- libjpeg*
   #- lshw
-  #- '*nfs*'
+  #- NetworkManager-tui
+  #- nfs*
+  #- libnfs*
   #- parted
   #- rpc*
-  #- slang
-  #- '*sss*'
+  #- sssd*
+  #- libsss*
   #- tcpdump
   #- teamd
   #- webkit*
