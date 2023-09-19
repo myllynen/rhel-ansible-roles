@@ -19,7 +19,6 @@ packages_remove:
 
   #- '*desktop*'
   #- '*fonts*'
-  #- '*icons*'
 
   #- cloud-init
   #- flashrom
