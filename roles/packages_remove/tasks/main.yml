@@ -2,6 +2,13 @@
 - name: Remove unwanted packages
   yum:
     name: "{{ packages_remove | select() | list }}"
-    autoremove: "{{ packages_remove_autoremove }}"
+    autoremove: false
     #cacheonly: true
     state: absent
+
+- name: Remove unneeded leaf packages
+  yum:
+    autoremove: true
+    #cacheonly: true
+    state: absent
+  when: packages_remove_autoremove | bool

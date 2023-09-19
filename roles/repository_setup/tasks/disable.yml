@@ -8,7 +8,6 @@
 - name: Remove Katello CA package
   yum:
     name: katello-ca-consumer-*
-    autoremove: true
     #cacheonly: true
     disable_plugin:
       - product-id

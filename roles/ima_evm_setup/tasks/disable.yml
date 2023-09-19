@@ -47,7 +47,6 @@
 - name: Remove RPM IMA plugin package
   yum:
     name: rpm-plugin-ima
-    autoremove: true
     #cacheonly: true
     state: absent
 

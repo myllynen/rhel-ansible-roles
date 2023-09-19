@@ -41,8 +41,8 @@ packages_remove:
   #- teamd
   #- webkit*
 
-# Enable or disable yum module 'autoremove' parameter
-# to remove all "leaf" packages no longer required
+# Remove all "leaf" packages no longer required,
+# see yum module autoremove parameter description
 packages_remove_autoremove: true
 </pre>
 

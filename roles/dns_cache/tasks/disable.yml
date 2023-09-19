@@ -69,7 +69,6 @@
 - name: Remove systemd-resolved package (RHEL 7)
   yum:
     name: systemd-resolved
-    autoremove: true
     #cacheonly: true
     state: absent
   register: resolved_package
