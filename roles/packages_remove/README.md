@@ -43,7 +43,7 @@ packages_remove:
 
 # Remove all "leaf" packages no longer required,
 # see yum module autoremove parameter description
-packages_remove_autoremove: true
+packages_remove_autoremove: false
 </pre>
 
 ## License
