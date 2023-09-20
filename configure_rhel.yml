@@ -980,6 +980,7 @@
     - service_state
     #- shell_profile
     - sshd_configuration
+    #- community.general.ssh_config
     #- redhat.rhel_system_roles.ssh
     #- redhat.rhel_system_roles.sshd
     #- troubleshooting_tools
