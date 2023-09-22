@@ -1,0 +1,59 @@
+---
+- name: Create logical volume for swap
+  community.general.lvol:
+    vg: "{{ swap_setup_vg_name }}"
+    lv: "{{ swap_setup_lv_name }}"
+    size: "{{ swap_setup_lv_size }}"
+    state: present
+  when: swap_setup_vg_name | default (false)
+
+- name: Check logical volume path
+  command: >
+    lvs
+    --no-headings --readonly -o lv_dm_path
+    --select vg_name={{ swap_setup_vg_name }},lv_name={{ swap_setup_lv_name }}
+  register: lvs_output
+  failed_when: false
+  changed_when: false
+  when: swap_setup_vg_name | default (false)
+
+- name: Check swap area on logical volume
+  command: blkid -L {{ swap_setup_lv_name }}
+  register: blkid_output
+  failed_when: false
+  changed_when: false
+  when: swap_setup_vg_name | default (false)
+
+- name: Setup swap area on logical volume
+  command: mkswap -L swap {{ lvs_output.stdout }}
+  when:
+    - swap_setup_vg_name | default (false)
+    - "'swap' not in blkid_output.stdout"
+
+- name: Configure fstab swap device mount point
+  ansible.posix.mount:
+    src: "{{ lvs_output.stdout | trim }}"
+    path: none
+    fstype: swap
+    state: present
+  register: fstab_config
+  when: swap_setup_vg_name | default (false)
+
+- name: Check swap status
+  command: swapon --noheadings --show=LABEL
+  register: swapon_output
+  failed_when: false
+  changed_when: false
+  when: swap_setup_vg_name | default (false)
+
+- name: Enable swap
+  command: swapon -L {{ swap_setup_lv_name }}
+  when:
+    - swap_setup_vg_name | default (false)
+    - swap_setup_enable_swap | bool
+    - swapon_output.stdout | trim != swap_setup_lv_name
+
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  changed_when: true
+  when: fstab_config is changed
