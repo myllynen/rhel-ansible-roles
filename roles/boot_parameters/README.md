@@ -15,6 +15,7 @@ boot_parameters_enable:
 
 boot_parameters_disable:
   - debug
+  #- resume
   - rhgb
 
 boot_parameters_timeout: 1
