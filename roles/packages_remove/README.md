@@ -20,6 +20,7 @@ packages_remove:
   #- '*desktop*'
   #- '*fonts*'
 
+  #- biosdevname
   #- cloud-init
   #- flashrom
   #- fwupd*
