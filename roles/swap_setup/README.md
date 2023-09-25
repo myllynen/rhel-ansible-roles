@@ -17,6 +17,7 @@ Below are the role default values from defaults/main.yml:
 
 # Existing VG where to create LV for swap
 # If this is unset then role does nothing
+# Image Builder uses by default VG rootvg
 swap_setup_vg_name:
 
 # LV for swap name
