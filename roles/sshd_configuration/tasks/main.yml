@@ -103,7 +103,7 @@
   lineinfile:
     path: "{{ config_file }}"
     regexp: '^(|#){{ item.key }} .*'
-    line: '{{ item.key + " " + item.value }}'
+    line: '{{ item.key + " " + item.value | string }}'
     create: true
     mode: '0600'
     validate: /usr/sbin/sshd -tf %s
