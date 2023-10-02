@@ -963,6 +963,7 @@
     #- swap_setup
     - ipv6_setup
     - etc_hosts
+    #- redhat.rhel_system_roles.rhc
     #- repository_setup
     - guest_agent
     #- redhat.rhel_system_roles.network
