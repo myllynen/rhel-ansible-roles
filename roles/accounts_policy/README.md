@@ -63,7 +63,7 @@ pwquality_config_file:
 #                  incl. optional support for Centrify.
 system_auth_profile:
 
-# Profile parameters for "authselect select" command
+# Profile parameters string for "authselect select" command
 # See the "authselect show 'profile'" output for details
 # E.g., with "minimal" use without-nullok with-pamaccess
 # With "custom/cis" the following parameters can be used:
