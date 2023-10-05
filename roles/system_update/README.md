@@ -18,7 +18,7 @@ Below are the role default values from defaults/main.yml:
 system_update_reboot_policy: when_needed
 
 # Send an email report after updating packages
-system_update_email_report: true
+system_update_email_report: false
 
 # Parameters for the community.general.mail module
 # Subject, reply, and to are mandatory, rest optional
