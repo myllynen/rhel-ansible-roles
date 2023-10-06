@@ -1,7 +1,7 @@
 ---
 namespace: myllynen
 name: rhel_ansible_roles
-version: "1.4.7"
+version: "1.4.8"
 readme: README.md
 authors:
   - Marko Myllynen <myllynen@redhat.com>

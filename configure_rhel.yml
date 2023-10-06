@@ -125,7 +125,7 @@
     #                  incl. optional support for Centrify.
     system_auth_profile:
 
-    # Profile parameters for "authselect select" command
+    # Profile parameters string for "authselect select" command
     # See the "authselect show 'profile'" output for details
     # E.g., with "minimal" use without-nullok with-pamaccess
     # With "custom/cis" the following parameters can be used:
@@ -800,7 +800,7 @@
     system_update_reboot_policy: when_needed
 
     # Send an email report after updating packages
-    system_update_email_report: true
+    system_update_email_report: false
 
     # Parameters for the community.general.mail module
     # Subject, reply, and to are mandatory, rest optional
@@ -1013,7 +1013,6 @@
     #- redhat.rhel_system_roles.metrics
     #- { role: splunk_forwarder, when: splunk_user_password_hash is defined }
     #- system_coredump
-    - system_init
     #- scap_compliance
     #- insights_client
-    #- system_reboot
+    - system_init
