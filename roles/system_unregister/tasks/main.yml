@@ -81,21 +81,28 @@
   changed_when: true
   when: ansible_facts.distribution_major_version | int >= 8
 
-- name: Check RHSM configuration backup file
-  stat:
-    path: /etc/rhsm/rhsm.conf.bak
-  register: rhsm_backup
+- name: Check RHSM configuration backup files
+  find:
+    paths: /etc/rhsm
+    patterns: 'rhsm.conf.*'
+  register: rhsm_backups
 
-- name: Restore RHSM configuration backup file
+- name: Restore RHSM configuration backup files
   copy:
-    src: /etc/rhsm/rhsm.conf.bak
+    src: "{{ item.path }}"
     dest: /etc/rhsm/rhsm.conf
     mode: '0644'
     remote_src: true
-  when: rhsm_backup.stat.exists
+  loop: "{{ rhsm_backups.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']
 
-- name: Remove RHSM configuration backup file
+- name: Remove RHSM configuration backup files
   file:
-    path: /etc/rhsm/rhsm.conf.bak
+    path: "{{ item.path }}"
     state: absent
-  when: rhsm_backup.stat.exists
+  loop: "{{ rhsm_backups.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']
