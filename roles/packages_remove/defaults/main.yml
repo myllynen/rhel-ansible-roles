@@ -6,19 +6,18 @@ packages_remove:
   - rhn*
   - telnet-server
 
-  #- '*desktop*'
-  #- '*fonts*'
-
   #- biosdevname
   #- cloud-init
   #- flashrom
-  #- fwupd*
+  #- fonts*
   #- gawk-all-langpacks
   #- geolite*
   #- glibc-gconv-extra
+  #- hwdata
   #- kernel-tools
   #- libicu
   #- libjpeg*
+  #- linux-firmware-whence
   #- lshw
   #- NetworkManager-tui
   #- nfs*
