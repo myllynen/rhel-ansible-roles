@@ -19,7 +19,6 @@ packages_install:
   - man-pages
   #- mlocate
   - nano
-  - oddjob-mkhomedir
   - openssh-clients
   #- perl-interpreter
   - psmisc
