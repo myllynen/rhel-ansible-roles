@@ -184,6 +184,9 @@
 
     boot_parameters_disable:
       - debug
+      #- no_timer_check
+      #- rd.lvm.lv
+      #- resume
       - rhgb
 
     boot_parameters_timeout: 1

@@ -15,6 +15,8 @@ boot_parameters_enable:
 
 boot_parameters_disable:
   - debug
+  #- no_timer_check
+  #- rd.lvm.lv
   #- resume
   - rhgb
 
