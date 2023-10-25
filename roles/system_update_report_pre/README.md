@@ -34,6 +34,7 @@ system_update_report_pre_email_parameters:
 # Attach PDF version of the report
 # PDFs will be generated on the control host using
 # utilities from enscript and ghostscript packages
+# and those packages must be installed separately.
 system_update_report_pre_pdf: false
 
 # Directory used to generate PDF files
