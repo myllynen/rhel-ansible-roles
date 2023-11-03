@@ -23,7 +23,6 @@ packages_remove:
   #- fonts*
   #- gawk-all-langpacks
   #- geolite*
-  #- glibc-gconv-extra
   #- hwdata
   #- kernel-tools
   #- libicu
