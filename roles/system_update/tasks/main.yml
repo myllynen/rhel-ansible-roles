@@ -56,7 +56,9 @@
 - name: Display list of updated packages
   debug:
     var: package_updates
-  when: package_updates is defined
+  when:
+    - system_update_display_updates | bool
+    - package_updates is defined
 
 - name: Install yum-utils package
   yum:
@@ -122,7 +124,6 @@
   become: false
   when:
     - system_update_email_report | bool
-    - system_update_report_pdf | bool
     - package_updates is defined
 
 - name: Remove local PDF directory

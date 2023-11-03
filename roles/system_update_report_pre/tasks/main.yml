@@ -54,7 +54,9 @@
 - name: Display list of available package updates
   debug:
     var: package_updates
-  when: package_updates is defined
+  when:
+    - system_update_report_pre_display_updates | bool
+    - package_updates is defined
 
 - name: Create PDF report
   include_tasks: pdf.yml

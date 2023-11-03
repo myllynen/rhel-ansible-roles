@@ -17,6 +17,9 @@ Below are the role default values from defaults/main.yml:
 # always - always reboot even if no updates were installed
 system_update_reboot_policy: when_needed
 
+# Display list of updated packages on output
+system_update_display_updates: true
+
 # Send an email report after updating packages
 system_update_email_report: false
 
@@ -41,7 +44,7 @@ system_update_email_parameters:
   #cc:
   #bcc:
 
-# Attach PDF version of the report
+# Attach PDF version of the report to the email
 # PDFs will be generated on the control host using
 # utilities from enscript and ghostscript packages
 # and those packages must be installed separately.

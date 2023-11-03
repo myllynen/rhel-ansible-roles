@@ -10,6 +10,9 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
+# Display list of pending updates on output
+system_update_report_pre_display_updates: true
+
 # Parameters for the community.general.mail module
 # Subject, reply, and to are mandatory, rest optional
 system_update_report_pre_email_parameters:
@@ -31,7 +34,7 @@ system_update_report_pre_email_parameters:
   #cc:
   #bcc:
 
-# Attach PDF version of the report
+# Attach PDF version of the report to the email
 # PDFs will be generated on the control host using
 # utilities from enscript and ghostscript packages
 # and those packages must be installed separately.
