@@ -26,6 +26,7 @@
 
 - name: Setup swap area on logical volume
   command: mkswap -L swap {{ lvs_output.stdout }}
+  changed_when: true
   when:
     - swap_setup_vg_name | default (false)
     - "'swap' not in blkid_output.stdout"
@@ -48,6 +49,7 @@
 
 - name: Enable swap
   command: swapon -L {{ swap_setup_lv_name }}
+  changed_when: true
   when:
     - swap_setup_vg_name | default (false)
     - swap_setup_enable_swap | bool
