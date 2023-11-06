@@ -15,87 +15,39 @@
     state: latest
   check_mode: true
   register: package_install
-  changed_when: false
 
-- name: Read list of available package updates (RHEL 7, part I)
+- name: Set available package updates (RHEL 7)
+  vars:
+    el7_installed: "{{ ['Installed: '] | product(package_install.changes.installed | default([])) | map('join') | list }}"
+    el7_updated: "{{ ['Updated: '] | product(package_install.changes.updated | default([])) | map('join') | list }}"
+    el7_removed: "{{ ['Removed: '] | product(package_install.changes.removed | default([])) | map('join') | list }}"
   set_fact:
-    el7_updates: "{{ el7_updates | default([]) + ['Updated: ' + item[0] + ' ' + item[1] | regex_replace(' from.*', '')] }}"
-  loop: "{{ package_install.changes.updated }}"
-  loop_control:
-    label: "{{ item[0] }}"
+    package_updates: "{{ (el7_installed + el7_updated + el7_removed) | sort }}"
   when:
     - ansible_facts.pkg_mgr == 'yum'
-    - package_install.changes is defined
+    - system_update_report_pre_display_updates | bool or
+      system_update_report_pre_email_report | bool
 
-- name: Read list of available package updates (RHEL 7, part II)
+- name: Set available package updates
   set_fact:
-    el7_installs: "{{ el7_installs | default([]) + ['Installed: ' + item[0] + ' ' + item[1] | regex_replace(' from.*', '')] }}"
-  loop: "{{ package_install.changes.installed }}"
-  loop_control:
-    label: "{{ item[0] }}"
-  when:
-    - ansible_facts.pkg_mgr == 'yum'
-    - package_install.changes is defined
-
-- name: Set list of available package updates (RHEL 7)
-  set_fact:
-    package_updates: "{{ (el7_updates + el7_installs | default([])) | sort | join('\n') }}"
-  when:
-    - ansible_facts.pkg_mgr == 'yum'
-    - package_install.changes is defined
-
-- name: Set list of available package updates
-  set_fact:
-    package_updates: "{{ package_install.results | sort | join('\n') }}"
+    package_updates: "{{ package_install.results | default([]) | sort }}"
   when:
     - ansible_facts.pkg_mgr == 'dnf'
-    - "'Nothing to do' not in package_install.msg"
+    - system_update_report_pre_display_updates | bool or
+      system_update_report_pre_email_report | bool
 
 - name: Display list of available package updates
+  vars:
+    output_old: "{{ (package_updates | join('\n')).split('\n') }}"
+    output_new: "{{ package_updates | join('\n') }}"
   debug:
-    var: package_updates
+    msg: "{{ output_new if ansible_version.full is version('2.11', '>=') else output_old }}"
   when:
     - system_update_report_pre_display_updates | bool
-    - package_updates is defined
+    - package_updates | default(false)
 
-- name: Create PDF report
-  include_tasks: pdf.yml
+- name: Send email report
+  include_tasks: report.yml
   when:
-    - system_update_report_pre_pdf | bool
-    - package_updates is defined
-
-- name: Send email notification about upcoming updates
-  vars:
-    pdf_file: "{{ system_update_report_pre_pdf_dir }}/{{ inventory_hostname | replace('.', '_') }}.pdf"
-    attachment: "{{ [pdf_file] if system_update_report_pre_pdf | bool else omit }}"
-  throttle: 1
-  community.general.mail:
-    host: "{{ system_update_report_pre_email_parameters.host | default(omit) }}"
-    port: "{{ system_update_report_pre_email_parameters.port | default(omit) }}"
-    secure: "{{ system_update_report_pre_email_parameters.secure | default(omit) }}"
-    timeout: "{{ system_update_report_pre_email_parameters.timeout | default(omit) }}"
-    ehlohost: "{{ system_update_report_pre_email_parameters.ehlohost | default(omit) }}"
-    username: "{{ system_update_report_pre_email_parameters.username | default(omit) }}"
-    password: "{{ system_update_report_pre_email_parameters.password | default(omit) }}"
-    charset: "{{ system_update_report_pre_email_parameters.charset | default(omit) }}"
-    headers: "{{ system_update_report_pre_email_parameters.headers | default(omit) }}"
-    subtype: "{{ system_update_report_pre_email_parameters.subtype | default(omit) }}"
-    subject: "{{ system_update_report_pre_email_parameters.subject }}"
-    sender: "{{ system_update_report_pre_email_parameters.sender }}"
-    to: "{{ system_update_report_pre_email_parameters.to }}"
-    cc: "{{ system_update_report_pre_email_parameters.cc | default(omit) }}"
-    bcc: "{{ system_update_report_pre_email_parameters.bcc | default(omit) }}"
-    body: "{{ package_updates }}"
-    attach: "{{ attachment }}"
-  delegate_to: localhost
-  become: false
-  when: package_updates is defined
-
-- name: Remove local PDF directory
-  file:
-    path: "{{ system_update_report_pre_pdf_dir }}"
-    state: absent
-  delegate_to: localhost
-  run_once: true
-  become: false
-  when: system_update_report_pre_pdf | bool
+    - system_update_report_pre_email_report | bool
+    - package_updates | default(false)

@@ -1,0 +1,39 @@
+---
+- name: Create PDF report
+  include_tasks: pdf.yml
+  when: system_update_report_pre_pdf | bool
+
+- name: Send email notification about upcoming updates
+  vars:
+    pdf_file: "{{ system_update_report_pre_pdf_dir }}/{{ inventory_hostname | replace('.', '_') }}.pdf"
+    attachment: "{{ [pdf_file] if system_update_report_pre_pdf | bool else omit }}"
+  throttle: 1
+  community.general.mail:
+    host: "{{ system_update_report_pre_email_parameters.host | default(omit) }}"
+    port: "{{ system_update_report_pre_email_parameters.port | default(omit) }}"
+    secure: "{{ system_update_report_pre_email_parameters.secure | default(omit) }}"
+    timeout: "{{ system_update_report_pre_email_parameters.timeout | default(omit) }}"
+    ehlohost: "{{ system_update_report_pre_email_parameters.ehlohost | default(omit) }}"
+    username: "{{ system_update_report_pre_email_parameters.username | default(omit) }}"
+    password: "{{ system_update_report_pre_email_parameters.password | default(omit) }}"
+    charset: "{{ system_update_report_pre_email_parameters.charset | default(omit) }}"
+    headers: "{{ system_update_report_pre_email_parameters.headers | default(omit) }}"
+    subtype: "{{ system_update_report_pre_email_parameters.subtype | default(omit) }}"
+    subject: "{{ system_update_report_pre_email_parameters.subject }}"
+    sender: "{{ system_update_report_pre_email_parameters.sender }}"
+    to: "{{ system_update_report_pre_email_parameters.to }}"
+    cc: "{{ system_update_report_pre_email_parameters.cc | default(omit) }}"
+    bcc: "{{ system_update_report_pre_email_parameters.bcc | default(omit) }}"
+    body: "{{ package_updates | join('\n') }}"
+    attach: "{{ attachment }}"
+  delegate_to: localhost
+  become: false
+
+- name: Remove local PDF directory
+  file:
+    path: "{{ system_update_report_pre_pdf_dir }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  become: false
+  when: system_update_report_pre_pdf | bool

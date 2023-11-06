@@ -18,9 +18,9 @@ Below are the role default values from defaults/main.yml:
 system_update_reboot_policy: when_needed
 
 # Display list of updated packages on output
-system_update_display_updates: true
+system_update_display_updates: false
 
-# Send an email report after updating packages
+# Send an email report of updated packages
 system_update_email_report: false
 
 # Parameters for the community.general.mail module

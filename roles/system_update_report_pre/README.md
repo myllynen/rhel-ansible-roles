@@ -11,7 +11,10 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # Display list of pending updates on output
-system_update_report_pre_display_updates: true
+system_update_report_pre_display_updates: false
+
+# Send an email report of pending updates
+system_update_report_pre_email_report: false
 
 # Parameters for the community.general.mail module
 # Subject, reply, and to are mandatory, rest optional

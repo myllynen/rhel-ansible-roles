@@ -21,17 +21,14 @@
     src: /etc/redhat-release
   register: os_release
 
-- name: Set PDF timestamp
+- name: Set timestamp and file names
   set_fact:
     pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
-
-- name: Set PDF/PS/TXT file names
-  set_fact:
     server_pdf: "{{ system_update_report_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
     server_ps: "{{ system_update_report_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.ps' }}"
     server_txt: "{{ system_update_report_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.txt' }}"
 
-- name: Write report to TXT file
+- name: Write report to text file
   shell: |
     set -o pipefail
     printf "{{ system_update_report_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ server_txt }}
@@ -39,24 +36,21 @@
     sed -i -e 's,<OSREL>,{{ os_release.content | b64decode | trim }},g' {{ server_txt }}
     sed -i -e 's,<DATE>,{{ patch_time }},g' {{ server_txt }}
     sed -i -e 's,<REBOOT>,{{ 'yes' if system_reboot.changed else 'no' }},g' {{ server_txt }}
-    printf "\n{{ package_updates }}" >> {{ server_txt }}
+    printf "\n{{ package_updates | join('\n') }}" >> {{ server_txt }}
     printf "\n\n\nThis report was automatically generated on {{ pdf_timestamp }}.\n" >> {{ server_txt }}
   register: command_output
   changed_when: true
   delegate_to: localhost
   become: false
-  when: package_updates is defined
 
-- name: Convert TXT file to PS file
+- name: Convert text file to PostScript file
   command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ inventory_hostname }} -T 4 -o {{ server_ps }} {{ server_txt }}
   changed_when: true
   delegate_to: localhost
   become: false
-  when: package_updates is defined
 
-- name: Convert PS file to PDF file
+- name: Convert PostScript file to PDF file
   command: ps2pdf {{ server_ps }} {{ server_pdf }}
   changed_when: true
   delegate_to: localhost
   become: false
-  when: package_updates is defined
