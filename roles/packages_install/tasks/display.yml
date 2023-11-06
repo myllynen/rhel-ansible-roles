@@ -1,0 +1,22 @@
+---
+- name: Set changed packages (RHEL 7)
+  vars:
+    el7_installed: "{{ ['Installed: '] | product(package_install.changes.installed | default([])) | map('join') | list }}"
+    el7_updated: "{{ ['Updated: '] | product(package_install.changes.updated | default([])) | map('join') | list }}"
+    el7_removed: "{{ ['Removed: '] | product(package_install.changes.removed | default([])) | map('join') | list }}"
+  set_fact:
+    package_changes: "{{ (el7_installed + el7_updated + el7_removed) | sort }}"
+  when: ansible_facts.pkg_mgr == 'yum'
+
+- name: Set changed packages
+  set_fact:
+    package_changes: "{{ package_install.results | default([]) | sort }}"
+  when: ansible_facts.pkg_mgr == 'dnf'
+
+- name: Display package changes
+  vars:
+    output_old: "{{ (package_changes | join('\n')).split('\n') }}"
+    output_new: "{{ package_changes | join('\n') }}"
+  debug:
+    msg: "{{ output_new if ansible_version.full is version('2.11', '>=') else output_old }}"
+  when: package_changes | default(false)

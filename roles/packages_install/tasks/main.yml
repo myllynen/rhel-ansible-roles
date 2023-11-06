@@ -5,7 +5,9 @@
       - '!all'
       - '!min'
       - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
+      - pkg_mgr
+  when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.pkg_mgr is not defined
 
 - name: Install wanted packages
   vars:
@@ -14,3 +16,10 @@
     name: "{{ packages_install | select() | list }}"
     install_weak_deps: "{{ weak_deps }}"
     state: present
+  register: package_install
+
+- name: Display package changes
+  include_tasks: display.yml
+  when:
+    - packages_install_display_results | bool
+    - package_install is changed

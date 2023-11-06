@@ -27,3 +27,6 @@ packages_install:
 
 # Enable or disable yum module 'install_weak_deps' parameter
 packages_install_weak_deps: true
+
+# Display results on output
+packages_install_display_results: false

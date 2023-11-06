@@ -32,3 +32,6 @@ packages_remove:
 # Remove all "leaf" packages no longer required,
 # see yum module autoremove parameter description
 packages_remove_autoremove: false
+
+# Display results on output
+packages_remove_display_results: false
