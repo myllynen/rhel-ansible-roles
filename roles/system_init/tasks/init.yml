@@ -118,7 +118,9 @@
 
 - name: Reboot system
   reboot:
-  when: "'reboot' in system_init_final_actions"
+  when:
+    - "'reboot' in system_init_final_actions"
+    - inventory_hostname != 'localhost'
 
 # Use removes: to only run on registered systems
 - name: Update RHSM system facts
@@ -130,7 +132,7 @@
 
 - name: Mark system initialized
   copy:
-    content: "This system was initialized on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
+    content: "This system was initialized by system_init on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
     dest: "{{ __system_init_file }}"
     mode: '0644'
 

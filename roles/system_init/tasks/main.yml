@@ -1,4 +1,11 @@
 ---
+# For backward compatibility, to be removed at RHEL 9 EOL
+- name: Migrate old system init file if present
+  command: mv /etc/.local_system_info {{ __system_init_file }}
+  register: mv_status
+  failed_when: false
+  changed_when: mv_status.rc == 0
+
 - name: Check system status
   stat:
     path: "{{ __system_init_file }}"

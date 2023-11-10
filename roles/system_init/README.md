@@ -18,6 +18,7 @@ Below are the role default values from defaults/main.yml:
 # Actions to take after initialization
 # reboot - reboot after initialization
 # syslog - write message to system log
+# NB. 'localhost' will not be rebooted
 system_init_final_actions:
   - reboot
   - syslog
