@@ -39,6 +39,7 @@
     paths: /etc/ssh/sshd_config.d
     patterns: '*.conf'
   register: config_files
+  when: config_dir.stat.exists
 
 - name: Reset sshd configuration files to RPM defaults
   vars:
@@ -116,7 +117,7 @@
 - name: Disable sshd configuration options
   vars:
     main_file: /etc/ssh/sshd_config
-    update_files: "{{ [main_file] + config_files.files | map(attribute='path') | list }}"
+    update_files: "{{ [main_file] + config_files.files | default([]) | map(attribute='path') | list }}"
   replace:
     path: "{{ item.0 }}"
     regexp: '^({{ item.1 }} .*)'

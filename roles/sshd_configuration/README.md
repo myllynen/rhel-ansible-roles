@@ -35,11 +35,11 @@ sshd_options_disable:
 sshd_sysconfig_file:
 
 # Reset sshd configuration to RHEL RPM defaults
-# NB. This is supported for only RHEL 9+ and may
+# NB. This is supported only for RHEL 9+ and may
 # cause idempotency issues with option disabling,
 # this only resets RPM provided files, not others
 # Consider using the file_copy role on older RHEL
-# Default files used by this role from: RHEL 9.2
+# Default files used by this role from: RHEL 9.3
 sshd_configuration_config_reset: false
 
 # Remove unrecognized sshd configuration files
@@ -52,6 +52,7 @@ sshd_configuration_exclusive: false
 sshd_configuration_files_known:
   - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
   - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
+  - /etc/ssh/sshd_config.d/01-permitrootlogin.conf
   - /etc/ssh/sshd_config.d/50-redhat.conf
 </pre>
 
