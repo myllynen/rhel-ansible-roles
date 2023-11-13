@@ -10,6 +10,7 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
+# Install a set of commonly used troubleshooting tools
 troubleshooting_tools:
   - bind-utils
   - curl

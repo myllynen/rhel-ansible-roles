@@ -945,6 +945,7 @@
     #
     # troubleshooting_tools - default list omitted here for brevity
     #
+    # Install a set of commonly used troubleshooting tools
     #troubleshooting_tools:
     #  -
 
