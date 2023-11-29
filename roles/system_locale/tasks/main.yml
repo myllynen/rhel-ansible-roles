@@ -7,6 +7,11 @@
       - distribution_major_version
   when: ansible_facts.distribution_major_version is not defined
 
+- name: Fail if unsupported system locale specified
+  fail:
+    msg: "Only C.UTF-8, en_US.UTF-8, or auto are supported as system_locale setting."
+  when: system_locale not in ['C.UTF-8', 'en_US.UTF-8', 'auto']
+
 - name: Check langpack support
   set_fact:
     langpacks: "{{ true if ansible_facts.distribution_major_version | int >= 8 else false }}"
