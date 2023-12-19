@@ -1,0 +1,11 @@
+{% if user_resource_limits | default(false) %}
+{% for entry in user_resource_limits %}
+{% if entry.type in ['hard', 'soft', '-'] and
+      entry.item in ['core', 'data', 'fsize', 'memlock', 'nofile', 'rss',
+                     'stack', 'cpu', 'nproc', 'as', 'maxlogins', 'maxsyslogins',
+                     'nonewprivs', 'priority', 'locks', 'sigpending', 'msgqueue',
+                     'nice', 'rtprio'] %}
+{{ '%-15s' | format(entry.domain) }} {{ '%-7s' | format(entry.type) }} {{ '%-15s' | format(entry.item) }} {{ entry.value }}
+{% endif %}
+{% endfor %}
+{% endif %}

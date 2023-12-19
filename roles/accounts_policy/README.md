@@ -53,6 +53,19 @@ pwhistory_config_file:
 pwquality_config_file:
 
 
+# Resource limits configuration for users
+# These will be configured in /etc/security/limits.d/95-ansible.conf
+# All of the following are required for each entry:
+#   domain type item value
+# If user_resource_limits is undefined will do nothing.
+# See the limits.conf(5) manual page for details.
+#user_resource_limits:
+#  - domain: "@student"
+#    type: "-"
+#    item: maxlogins
+#    value: 4
+
+
 # Either use a system provided profile (e.g., "minimal")
 # or copy and use a custom one. A custom profile must be
 # named as "custom/name". E.g., use "/srv/custom/strict"
