@@ -23,13 +23,13 @@
             etc_hosts_omit_entries != 'ipv4' and
             ansible_facts.default_ipv4 is defined and
             ansible_facts.default_ipv4 | length > 0 %}
-      {{ ansible_facts.default_ipv4.address }}  {{ self_fqdn }} {{ self_host }}
+      {{ '%-16s' | format(ansible_facts.default_ipv4.address) }} {{ self_fqdn }} {{ self_host }}
       {% endif %}
       {% if self_domain != '' and
             etc_hosts_omit_entries != 'ipv6' and
             ansible_facts.default_ipv6 is defined and
             ansible_facts.default_ipv6 | length > 0 %}
-      {{ ansible_facts.default_ipv6.address }}  {{ self_fqdn }} {{ self_host }}
+      {{ '%-40s' | format(ansible_facts.default_ipv6.address) }} {{ self_fqdn }} {{ self_host }}
       {% endif %}
       {% endif %}
     etc_hosts_content: |
