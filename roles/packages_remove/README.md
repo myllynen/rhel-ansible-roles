@@ -24,7 +24,7 @@ packages_remove:
   #- gawk-all-langpacks
   #- geolite*
   #- hwdata
-  #- kernel-tools
+  #- kernel-tools*
   #- libicu
   #- libjpeg*
   #- linux-firmware-whence
