@@ -497,6 +497,9 @@
     # Enable or disable yum module 'install_weak_deps' parameter
     packages_install_weak_deps: true
 
+    # Display results on output
+    packages_install_display_results: false
+
     #
     # packages_remove - default list omitted here for brevity
     #
@@ -506,6 +509,9 @@
     # Remove all "leaf" packages no longer required,
     # see yum module autoremove parameter description
     packages_remove_autoremove: false
+
+    # Display results on output
+    packages_remove_display_results: false
 
     #
     # performance_tuning
@@ -930,12 +936,18 @@
     # This role is a wrapper for redhat.rhel_system_roles.timesync
     # that takes a list of NTP servers as input and after running
     # the system role flushes handlers to update time immediately
-    ntp_servers:
-      - 0.rhel.pool.ntp.org
-      - 1.rhel.pool.ntp.org
-      - 2.rhel.pool.ntp.org
-      - 3.rhel.pool.ntp.org
-      - time.cloudflare.com
+    # See the system role documentation for details of the config
+    timesync_ntp_servers:
+      - hostname: 0.rhel.pool.ntp.org
+        iburst: true
+      - hostname: 1.rhel.pool.ntp.org
+        iburst: true
+      - hostname: 2.rhel.pool.ntp.org
+        iburst: true
+      - hostname: 3.rhel.pool.ntp.org
+        iburst: true
+      - hostname: time.cloudflare.com
+        iburst: true
 
     #
     # timezone
