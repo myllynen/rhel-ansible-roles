@@ -10,8 +10,8 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# Verify Secure Boot is enabled
-# Must be enabled on hardware level
+# Verify Secure Boot
+# Fails if UEFI Secure Boot is not enabled
 secure_boot_verify: false
 
 # One of: disabled, integrity, confidentiality
@@ -25,6 +25,10 @@ selinux: enforcing
 # System-wide crypto policy
 # NB. Supported RHEL versions: RHEL 8+
 crypto_policy: DEFAULT
+
+# Enable or disable SCP protocol (not scp(1))
+# NB. Supported RHEL versions: RHEL 9 only
+scp_protocol_disable: false
 </pre>
 
 ## License

@@ -7,11 +7,31 @@
       - distribution_major_version
   when: ansible_facts.distribution_major_version is not defined
 
-- name: Install mokutil package
+- name: Install required packages
+  vars:
+    security_packages:
+      - "{{ 'crypto-policies-scripts' if ansible_facts.distribution_major_version | int >= 8 else '' }}"
+      - "{{ 'grubby' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+      - "{{ 'mokutil' if secure_boot_verify | bool else '' }}"
+    selinux_package_lists:
+      rhel7:
+        - libselinux-python
+        - libsemanage-python
+        - policycoreutils-python
+        - selinux-policy-targeted
+        - setools-console
+      default:
+        - python3-libselinux
+        - python3-libsemanage
+        - policycoreutils-python-utils
+        - selinux-policy-targeted
+        - setools-console
+    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
+    se_package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
+    selinux_packages: "{{ selinux_package_lists[se_package_set] }}"
   yum:
-    name: mokutil
+    name: "{{ security_packages | select() | list + selinux_packages }}"
     state: present
-  when: secure_boot_verify | bool
 
 - name: Gather package facts
   package_facts:
@@ -34,72 +54,6 @@
     - secure_boot_verify | bool
     - "'Secure Boot enabled' not in sb_state.stdout"
 
-- name: Install SELinux packages
-  vars:
-    selinux_package_lists:
-      rhel7:
-        - libselinux-python
-        - libsemanage-python
-        - policycoreutils-python
-        - selinux-policy-targeted
-        - setools-console
-      default:
-        - python3-libselinux
-        - python3-libsemanage
-        - policycoreutils-python-utils
-        - selinux-policy-targeted
-        - setools-console
-    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
-    package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
-    selinux_packages: "{{ selinux_package_lists[package_set] }}"
-  yum:
-    name: "{{ selinux_packages }}"
-    state: present
-
-- name: Gather package facts
-  package_facts:
-
-- name: Configure SELinux state
-  ansible.posix.selinux:
-    policy: targeted
-    state: "{{ selinux }}"
-  register: selinux_config
-  when: "'libselinux-python' in ansible_facts.packages or
-         'python3-libselinux' in ansible_facts.packages"
-
-- name: Install crypto-policies-scripts package
-  yum:
-    name: crypto-policies-scripts
-    state: present
-  when: ansible_facts.distribution_major_version | int >= 8
-
-- name: Gather package facts
-  package_facts:
-
-- name: Check current crypto policy
-  command: update-crypto-policies --show
-  check_mode: false
-  register: current_crypto_policy
-  changed_when: false
-  when:
-    - "'crypto-policies-scripts' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version | int >= 8
-
-- name: Configure crypto policy
-  command: update-crypto-policies --no-reload --set {{ crypto_policy }}
-  register: crypto_policy_config
-  changed_when: true
-  when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - "'crypto-policies-scripts' in ansible_facts.packages"
-    - current_crypto_policy.stdout != crypto_policy
-
-- name: Install grubby package
-  yum:
-    name: grubby
-    state: present
-  when: ansible_facts.distribution_major_version | int >= 9
-
 - name: Check kernel lockdown configuration
   vars:
     lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
@@ -121,12 +75,54 @@
   register: lockdown_config
   changed_when: true
   when:
+    - "'grubby' in ansible_facts.packages"
     - ansible_facts.distribution_major_version | int >= 9
     - (kernel_lockdown == 'disabled' and lockdown_check.found != 0) or
       (kernel_lockdown != 'disabled' and lockdown_check.found == 0)
 
+- name: Configure SELinux state
+  ansible.posix.selinux:
+    policy: targeted
+    state: "{{ selinux }}"
+  register: selinux_config
+  when: "'libselinux-python' in ansible_facts.packages or
+         'python3-libselinux' in ansible_facts.packages"
+
+- name: Check current crypto policy
+  command: update-crypto-policies --show
+  check_mode: false
+  register: current_crypto_policy
+  changed_when: false
+  when:
+    - "'crypto-policies-scripts' in ansible_facts.packages"
+    - ansible_facts.distribution_major_version | int >= 8
+
+- name: Configure crypto policy
+  command: update-crypto-policies --no-reload --set {{ crypto_policy }}
+  register: crypto_policy_config
+  changed_when: true
+  when:
+    - ansible_facts.distribution_major_version | int >= 8
+    - "'crypto-policies-scripts' in ansible_facts.packages"
+    - current_crypto_policy.stdout != crypto_policy
+
+- name: Check SCP configuration
+  stat:
+    path: /etc/ssh/disable_scp
+  register: scp_state
+  when: ansible_facts.distribution_major_version | int >= 9
+
+- name: Configure SCP state
+  file:
+    path: /etc/ssh/disable_scp
+    mode: '0644'
+    state: "{{ 'touch' if scp_protocol_disable | bool else 'absent' }}"
+  when:
+    - ansible_facts.distribution_major_version | int >= 9
+    - scp_state.stat.exists != scp_protocol_disable | bool
+
 - name: Reboot system
   reboot:
-  when: (selinux_config.reboot_required is defined and selinux_config.reboot_required) or
-        crypto_policy_config is changed or
-        lockdown_config is changed
+  when: lockdown_config is changed or
+        (selinux_config.reboot_required is defined and selinux_config.reboot_required) or
+        crypto_policy_config is changed
