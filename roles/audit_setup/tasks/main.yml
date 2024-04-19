@@ -22,8 +22,8 @@
 
 - name: Install audit package
   yum:
-    name: audit
     state: present
+    name: audit
 
 - name: Gather package facts
   package_facts:
@@ -54,15 +54,15 @@
   when: audit_setup_exclusive | bool
 
 - name: Check changed audit rules
-  command: augenrules --check
   check_mode: false
+  command: augenrules --check
   register: rules_status
   changed_when: false
   when: "'audit' in ansible_facts.packages"
 
 - name: Check locked audit rules
-  command: auditctl -s
   check_mode: false
+  command: auditctl -s
   register: audit_status
   changed_when: false
   when: "'audit' in ansible_facts.packages"
@@ -78,14 +78,14 @@
 
 - name: Enable auditd service
   service:
-    name: auditd
     enabled: true
+    name: auditd
   when: "'audit' in ansible_facts.packages"
 
 - name: Start auditd service
   service:
-    name: auditd
     state: started
+    name: auditd
   register: service_start
   when: "'audit' in ansible_facts.packages"
 

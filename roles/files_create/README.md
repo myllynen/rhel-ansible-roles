@@ -16,20 +16,20 @@ Below are the role default values from defaults/main.yml:
 # Registers variables:
 # create_directories, create_files, create_links
 files_create:
-#  - path: /opt/dir
+#  - state: directory
+#    path: /opt/dir
 #    owner: root
 #    group: root
 #    mode: '0755'
-#    state: directory
-#  - path: /opt/dir/file
+#  - state: file
+#    path: /opt/dir/file
 #    owner: root
 #    group: root
 #    mode: '0644'
-#    state: file
-#  - src: /opt/dir/file
+#  - state: link
+#    src: /opt/dir/file
 #    dest: /opt/dir/link
 #    force: true
-#    state: link
 </pre>
 
 ## License

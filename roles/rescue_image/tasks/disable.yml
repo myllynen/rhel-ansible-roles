@@ -9,9 +9,9 @@
 
 - name: Remove dracut-config-rescue package
   yum:
+    state: absent
     name: dracut-config-rescue
     #cacheonly: true
-    state: absent
 
 # For RHEL 7
 - name: Check boot loader entries directory
@@ -31,8 +31,8 @@
 
 - name: Remove rescue images
   file:
-    path: "{{ item }}"
     state: absent
+    path: "{{ item }}"
   loop: "{{ rescue_images.files | map(attribute='path') | list }}"
   register: remove_images
 

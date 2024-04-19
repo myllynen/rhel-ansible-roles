@@ -1,15 +1,15 @@
 ---
 - name: Install crypto-policies-scripts package
   yum:
-    name: crypto-policies-scripts
     state: present
+    name: crypto-policies-scripts
 
 - name: Gather package facts
   package_facts:
 
 - name: Check FIPS mode
-  command: fips-mode-setup --is-enabled
   check_mode: false
+  command: fips-mode-setup --is-enabled
   register: fips_mode
   failed_when: false
   changed_when: false
@@ -25,22 +25,22 @@
   when: fips_mode.rc != 0
 
 - name: Verify FIPS mode (CPU)
-  command: grep -w aes /proc/cpuinfo
   check_mode: false
+  command: grep -w aes /proc/cpuinfo
   register: cpu_flags
   failed_when: "'aes' not in cpu_flags.stdout"
   changed_when: false
 
 - name: Verify FIPS mode (system)
-  command: fips-mode-setup --is-enabled
   check_mode: false
+  command: fips-mode-setup --is-enabled
   register: fips_mode
   failed_when: fips_mode.rc != 0
   changed_when: false
 
 - name: Verify FIPS mode (crypto policies)
-  command: update-crypto-policies --show
   check_mode: false
+  command: update-crypto-policies --show
   register: crypto_policies
   failed_when: "'FIPS' not in crypto_policies.stdout"
   changed_when: false

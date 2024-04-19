@@ -1,10 +1,10 @@
 ---
 - name: Check system authentication configuration
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/pam.d/system-auth
     regexp: '^auth.*pam_sss.so.*'
-    state: absent
-  check_mode: true
   register: auth_config
   changed_when: false
 
@@ -23,8 +23,8 @@
   register: sssd_config
 
 - name: Run SSSD configuration check
-  command: sssctl config-check
   check_mode: false
+  command: sssctl config-check
   changed_when: false
   when: "'sssd' in ansible_facts.packages"
 
@@ -43,39 +43,39 @@
 
 - name: Enable oddjobd service
   service:
-    name: oddjobd
     enabled: true
+    name: oddjobd
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Start oddjobd service
   service:
-    name: oddjobd
     state: started
+    name: oddjobd
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Enable sssd-kcm socket
   service:
-    name: sssd-kcm.socket
     enabled: true
+    name: sssd-kcm.socket
   when: "'sssd-kcm' in ansible_facts.packages"
 
 - name: Enable sssd service
   service:
-    name: sssd
     enabled: true
+    name: sssd
   when: "'sssd' in ansible_facts.packages"
 
 - name: Start sssd service
   service:
-    name: sssd
     state: started
+    name: sssd
   register: service_start
   when: "'sssd' in ansible_facts.packages"
 
 - name: Restart sssd to apply configuration changes
   service:
-    name: sssd
     state: restarted
+    name: sssd
   when:
     - "'sssd' in ansible_facts.packages"
     - service_start is not changed

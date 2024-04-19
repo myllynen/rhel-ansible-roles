@@ -9,22 +9,22 @@
 
 - name: Install tuned package
   yum:
-    name: tuned
     state: present
+    name: tuned
 
 - name: Gather package facts
   package_facts:
 
 - name: Enable tuned service
   service:
-    name: tuned
     enabled: true
+    name: tuned
   when: "'tuned' in ansible_facts.packages"
 
 - name: Start tuned service
   service:
-    name: tuned
     state: started
+    name: tuned
   when: "'tuned' in ansible_facts.packages"
 
 - name: Read current tuned profile

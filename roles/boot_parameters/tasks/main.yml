@@ -9,25 +9,25 @@
 
 - name: Install grubby package
   yum:
-    name: grubby
     state: present
+    name: grubby
 
 - name: Check enabled boot parameters
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
-    state: absent
-  check_mode: true
   register: enable_check
   changed_when: false
   loop: "{{ boot_parameters_enable | select() | list }}"
 
 - name: Check disabled boot parameters
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
-    state: absent
-  check_mode: true
   register: disable_check
   changed_when: false
   loop: "{{ boot_parameters_disable | select() | list }}"
@@ -87,8 +87,8 @@
 
 - name: Remove boot loader password configuration
   file:
-    path: "{{ user_config }}"
     state: absent
+    path: "{{ user_config }}"
   register: password_remove
   when: not boot_parameters_password | default(true)
 

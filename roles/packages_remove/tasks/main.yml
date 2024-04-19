@@ -9,17 +9,17 @@
 
 - name: Remove unwanted packages
   yum:
+    state: absent
     name: "{{ packages_remove | select() | list }}"
     autoremove: false
     #cacheonly: true
-    state: absent
   register: package_remove
 
 - name: Remove unneeded leaf packages
   yum:
+    state: absent
     autoremove: true
     #cacheonly: true
-    state: absent
   register: package_remove_leaf
   when: packages_remove_autoremove | bool
 

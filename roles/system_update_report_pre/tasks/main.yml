@@ -9,11 +9,11 @@
 
 - name: Check available package updates
   # noqa: package-latest
+  check_mode: true
   yum:
+    state: latest
     name: '*'
     update_cache: true
-    state: latest
-  check_mode: true
   register: package_install
 
 - name: Set available package updates (RHEL 7)

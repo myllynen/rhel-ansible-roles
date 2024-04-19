@@ -10,9 +10,9 @@
 - name: Update all packages
   # noqa: package-latest
   yum:
+    state: latest
     name: '*'
     update_cache: true
-    state: latest
   register: package_install
 
 - name: Set package update timestamp
@@ -53,8 +53,8 @@
 
 - name: Install yum-utils package
   yum:
-    name: yum-utils
     state: present
+    name: yum-utils
   when: system_update_reboot_policy == 'when_needed'
 
 - name: Gather package facts
@@ -63,8 +63,8 @@
 - name: Check need for rebooting
   vars:
     plugin_opt: "{{ '--disableplugin=product-id,subscription-manager' if ansible_facts.pkg_mgr != 'yum' else '' }}"
-  command: needs-restarting {{ plugin_opt }} -r
   check_mode: false
+  command: needs-restarting {{ plugin_opt }} -r
   register: needs_restarting
   failed_when: false
   changed_when: false

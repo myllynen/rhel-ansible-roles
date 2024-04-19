@@ -21,8 +21,8 @@
           (rhc_packages if insights_client_rhc_enable | bool else []) +
           (openscap_packages if insights_client_scap_enable | bool else []) }}"
   yum:
-    name: "{{ required_packages | select() | list }}"
     state: present
+    name: "{{ required_packages | select() | list }}"
 
 - name: Gather package facts
   package_facts:
@@ -64,34 +64,34 @@
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2175793
 - name: Check Red Hat Subscription Management configuration
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/rhsm/rhsm.conf
     regexp: '^hostname\s?=\s?subscription.rhsm.redhat.com'
-    state: absent
-  check_mode: true
   register: registration_redhat
   changed_when: false
 
 - name: Disable rhcd service
   service:
-    name: rhcd
     enabled: false
+    name: rhcd
   when:
     - "'rhc' in ansible_facts.packages"
     - registration_redhat.found == 0
 
 - name: Stop rhcd service
   service:
-    name: rhcd
     state: stopped
+    name: rhcd
   when:
     - "'rhc' in ansible_facts.packages"
     - registration_redhat.found == 0
 
 - name: Enable rhcd service
   service:
-    name: rhcd
     enabled: true
+    name: rhcd
   when:
     - "'rhc' in ansible_facts.packages"
     - insights_client_rhc_enable | bool
@@ -99,8 +99,8 @@
 
 - name: Start rhcd service
   service:
-    name: rhcd
     state: started
+    name: rhcd
   when:
     - "'rhc' in ansible_facts.packages"
     - insights_client_rhc_enable | bool

@@ -1,10 +1,10 @@
 ---
 - name: Create logical volume for swap
   community.general.lvol:
+    state: present
     vg: "{{ swap_setup_vg_name }}"
     lv: "{{ swap_setup_lv_name }}"
     size: "{{ swap_setup_lv_size }}"
-    state: present
   when: swap_setup_vg_name | default (false)
 
 - name: Check logical volume path
@@ -33,10 +33,10 @@
 
 - name: Configure fstab swap device mount point
   ansible.posix.mount:
+    state: present
     src: "{{ lvs_output.stdout | trim }}"
     path: none
     fstype: swap
-    state: present
   register: fstab_config
   when: swap_setup_vg_name | default (false)
 

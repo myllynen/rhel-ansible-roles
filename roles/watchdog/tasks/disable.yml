@@ -21,20 +21,20 @@
   vars:
     option_state: "{{ 'present' if ansible_facts.distribution_major_version | int >= 9 else 'absent' }}"
   lineinfile:
+    state: "{{ option_state }}"
     path: /etc/systemd/system.conf
     regexp: '^(#|)KExecWatchdogSec=.*'
     line: '#KExecWatchdogSec=off'
-    state: "{{ option_state }}"
   register: watchdog_kexec
 
 - name: Restore system watchdog device default configuration
   vars:
     option_state: "{{ 'present' if ansible_facts.distribution_major_version | int >= 9 else 'absent' }}"
   lineinfile:
+    state: "{{ option_state }}"
     path: /etc/systemd/system.conf
     regexp: '^(#|)WatchdogDevice=.*'
     line: '#WatchdogDevice='
-    state: "{{ option_state }}"
   register: watchdog_device
 
 - name: Reload systemd to apply watchdog configuration changes

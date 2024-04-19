@@ -1,8 +1,8 @@
 ---
 - name: Install aide package
   yum:
-    name: aide
     state: present
+    name: aide
 
 - name: Copy aide configuration file
   copy:
@@ -15,8 +15,8 @@
   package_facts:
 
 - name: Run aide configuration check
-  command: /usr/sbin/aide --config-check
   check_mode: false
+  command: /usr/sbin/aide --config-check
   changed_when: false
   when: "'aide' in ansible_facts.packages"
 

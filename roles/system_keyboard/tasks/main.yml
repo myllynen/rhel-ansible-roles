@@ -1,18 +1,18 @@
 ---
 - name: Install required packages
   yum:
+    state: present
     name:
       - kbd
       - kbd-misc
-    state: present
   register: package_install
 
 - name: Check system keyboard configuration
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/vconsole.conf
     regexp: '^KEYMAP=("|){{ system_keyboard }}(|")'
-    state: absent
-  check_mode: true
   register: keyboard_check
   changed_when: false
 
@@ -23,11 +23,11 @@
   when: not keyboard_check.found
 
 - name: Check system console font configuration
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/vconsole.conf
     regexp: '^FONT=("|){{ system_font }}(|")'
-    state: absent
-  check_mode: true
   register: font_check
   changed_when: false
 

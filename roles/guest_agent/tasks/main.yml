@@ -20,15 +20,16 @@
       - 'n*firmware*'
       - "{{ 'linux-firmware-whence' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
   yum:
+    state: absent
     name: "{{ firmware_packages | select() | list }}"
     #cacheonly: true
-    state: absent
   when:
     - ansible_facts.virtualization_role == "guest"
     - guest_agent_remove_firmware | bool
 
 - name: Remove all virtual guest packages
   yum:
+    state: absent
     name:
       - 'hyperv*'
       - open-vm-tools
@@ -36,18 +37,17 @@
       - spice-vdagent
       - WALinuxAgent
     #cacheonly: true
-    state: absent
   when: ansible_facts.virtualization_role != "guest" or
         not guest_agent_enable | bool
 
 - name: Remove unneeded packages on Azure/Hyper-V
   yum:
+    state: absent
     name:
       - open-vm-tools
       - qemu-guest-agent
       - spice-vdagent
     #cacheonly: true
-    state: absent
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "VirtualPC"
@@ -55,12 +55,12 @@
 
 - name: Remove unneeded packages on KVM
   yum:
+    state: absent
     name:
       - 'hyperv*'
       - open-vm-tools
       - WALinuxAgent
     #cacheonly: true
-    state: absent
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "kvm"
@@ -68,13 +68,13 @@
 
 - name: Remove unneeded packages on VMware
   yum:
+    state: absent
     name:
       - 'hyperv*'
       - qemu-guest-agent
       - spice-vdagent
       - WALinuxAgent
     #cacheonly: true
-    state: absent
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "VMware"
@@ -82,6 +82,7 @@
 
 - name: Remove unneeded packages on other VMs
   yum:
+    state: absent
     name:
       - 'hyperv*'
       - open-vm-tools
@@ -89,7 +90,6 @@
       - spice-vdagent
       - WALinuxAgent
     #cacheonly: true
-    state: absent
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type not in ['kvm', 'VirtualPC', 'VMware']
@@ -104,8 +104,8 @@
         - WALinuxAgent
       VMware: open-vm-tools
   yum:
-    name: "{{ agent_packages[ansible_facts.virtualization_type] }}"
     state: present
+    name: "{{ agent_packages[ansible_facts.virtualization_type] }}"
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_packages
@@ -125,8 +125,8 @@
       VirtualPC: waagent.service
       VMware: vmtoolsd.service
   service:
-    name: "{{ agent_services[ansible_facts.virtualization_type] }}"
     enabled: true
+    name: "{{ agent_services[ansible_facts.virtualization_type] }}"
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_services
@@ -141,8 +141,8 @@
       VirtualPC: waagent.service
       VMware: vmtoolsd.service
   service:
-    name: "{{ agent_services[ansible_facts.virtualization_type] }}"
     state: started
+    name: "{{ agent_services[ansible_facts.virtualization_type] }}"
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_services

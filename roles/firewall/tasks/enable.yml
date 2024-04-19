@@ -1,8 +1,8 @@
 ---
 - name: Install firewalld package
   yum:
-    name: firewalld
     state: present
+    name: firewalld
 
 - name: Gather package facts
   package_facts:
@@ -17,21 +17,21 @@
 
 - name: Enable firewalld service
   service:
-    name: firewalld
     enabled: true
+    name: firewalld
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Start firewalld service
   service:
-    name: firewalld
     state: started
+    name: firewalld
   register: service_start
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Reload firewalld to apply configuration changes
   service:
-    name: firewalld
     state: reloaded
+    name: firewalld
   when:
     - "'firewalld' in ansible_facts.packages"
     - service_start is not changed
@@ -51,17 +51,17 @@
 
 - name: Open configured ports in firewall
   ansible.posix.firewalld:
+    state: enabled
     zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
     permanent: true
     immediate: true
-    state: enabled
   loop: "{{ ports_to_open }}"
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Check open ports in firewall
-  command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
   check_mode: false
+  command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
   register: open_ports
   changed_when: false
   when:
@@ -70,11 +70,11 @@
 
 - name: Close unconfigured ports in firewall
   ansible.posix.firewalld:
+    state: disabled
     zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
     permanent: true
     immediate: true
-    state: disabled
   loop: "{{ open_ports.stdout.split(' ') | select() | list }}"
   when:
     - "'firewalld' in ansible_facts.packages"
@@ -98,17 +98,17 @@
 
 - name: Open configured services in firewall
   ansible.posix.firewalld:
+    state: enabled
     zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
     permanent: true
     immediate: true
-    state: enabled
   loop: "{{ services_to_open }}"
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Check open services in firewall
-  command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
   check_mode: false
+  command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
   register: open_services
   changed_when: false
   when:
@@ -117,11 +117,11 @@
 
 - name: Close unconfigured services in firewall
   ansible.posix.firewalld:
+    state: disabled
     zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
     permanent: true
     immediate: true
-    state: disabled
   loop: "{{ open_services.stdout.split(' ') | select() | list }}"
   when:
     - "'firewalld' in ansible_facts.packages"

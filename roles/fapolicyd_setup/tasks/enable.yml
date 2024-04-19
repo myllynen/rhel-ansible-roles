@@ -1,10 +1,10 @@
 ---
 - name: Install fapolicyd packages
   yum:
+    state: present
     name:
       - fapolicyd
       - fapolicyd-selinux
-    state: present
 
 - name: Gather package facts
   package_facts:
@@ -31,8 +31,8 @@
 
 - name: Remove old fapolicyd rules file
   file:
-    path: /etc/fapolicyd/fapolicyd.rules
     state: absent
+    path: /etc/fapolicyd/fapolicyd.rules
   register: old_rules
   when: fapolicyd_setup_rules_file | default(false)
 
@@ -84,23 +84,23 @@
   when: fapolicyd_setup_exclusive | bool
 
 - name: Run fapolicyd configuration check
-  command: fapolicyd-cli --check-config
   check_mode: false
+  command: fapolicyd-cli --check-config
   changed_when: false
   when: "'fapolicyd' in ansible_facts.packages"
 
 - name: Enable fapolicyd service
   service:
-    name: fapolicyd
     enabled: true
+    name: fapolicyd
   when:
     - "'fapolicyd' in ansible_facts.packages"
     - fapolicyd_setup_enable_service | bool
 
 - name: Start fapolicyd service
   service:
-    name: fapolicyd
     state: started
+    name: fapolicyd
   register: service_start
   when:
     - "'fapolicyd' in ansible_facts.packages"
@@ -108,8 +108,8 @@
 
 - name: Restart fapolicyd to apply configuration changes
   service:
-    name: fapolicyd
     state: restarted
+    name: fapolicyd
   when:
     - "'fapolicyd' in ansible_facts.packages"
     - fapolicyd_setup_enable_service | bool

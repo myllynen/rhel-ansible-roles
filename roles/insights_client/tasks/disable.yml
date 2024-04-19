@@ -4,14 +4,14 @@
 
 - name: Disable rhcd service
   service:
-    name: rhcd
     enabled: false
+    name: rhcd
   when: "'rhc' in ansible_facts.packages"
 
 - name: Stop rhcd service
   service:
-    name: rhcd
     state: stopped
+    name: rhcd
   when: "'rhc' in ansible_facts.packages"
 
 - name: Unregister system from Red Hat Insights

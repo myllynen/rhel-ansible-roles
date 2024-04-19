@@ -48,8 +48,8 @@
   vars:
     plain_paths: "{{ files_remove | select() | reject('search', '\\?|\\*|\\[') | list }}"
   file:
-    path: "{{ item }}"
     state: absent
+    path: "{{ item }}"
   register: remove_files
   loop: "{{ (plain_paths + glob_paths) | select() | list }}"
   when: item not in files_remove_exclude | default([], true)

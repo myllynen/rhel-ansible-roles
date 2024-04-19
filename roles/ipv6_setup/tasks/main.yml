@@ -5,16 +5,16 @@
 # This role may run before repositories are setup
 - name: Install grubby package
   yum:
-    name: grubby
     state: present
+    name: grubby
   when: "'grubby' not in ansible_facts.packages"
 
 - name: Check IPv6 boot parameter
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| )ipv6.disable(=| |")'
-    state: absent
-  check_mode: true
   register: boot_param_check
   changed_when: false
 

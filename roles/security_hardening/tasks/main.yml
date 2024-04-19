@@ -30,15 +30,15 @@
     se_package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
     selinux_packages: "{{ selinux_package_lists[se_package_set] }}"
   yum:
-    name: "{{ security_packages | select() | list + selinux_packages }}"
     state: present
+    name: "{{ security_packages | select() | list + selinux_packages }}"
 
 - name: Gather package facts
   package_facts:
 
 - name: Check Secure Boot state
-  command: mokutil --sb-state
   check_mode: false
+  command: mokutil --sb-state
   register: sb_state
   failed_when: false
   changed_when: false
@@ -57,11 +57,11 @@
 - name: Check kernel lockdown configuration
   vars:
     lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
+  check_mode: true
   lineinfile:
+    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ lockdown_param }}(=| |")'
-    state: absent
-  check_mode: true
   register: lockdown_check
   changed_when: false
   when: ansible_facts.distribution_major_version | int >= 9
@@ -82,15 +82,15 @@
 
 - name: Configure SELinux state
   ansible.posix.selinux:
-    policy: targeted
     state: "{{ selinux }}"
+    policy: targeted
   register: selinux_config
   when: "'libselinux-python' in ansible_facts.packages or
          'python3-libselinux' in ansible_facts.packages"
 
 - name: Check current crypto policy
-  command: update-crypto-policies --show
   check_mode: false
+  command: update-crypto-policies --show
   register: current_crypto_policy
   changed_when: false
   when:
@@ -114,9 +114,9 @@
 
 - name: Configure SCP state
   file:
+    state: "{{ 'touch' if scp_protocol_disable | bool else 'absent' }}"
     path: /etc/ssh/disable_scp
     mode: '0644'
-    state: "{{ 'touch' if scp_protocol_disable | bool else 'absent' }}"
   when:
     - ansible_facts.distribution_major_version | int >= 9
     - scp_state.stat.exists != scp_protocol_disable | bool

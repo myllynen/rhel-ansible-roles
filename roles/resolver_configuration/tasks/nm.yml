@@ -29,7 +29,7 @@
 
 - name: Reload NetworkManager to apply configuration changes
   service:
-    name: NetworkManager
     state: reloaded
+    name: NetworkManager
   when: nm_resolver_config is changed or
         nm_rc_manager_config is changed

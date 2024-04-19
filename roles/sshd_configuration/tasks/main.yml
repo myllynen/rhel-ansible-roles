@@ -140,8 +140,8 @@
 
 - name: Reload sshd to apply configuration changes
   service:
-    name: sshd
     state: reloaded
+    name: sshd
   when: files_reset is changed or
         sysconfig_copy is changed or
         config_create is changed or

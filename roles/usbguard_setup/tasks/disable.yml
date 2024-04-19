@@ -4,12 +4,12 @@
 
 - name: Disable usbguard service
   service:
-    name: usbguard
     enabled: false
+    name: usbguard
   when: "'usbguard' in ansible_facts.packages"
 
 - name: Stop usbguard service
   service:
-    name: usbguard
     state: stopped
+    name: usbguard
   when: "'usbguard' in ansible_facts.packages"

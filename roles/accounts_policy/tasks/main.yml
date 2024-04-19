@@ -66,8 +66,8 @@
       - authselect
       - "{{ 'oddjob-mkhomedir' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
   yum:
-    name: "{{ auth_packages | select() | list }}"
     state: present
+    name: "{{ auth_packages | select() | list }}"
   when:
     - ansible_facts.distribution_major_version | int >= 8
     - system_auth_profile | default(false)
@@ -77,16 +77,16 @@
 
 - name: Enable oddjobd service
   service:
-    name: oddjobd
     enabled: true
+    name: oddjobd
   when:
     - "'oddjob-mkhomedir' in ansible_facts.packages"
     - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
 
 - name: Start oddjobd service
   service:
-    name: oddjobd
     state: started
+    name: oddjobd
   when:
     - "'oddjob-mkhomedir' in ansible_facts.packages"
     - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
@@ -103,8 +103,8 @@
     - "'custom/' in system_auth_profile"
 
 - name: Check current system-local authentication profile in use
-  command: authselect current -r
   check_mode: false
+  command: authselect current -r
   register: profile_current
   failed_when: profile_current.rc != 0 and 'No existing configuration' not in profile_current.stdout
   changed_when: false
@@ -114,8 +114,8 @@
     - system_auth_profile | default(false)
 
 - name: Check current system-local authentication profile status
-  command: authselect check
   check_mode: false
+  command: authselect check
   register: profile_valid
   failed_when: false
   changed_when: false

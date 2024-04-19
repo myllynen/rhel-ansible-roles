@@ -31,8 +31,8 @@
 
 - name: Remove local PDF directory
   file:
-    path: "{{ system_update_report_pdf_dir }}"
     state: absent
+    path: "{{ system_update_report_pdf_dir }}"
   delegate_to: localhost
   run_once: true
   become: false

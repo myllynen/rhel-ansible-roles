@@ -85,9 +85,9 @@
 
 - name: Relabel stored installer files
   community.general.sefcontext:
+    state: present
     target: /var/log/anaconda/{{ item | basename }}
     setype: var_log_t
-    state: present
   loop: "{{ installer_files }}"
   loop_control:
     label: /var/log/anaconda/{{ item | basename }}
@@ -112,8 +112,8 @@
 
 - name: Remove all leftover files
   file:
-    path: "{{ item }}"
     state: absent
+    path: "{{ item }}"
   loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') | list }}"
 
 - name: Reboot system

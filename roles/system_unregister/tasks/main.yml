@@ -12,14 +12,14 @@
 
 - name: Disable rhcd service
   service:
-    name: rhcd
     enabled: false
+    name: rhcd
   when: "'rhc' in ansible_facts.packages"
 
 - name: Stop rhcd service
   service:
-    name: rhcd
     state: stopped
+    name: rhcd
   when: "'rhc' in ansible_facts.packages"
 
 - name: Unregister system from Red Hat Insights
@@ -44,18 +44,18 @@
 
 - name: Remove Katello CA package
   yum:
+    state: absent
     name: katello-ca-consumer-*
     #cacheonly: true
     disable_plugin:
       - product-id
       - subscription-manager
     disablerepo: '*'
-    state: absent
 
 - name: Remove Katello CA certificates
   file:
-    path: "{{ item }}"
     state: absent
+    path: "{{ item }}"
   loop:
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
@@ -72,8 +72,8 @@
 
 - name: Remove RHSM cache files
   file:
-    path: "{{ item }}"
     state: absent
+    path: "{{ item }}"
   loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
 
 - name: Clean package manager caches
@@ -100,8 +100,8 @@
 
 - name: Remove RHSM configuration backup files
   file:
-    path: "{{ item.path }}"
     state: absent
+    path: "{{ item.path }}"
   loop: "{{ rhsm_backups.files | sort(attribute='path') }}"
   loop_control:
     label: "{{ item.path }}"

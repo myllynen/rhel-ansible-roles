@@ -1,19 +1,19 @@
 ---
 - name: Remove NetworkManager resolver configuration options file
   file:
-    path: /etc/NetworkManager/conf.d/50-resolver.conf
     state: absent
+    path: /etc/NetworkManager/conf.d/50-resolver.conf
   register: nm_resolver_config
 
 - name: Remove NetworkManager resolver management configuration file
   file:
-    path: /etc/NetworkManager/conf.d/90-rc-manager.conf
     state: absent
+    path: /etc/NetworkManager/conf.d/90-rc-manager.conf
   register: nm_rc_manager_config
 
 - name: Reload NetworkManager to apply configuration changes
   service:
-    name: NetworkManager
     state: reloaded
+    name: NetworkManager
   when: nm_resolver_config is changed or
         nm_rc_manager_config is changed

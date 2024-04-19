@@ -13,9 +13,9 @@
   vars:
     weak_deps: "{{ packages_install_weak_deps | bool if ansible_facts.distribution_major_version | int >= 8 else false }}"
   yum:
+    state: present
     name: "{{ packages_install | select() | list }}"
     install_weak_deps: "{{ weak_deps }}"
-    state: present
   register: package_install
 
 - name: Display package changes

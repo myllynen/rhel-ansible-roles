@@ -9,8 +9,8 @@
 
 - name: Install dnsmasq package
   yum:
-    name: dnsmasq
     state: present
+    name: dnsmasq
 
 - name: Create NetworkManager dnsmasq configuration file
   template:
@@ -30,7 +30,7 @@
 
 - name: Reload NetworkManager to apply configuration changes
   service:
-    name: NetworkManager
     state: reloaded
+    name: NetworkManager
   when: dnsmasq_config is changed or
         nm_config is changed

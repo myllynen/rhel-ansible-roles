@@ -17,6 +17,7 @@
 
 - name: Install katello-ca-consumer-latest package
   yum:
+    state: present
     name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"
     disable_gpg_check: true
     validate_certs: false
@@ -24,7 +25,6 @@
     disable_plugin:
       - product-id
       - subscription-manager
-    state: present
   when:
     - not repository_setup_rhsm_curl_args
     - repository_setup_rhsm_parameters.rhsm_baseurl | default(false)
@@ -32,6 +32,7 @@
 
 - name: Configure Red Hat subscription using subscription-manager
   community.general.redhat_subscription:
+    state: present
     activationkey: "{{ repository_setup_rhsm_parameters.activationkey | default(omit) }}"
     org_id: "{{ repository_setup_rhsm_parameters.org_id | default(omit) }}"
     username: "{{ repository_setup_rhsm_parameters.username | default(omit) }}"
@@ -55,7 +56,6 @@
     server_proxy_user: "{{ repository_setup_rhsm_parameters.server_proxy_user | default(omit) }}"
     server_proxy_password: "{{ repository_setup_rhsm_parameters.server_proxy_password | default(omit) }}"
     syspurpose: "{{ repository_setup_rhsm_parameters.syspurpose | default(omit) }}"
-    state: present
   register: subscription_state
   when:
     - not repository_setup_rhsm_curl_args
@@ -64,8 +64,8 @@
 
 - name: Disable Red Hat repositories
   community.general.rhsm_repository:
-    name: "{{ repository_setup_rhsm_repositories_disable }}"
     state: disabled
+    name: "{{ repository_setup_rhsm_repositories_disable }}"
   register: repos_disabled
   when:
     - not repository_setup_rhsm_curl_args
@@ -73,9 +73,9 @@
 
 - name: Enable Red Hat repositories
   community.general.rhsm_repository:
+    state: enabled
     name: "{{ repository_setup_rhsm_repositories_enable }}"
     purge: "{{ repository_setup_rhsm_repositories_purge }}"
-    state: enabled
   register: repos_enabled
   when:
     - not repository_setup_rhsm_curl_args
@@ -100,10 +100,10 @@
 
 - name: Enable rhsmcertd service
   service:
-    name: rhsmcertd
     enabled: true
+    name: rhsmcertd
 
 - name: Start rhsmcertd service
   service:
-    name: rhsmcertd
     state: started
+    name: rhsmcertd

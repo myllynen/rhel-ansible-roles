@@ -9,16 +9,16 @@
 
 - name: Install OpenSCAP packages
   yum:
+    state: "{{ scap_compliance_package_state }}"
     name:
       - openscap
       - openscap-scanner
       - scap-security-guide
-    state: "{{ scap_compliance_package_state }}"
 
 - name: Create oscap results directory
   file:
-    path: "{{ scap_compliance_report_dir }}"
     state: directory
+    path: "{{ scap_compliance_report_dir }}"
     mode: '0700'
 
 - name: Create tailoring file

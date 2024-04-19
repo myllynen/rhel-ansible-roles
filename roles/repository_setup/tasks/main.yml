@@ -8,8 +8,8 @@
 
 - name: Remove repository configuration files
   file:
-    path: /etc/yum.repos.d/{{ item | basename }}
     state: absent
+    path: /etc/yum.repos.d/{{ item | basename }}
   loop: "{{ repository_setup_repo_files_remove | select() | list }}"
 
 - name: Enable Red Hat Subscription Management

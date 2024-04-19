@@ -1,8 +1,8 @@
 ---
 - name: Install multipath packages
   yum:
-    name: device-mapper-multipath
     state: present
+    name: device-mapper-multipath
 
 - name: Copy multipath configuration file
   copy:
@@ -14,14 +14,14 @@
 
 - name: Enable multipathd service
   service:
-    name: multipathd
     enabled: true
+    name: multipathd
   when: multipath_setup_config_file | default(false)
 
 - name: Start multipathd service
   service:
-    name: multipathd
     state: started
+    name: multipathd
   register: service_start
   when:
     - multipath_setup_config_file | default(false)
@@ -29,8 +29,8 @@
 
 - name: Reload multipathd to apply configuration changes
   service:
-    name: multipathd
     state: reloaded
+    name: multipathd
   when:
     - not multipath_setup_reboot | bool
     - service_start is not changed

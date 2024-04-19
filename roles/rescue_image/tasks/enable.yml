@@ -1,5 +1,5 @@
 ---
 - name: Install dracut-config-rescue package
   yum:
-    name: dracut-config-rescue
     state: present
+    name: dracut-config-rescue

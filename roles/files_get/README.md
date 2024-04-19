@@ -17,11 +17,11 @@ files_get:
 #  - url: https://server.example.com/data.zip
 #    url_username: admin
 #    url_password: admin123
+#    validate_certs: false
 #    use_proxy: false
 #    dest: /var/tmp/data.zip
 #    mode: '0600'
 #    timeout: 5
-#    validate_certs: false
 
 # Value for no_log parameter when getting
 # files and using passwords, unset otherwise
