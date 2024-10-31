@@ -1,8 +1,8 @@
 ---
 - name: Install nscd package
-  yum:
-    state: present
+  dnf:
     name: nscd
+    state: present
 
 - name: Gather package facts
   package_facts:
@@ -16,21 +16,21 @@
 
 - name: Enable nscd service
   service:
-    enabled: true
     name: nscd
+    enabled: true
   when: "'nscd' in ansible_facts.packages"
 
 - name: Start nscd service
   service:
-    state: started
     name: nscd
+    state: started
   register: service_start
   when: "'nscd' in ansible_facts.packages"
 
 - name: Reload nscd to apply configuration changes
   service:
-    state: reloaded
     name: nscd
+    state: reloaded
   when:
     - "'nscd' in ansible_facts.packages"
     - service_start is not changed

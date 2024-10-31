@@ -13,18 +13,19 @@
   register: curl_command
   failed_when: curl_command.rc != 0 and 'already registered' not in curl_command.stderr
   changed_when: "'already registered' not in curl_command.stderr"
-  when: repository_setup_rhsm_curl_args | default(false)
+  when: repository_setup_rhsm_curl_args
 
 - name: Install katello-ca-consumer-latest package
-  yum:
-    state: present
+  dnf:
     name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    state: present
     disable_gpg_check: true
     validate_certs: false
-    #cacheonly: true
+    cacheonly: true
     disable_plugin:
       - product-id
       - subscription-manager
+    disablerepo: '*'
   when:
     - not repository_setup_rhsm_curl_args
     - repository_setup_rhsm_parameters.rhsm_baseurl | default(false)
@@ -64,22 +65,22 @@
 
 - name: Disable Red Hat repositories
   community.general.rhsm_repository:
-    state: disabled
     name: "{{ repository_setup_rhsm_repositories_disable }}"
+    state: disabled
   register: repos_disabled
   when:
     - not repository_setup_rhsm_curl_args
-    - repository_setup_rhsm_repositories_disable | default(false)
+    - repository_setup_rhsm_repositories_disable
 
 - name: Enable Red Hat repositories
   community.general.rhsm_repository:
-    state: enabled
     name: "{{ repository_setup_rhsm_repositories_enable }}"
+    state: enabled
     purge: "{{ repository_setup_rhsm_repositories_purge }}"
   register: repos_enabled
   when:
     - not repository_setup_rhsm_curl_args
-    - repository_setup_rhsm_repositories_enable | default(false)
+    - repository_setup_rhsm_repositories_enable
 
 - name: Update RHSM system facts
   command: subscription-manager facts --update
@@ -100,10 +101,10 @@
 
 - name: Enable rhsmcertd service
   service:
-    enabled: true
     name: rhsmcertd
+    enabled: true
 
 - name: Start rhsmcertd service
   service:
-    state: started
     name: rhsmcertd
+    state: started

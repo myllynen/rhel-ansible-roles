@@ -9,42 +9,42 @@
 
 - name: Mask service
   systemd:
-    masked: true
     name: "{{ item }}"
-  loop: "{{ service_state_mask | select() | list }}"
+    masked: true
+  loop: "{{ service_state_mask | select }}"
 
 - name: Unmask service
   systemd:
-    masked: false
     name: "{{ item }}"
-  loop: "{{ service_state_unmask | select() | list }}"
+    masked: false
+  loop: "{{ service_state_unmask | select }}"
 
 - name: Disable service
   systemd:
-    enabled: false
     name: "{{ item }}"
-  loop: "{{ service_state_disable | select() | list }}"
+    enabled: false
+  loop: "{{ service_state_disable | select }}"
   when: item in unit_files.stdout
 
 - name: Stop service
   systemd:
-    state: stopped
     name: "{{ item }}"
-  loop: "{{ service_state_disable | select() | list }}"
+    state: stopped
+  loop: "{{ service_state_disable | select }}"
   when: item in unit_files.stdout
 
 - name: Enable service
   systemd:
-    enabled: true
     name: "{{ item }}"
-  loop: "{{ service_state_enable | select() | list }}"
+    enabled: true
+  loop: "{{ service_state_enable | select }}"
   when: not service_state_skip_missing | bool or
         item in unit_files.stdout
 
 - name: Start service
   systemd:
-    state: started
     name: "{{ item }}"
-  loop: "{{ service_state_enable | select() | list }}"
+    state: started
+  loop: "{{ service_state_enable | select }}"
   when: not service_state_skip_missing | bool or
         item in unit_files.stdout

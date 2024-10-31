@@ -4,12 +4,12 @@
 
 - name: Disable firewalld service
   service:
-    enabled: false
     name: firewalld
+    enabled: false
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Stop firewalld service
   service:
-    state: stopped
     name: firewalld
+    state: stopped
   when: "'firewalld' in ansible_facts.packages"

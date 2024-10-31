@@ -10,11 +10,8 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# NB. Supported RHEL versions: RHEL 8+
-#
-# Enable or disable service after configuration
+# Enable or not the service after configuration
 # to allow testing and verification before use.
-# NB. See ima_evm_setup if planning to use IMA.
 fapolicyd_setup_enable_service: false
 
 # fapolicyd config file to copy
@@ -43,6 +40,7 @@ fapolicyd_setup_exclusive: false
 # (zz-ansible.rules and zz-ansible.trust)
 # Other files in rules.d and trust.d will
 # be removed meaning this MUST be tested!
+# NB. Ensure these files are trustworthy!
 fapolicyd_setup_files_known:
 #  - /etc/fapolicyd/rules.d/50-os.rules
 #  - /etc/fapolicyd/trust.d/50-os.trust

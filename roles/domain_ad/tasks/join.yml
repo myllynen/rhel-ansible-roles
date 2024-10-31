@@ -43,39 +43,39 @@
 
 - name: Enable oddjobd service
   service:
-    enabled: true
     name: oddjobd
+    enabled: true
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Start oddjobd service
   service:
-    state: started
     name: oddjobd
+    state: started
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Enable sssd-kcm socket
   service:
-    enabled: true
     name: sssd-kcm.socket
+    enabled: true
   when: "'sssd-kcm' in ansible_facts.packages"
 
 - name: Enable sssd service
   service:
-    enabled: true
     name: sssd
+    enabled: true
   when: "'sssd' in ansible_facts.packages"
 
 - name: Start sssd service
   service:
-    state: started
     name: sssd
+    state: started
   register: service_start
   when: "'sssd' in ansible_facts.packages"
 
 - name: Restart sssd to apply configuration changes
   service:
-    state: restarted
     name: sssd
+    state: restarted
   when:
     - "'sssd' in ansible_facts.packages"
     - service_start is not changed
@@ -83,18 +83,9 @@
       krb5_config is changed or
       sssd_config is changed
 
-- name: Configure system-wide authentication (RHEL 7)
-  command: authconfig --enablemkhomedir --enablesssd --enablesssdauth --update
-  changed_when: true
-  when:
-    - ansible_facts.distribution_major_version | int < 8
-    - domain_ad_auth_config_update | bool
-    - auth_config.found == 0
-
 - name: Configure system-wide authentication
   command: authselect select -f sssd {{ domain_ad_auth_select_parameters }}
   changed_when: true
   when:
-    - ansible_facts.distribution_major_version | int >= 8
     - domain_ad_auth_config_update | bool
     - auth_config.found == 0

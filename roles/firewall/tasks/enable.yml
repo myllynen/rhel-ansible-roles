@@ -1,8 +1,8 @@
 ---
 - name: Install firewalld package
-  yum:
-    state: present
+  dnf:
     name: firewalld
+    state: present
 
 - name: Gather package facts
   package_facts:
@@ -17,21 +17,21 @@
 
 - name: Enable firewalld service
   service:
-    enabled: true
     name: firewalld
+    enabled: true
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Start firewalld service
   service:
-    state: started
     name: firewalld
+    state: started
   register: service_start
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Reload firewalld to apply configuration changes
   service:
-    state: reloaded
     name: firewalld
+    state: reloaded
   when:
     - "'firewalld' in ansible_facts.packages"
     - service_start is not changed
@@ -47,15 +47,15 @@
 
 - name: Set list of ports to open
   set_fact:
-    ports_to_open: "{{ firewall_open_ports | default([], true) | select() | list | unique }}"
+    ports_to_open: "{{ firewall_open_ports | default([], true) | select | unique }}"
 
 - name: Open configured ports in firewall
   ansible.posix.firewalld:
-    state: enabled
-    zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
-    permanent: true
+    zone: "{{ firewall_default_zone }}"
+    state: enabled
     immediate: true
+    permanent: true
   loop: "{{ ports_to_open }}"
   when: "'firewalld' in ansible_facts.packages"
 
@@ -70,12 +70,12 @@
 
 - name: Close unconfigured ports in firewall
   ansible.posix.firewalld:
-    state: disabled
-    zone: "{{ firewall_default_zone }}"
     port: "{{ item }}"
-    permanent: true
+    zone: "{{ firewall_default_zone }}"
+    state: disabled
     immediate: true
-  loop: "{{ open_ports.stdout.split(' ') | select() | list }}"
+    permanent: true
+  loop: "{{ open_ports.stdout.split(' ') | select }}"
   when:
     - "'firewalld' in ansible_facts.packages"
     - firewall_close_unconfigured | bool
@@ -84,7 +84,7 @@
 
 - name: Display unconfigured ports left open
   vars:
-    unclosed_ports: "{{ open_ports.stdout.split(' ') | select() | difference(ports_to_open) | list }}"
+    unclosed_ports: "{{ open_ports.stdout.split(' ') | select | difference(ports_to_open) }}"
   debug:
     msg: "{{ unclosed_ports | join(' ') }}"
   when:
@@ -94,15 +94,15 @@
 
 - name: Set list of services to open
   set_fact:
-    services_to_open: "{{ firewall_open_services | default([], true) | select() | list | unique }}"
+    services_to_open: "{{ firewall_open_services | default([], true) | select | unique }}"
 
 - name: Open configured services in firewall
   ansible.posix.firewalld:
-    state: enabled
-    zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
-    permanent: true
+    zone: "{{ firewall_default_zone }}"
+    state: enabled
     immediate: true
+    permanent: true
   loop: "{{ services_to_open }}"
   when: "'firewalld' in ansible_facts.packages"
 
@@ -117,12 +117,12 @@
 
 - name: Close unconfigured services in firewall
   ansible.posix.firewalld:
-    state: disabled
-    zone: "{{ firewall_default_zone }}"
     service: "{{ item }}"
-    permanent: true
+    zone: "{{ firewall_default_zone }}"
+    state: disabled
     immediate: true
-  loop: "{{ open_services.stdout.split(' ') | select() | list }}"
+    permanent: true
+  loop: "{{ open_services.stdout.split(' ') | select }}"
   when:
     - "'firewalld' in ansible_facts.packages"
     - firewall_close_unconfigured | bool
@@ -132,7 +132,7 @@
 
 - name: Display unconfigured services left open
   vars:
-    unclosed_services: "{{ open_services.stdout.split(' ') | select() | difference(services_to_open) | difference(['ssh']) | list }}"
+    unclosed_services: "{{ open_services.stdout.split(' ') | select | difference(services_to_open) | difference(['ssh']) }}"
   debug:
     msg: "{{ unclosed_services | join(' ') }}"
   when:

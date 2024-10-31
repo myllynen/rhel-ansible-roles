@@ -37,6 +37,7 @@ certificates_files_ext_format:
 certificates_exclusive: false
 
 # List of additionally recognized cert files
+# NB. Ensure these files are trustworthy!
 certificates_files_known:
 #  - /etc/pki/ca-trust/source/anchors/old.pem
 </pre>

@@ -1,44 +1,47 @@
 ---
 - name: Delete local user
   user:
-    state: absent
     name: "{{ item }}"
+    state: absent
     remove: true
-  loop: "{{ accounts_local_users_delete | select() | list }}"
+  loop: "{{ accounts_local_users_delete | select }}"
 
 - name: Delete local group
   group:
-    state: absent
     name: "{{ item }}"
-  loop: "{{ accounts_local_groups_delete | select() | list }}"
+    state: absent
+  loop: "{{ accounts_local_groups_delete | select }}"
 
 - name: Create local group
   group:
-    state: present
     name: "{{ item.name }}"
+    state: present
     gid: "{{ item.gid }}"
-  loop: "{{ accounts_local_groups_create | select() | list }}"
+  loop: "{{ accounts_local_groups_create | select }}"
 
 - name: Create passwordless list of local users to create
   no_log: "{{ accounts_local_no_log }}"
   set_fact:
-    create_users: "{{ create_users | default([]) + [item | dict2items | rejectattr('key', 'equalto', 'password') | list | items2dict] }}"
-  loop: "{{ accounts_local_users_create | select() | list }}"
+    create_users: "{{ create_users | default([]) + [item | dict2items | rejectattr('key', 'equalto', 'password') | items2dict] }}"
+  loop: "{{ accounts_local_users_create | select }}"
   loop_control:
     label: "{{ item.name }}"
 
 - name: Create local user
   user:
-    state: present
     name: "{{ item.name }}"
+    state: present
     uid: "{{ item.uid }}"
     group: "{{ item.group | default(omit) }}"
     comment: "{{ item.comment | default(omit) }}"
     create_home: "{{ item.create_home | default(omit) }}"
-    expires: "{{ item.expires | default(omit) }}"
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
-  loop: "{{ create_users | default([]) | select() | list }}"
+    expires: "{{ item.expires | default(omit) }}"
+    password_expire_min: "{{ item.password_expire_min | default(omit) }}"
+    password_expire_max: "{{ item.password_expire_max | default(omit) }}"
+    #password_expire_warn: "{{ item.password_expire_warn | default(omit) }}"
+  loop: "{{ create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -53,10 +56,9 @@
     pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', rand_salt) }}"
   no_log: "{{ accounts_local_no_log }}"
   user:
-    state: present
     name: "{{ item.name }}"
     password: "{{ pw_encrypted }}"
-  loop: "{{ accounts_local_users_create | select() | selectattr('password', 'defined') | list }}"
+  loop: "{{ accounts_local_users_create | select | selectattr('password', 'defined') }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -66,18 +68,17 @@
 
 - name: Add local user to supplementary groups
   user:
-    state: present
     name: "{{ item.name }}"
     groups: "{{ item.groups }}"
     append: "{{ item.append }}"
-  loop: "{{ accounts_local_users_groups | select() | list }}"
+  loop: "{{ accounts_local_users_groups | select }}"
   when: item.name in getent_passwd
 
 - name: Delete local user sudo configuration
   file:
-    state: absent
     path: /etc/sudoers.d/{{ item.name }}
-  loop: "{{ create_users | default([]) | select() | list }}"
+    state: absent
+  loop: "{{ create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
   when: not item.sudo_allow_all | default(false)
@@ -93,14 +94,13 @@
     group: root
     mode: '0440'
     validate: /usr/sbin/visudo -csf %s
-  loop: "{{ create_users | default([]) | select() | list }}"
+  loop: "{{ create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
   when: item.sudo_allow_all | default(false)
 
 - name: Configure local user SSH authorized key
   ansible.posix.authorized_key:
-    state: present
     user: "{{ item.0.name }}"
     key: "{{ item.1 }}"
     exclusive: "{{ item.0.authorized_keys_exclusive | default(omit) }}"

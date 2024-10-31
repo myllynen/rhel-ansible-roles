@@ -17,7 +17,7 @@
   when: item not in __ima_policies_supported
 
 - name: Install IMA/EVM packages
-  yum:
+  dnf:
     name: "{{ __ima_packages }}"
     state: present
 
@@ -35,13 +35,13 @@
     - not tpm_device.stat.exists
 
 - name: Install TPM packages
-  yum:
+  dnf:
     name: "{{ __tpm_packages }}"
     state: present
   when: ima_evm_setup_enable_tpm_use | bool
 
 - name: Install MOK packages
-  yum:
+  dnf:
     name: "{{ __mok_packages }}"
     state: present
   when: ima_evm_setup_require_secure_boot | bool
@@ -70,7 +70,7 @@
 - name: Set IMA/EVM boot parameters to configure (policies)
   set_fact:
     ima_policies: "{{ ima_policies | default([]) + ['ima_policy=' + item] }}"
-  loop: "{{ ima_evm_setup_ima_policies }}"
+  loop: "{{ ima_evm_setup_ima_policies | default([], true) }}"
 
 - name: Set IMA/EVM boot parameters to configure (other)
   set_fact:
@@ -120,7 +120,7 @@
   set_fact:
     ima_evm_setup_sign_files: true
   when: boot_check_ima_hash.found == 0 or
-        (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
+        (0 in boot_check_ima_policies.results | map(attribute='found')) or
         (fattr_info.stdout is defined and 'security.ima' not in fattr_info.stdout) or
         ('evm' in ima_evm_setup_method and fattr_info.stdout is defined and 'security.evm' not in fattr_info.stdout)
 
@@ -363,8 +363,8 @@
     --args="{{ ima_params | join(' ') + ' ' + ima_policies | join(' ') }}"
   register: boot_config
   changed_when: true
-  when: (0 in boot_check_ima_policies.results | map(attribute='found') | list) or
-        (0 in boot_check_ima_params.results | map(attribute='found') | list) or
+  when: 0 in boot_check_ima_policies.results | map(attribute='found') or
+        0 in boot_check_ima_params.results | map(attribute='found') or
         boot_check_unwanted_policies.rc == 1
 
 - name: Rebuild initramfs

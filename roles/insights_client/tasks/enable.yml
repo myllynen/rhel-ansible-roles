@@ -4,25 +4,23 @@
     gather_subset:
       - '!all'
       - '!min'
-      - distribution_major_version
       - system
-  when: ansible_facts.distribution_major_version is not defined or
-        ansible_facts.fqdn is not defined
+  when: ansible_facts.fqdn is not defined
 
 - name: Install required packages
   vars:
     rhc_packages:
-      - "{{ 'rhc' if insights_client_rhc_enable | bool else '' }}"
-      - "{{ 'rhc-worker-playbook' if ansible_facts.distribution_major_version | int >= 8 else '' }}"
+      - rhc
+      - rhc-worker-playbook
     openscap_packages:
       - scap-security-guide
     required_packages:
       "{{ ['insights-client'] +
           (rhc_packages if insights_client_rhc_enable | bool else []) +
           (openscap_packages if insights_client_scap_enable | bool else []) }}"
-  yum:
+  dnf:
+    name: "{{ required_packages | select }}"
     state: present
-    name: "{{ required_packages | select() | list }}"
 
 - name: Gather package facts
   package_facts:
@@ -34,7 +32,7 @@
   replace:
     path: /etc/insights-client/insights-client.conf
     regexp: '^(|#)proxy=.*'
-    replace: '{{ proxy_set if insights_client_proxy_server | default(false) else proxy_not }}'
+    replace: '{{ proxy_set if insights_client_proxy_server else proxy_not }}'
   when: "'insights-client' in ansible_facts.packages"
 
 - name: Register system to Red Hat Insights
@@ -66,32 +64,32 @@
 - name: Check Red Hat Subscription Management configuration
   check_mode: true
   lineinfile:
-    state: absent
     path: /etc/rhsm/rhsm.conf
     regexp: '^hostname\s?=\s?subscription.rhsm.redhat.com'
+    state: absent
   register: registration_redhat
   changed_when: false
 
 - name: Disable rhcd service
   service:
-    enabled: false
     name: rhcd
+    enabled: false
   when:
     - "'rhc' in ansible_facts.packages"
     - registration_redhat.found == 0
 
 - name: Stop rhcd service
   service:
-    state: stopped
     name: rhcd
+    state: stopped
   when:
     - "'rhc' in ansible_facts.packages"
     - registration_redhat.found == 0
 
 - name: Enable rhcd service
   service:
-    enabled: true
     name: rhcd
+    enabled: true
   when:
     - "'rhc' in ansible_facts.packages"
     - insights_client_rhc_enable | bool
@@ -99,8 +97,8 @@
 
 - name: Start rhcd service
   service:
-    state: started
     name: rhcd
+    state: started
   when:
     - "'rhc' in ansible_facts.packages"
     - insights_client_rhc_enable | bool

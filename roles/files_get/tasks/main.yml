@@ -1,7 +1,7 @@
 ---
 - name: Get files
   vars:
-    passwords_used: "{{ files_get | default([], true) | selectattr('url_password', 'defined') | list | length > 0 }}"
+    passwords_used: "{{ files_get | default([], true) | selectattr('url_password', 'defined') | length > 0 }}"
   no_log: "{{ passwords_used and files_get_no_log }}"
   get_url:
     url: "{{ item.url }}"

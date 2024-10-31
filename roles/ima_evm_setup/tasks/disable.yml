@@ -22,7 +22,7 @@
     --remove-args="{{ __ima_boot_params | join(' ') }}"
   register: boot_config
   changed_when: true
-  when: 1 in boot_params_check.results | map(attribute='found') | list
+  when: 1 in boot_params_check.results | map(attribute='found')
 
 - name: Reboot system
   reboot:
@@ -45,10 +45,11 @@
   when: "'tpm2-abrmd' in ansible_facts.packages"
 
 - name: Remove RPM IMA plugin package
-  yum:
+  dnf:
     name: rpm-plugin-ima
-    #cacheonly: true
     state: absent
+    cacheonly: true
+    disablerepo: '*'
 
 - name: Check current IMA/EVM file attributes
   command: getfattr -m - -d /usr/bin/getfattr

@@ -1,14 +1,4 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
-
 - name: Enable FIPS mode
   include_tasks: enable.yml
-  when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - fips_setup_enable | bool
+  when: fips_setup_enable | bool

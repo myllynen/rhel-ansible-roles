@@ -1,5 +1,5 @@
 ---
-# For backward compatibility, to be removed at RHEL 9 EOL
+# For backward compatibility, to be removed after RHEL 9 EOL
 - name: Migrate old system init file if present
   command: mv /etc/.local_system_info {{ __system_init_file }}
   register: mv_status

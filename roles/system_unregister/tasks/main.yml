@@ -1,25 +1,17 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
-
 - name: Gather package facts
   package_facts:
 
 - name: Disable rhcd service
   service:
-    enabled: false
     name: rhcd
+    enabled: false
   when: "'rhc' in ansible_facts.packages"
 
 - name: Stop rhcd service
   service:
-    state: stopped
     name: rhcd
+    state: stopped
   when: "'rhc' in ansible_facts.packages"
 
 - name: Unregister system from Red Hat Insights
@@ -28,14 +20,6 @@
     removes: /etc/insights-client/.registered
   when: "'insights-client' in ansible_facts.packages"
 
-# Use removes: to only run on registered systems
-- name: Clean package manager caches (RHEL 7)
-  # noqa: command-instead-of-module
-  command:
-    cmd: yum -C clean all
-    removes: /etc/rhsm/ca/katello-server-ca.pem
-  when: ansible_facts.distribution_major_version | int < 8
-
 - name: Unregister from Red Hat Subscription Management
   command: subscription-manager unregister
   register: registration
@@ -43,10 +27,10 @@
   changed_when: registration.rc == 0 and 'has been unregistered' in registration.stdout
 
 - name: Remove Katello CA package
-  yum:
-    state: absent
+  dnf:
     name: katello-ca-consumer-*
-    #cacheonly: true
+    state: absent
+    cacheonly: true
     disable_plugin:
       - product-id
       - subscription-manager
@@ -54,8 +38,8 @@
 
 - name: Remove Katello CA certificates
   file:
-    state: absent
     path: "{{ item }}"
+    state: absent
   loop:
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
@@ -63,8 +47,8 @@
 - name: Locate RHSM cache files
   find:
     paths: /var/lib/rhsm
-    recurse: true
     file_type: file
+    recurse: true
     excludes:
       - redhat.repo
       - syspurpose.json
@@ -72,14 +56,13 @@
 
 - name: Remove RHSM cache files
   file:
-    state: absent
     path: "{{ item }}"
-  loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
+    state: absent
+  loop: "{{ rhsm_cache.files | map(attribute='path') }}"
 
 - name: Clean package manager caches
   command: dnf -C clean all
   changed_when: true
-  when: ansible_facts.distribution_major_version | int >= 8
 
 - name: Check RHSM configuration backup files
   find:
@@ -100,8 +83,8 @@
 
 - name: Remove RHSM configuration backup files
   file:
-    state: absent
     path: "{{ item.path }}"
+    state: absent
   loop: "{{ rhsm_backups.files | sort(attribute='path') }}"
   loop_control:
     label: "{{ item.path }}"

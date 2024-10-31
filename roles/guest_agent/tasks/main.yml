@@ -19,77 +19,83 @@
       - 'lib*firmware*'
       - 'n*firmware*'
       - "{{ 'linux-firmware-whence' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
-  yum:
+  dnf:
+    name: "{{ firmware_packages | select }}"
     state: absent
-    name: "{{ firmware_packages | select() | list }}"
-    #cacheonly: true
+    cacheonly: true
+    disablerepo: '*'
   when:
     - ansible_facts.virtualization_role == "guest"
     - guest_agent_remove_firmware | bool
 
 - name: Remove all virtual guest packages
-  yum:
-    state: absent
+  dnf:
     name:
       - 'hyperv*'
       - open-vm-tools
       - qemu-guest-agent
       - spice-vdagent
       - WALinuxAgent
-    #cacheonly: true
+    state: absent
+    cacheonly: true
+    disablerepo: '*'
   when: ansible_facts.virtualization_role != "guest" or
         not guest_agent_enable | bool
 
 - name: Remove unneeded packages on Azure/Hyper-V
-  yum:
-    state: absent
+  dnf:
     name:
       - open-vm-tools
       - qemu-guest-agent
       - spice-vdagent
-    #cacheonly: true
+    state: absent
+    cacheonly: true
+    disablerepo: '*'
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "VirtualPC"
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on KVM
-  yum:
-    state: absent
+  dnf:
     name:
       - 'hyperv*'
       - open-vm-tools
       - WALinuxAgent
-    #cacheonly: true
+    state: absent
+    cacheonly: true
+    disablerepo: '*'
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "kvm"
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on VMware
-  yum:
-    state: absent
+  dnf:
     name:
       - 'hyperv*'
       - qemu-guest-agent
       - spice-vdagent
       - WALinuxAgent
-    #cacheonly: true
+    state: absent
+    cacheonly: true
+    disablerepo: '*'
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "VMware"
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on other VMs
-  yum:
-    state: absent
+  dnf:
     name:
       - 'hyperv*'
       - open-vm-tools
       - qemu-guest-agent
       - spice-vdagent
       - WALinuxAgent
-    #cacheonly: true
+    state: absent
+    cacheonly: true
+    disablerepo: '*'
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type not in ['kvm', 'VirtualPC', 'VMware']
@@ -103,9 +109,9 @@
         - hyperv-daemons
         - WALinuxAgent
       VMware: open-vm-tools
-  yum:
-    state: present
+  dnf:
     name: "{{ agent_packages[ansible_facts.virtualization_type] }}"
+    state: present
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_packages
@@ -125,8 +131,8 @@
       VirtualPC: waagent.service
       VMware: vmtoolsd.service
   service:
-    enabled: true
     name: "{{ agent_services[ansible_facts.virtualization_type] }}"
+    enabled: true
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_services
@@ -141,8 +147,8 @@
       VirtualPC: waagent.service
       VMware: vmtoolsd.service
   service:
-    state: started
     name: "{{ agent_services[ansible_facts.virtualization_type] }}"
+    state: started
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_services

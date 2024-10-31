@@ -9,37 +9,33 @@
 
 - name: Create issue directory
   file:
-    state: directory
     path: /etc/issue.d
+    state: directory
     mode: '0755'
-  when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - issue_template | default(false)
+  when: issue_template
 
 - name: Create issue file
-  vars:
-    issue_path: "{{ '/etc/issue.d/zz-ansible.issue' if ansible_facts.distribution_major_version | int >= 8 else '/etc/issue' }}"
   template:
     src: "{{ issue_template }}"
-    dest: "{{ issue_path }}"
+    dest: /etc/issue.d/zz-ansible.issue
     mode: '0644'
-  when: issue_template | default(false)
+  when: issue_template
 
 - name: Create issue.net file
   template:
     src: "{{ issue_template }}"
     dest: /etc/issue.net
     mode: '0644'
-  when: issue_template | default(false)
+  when: issue_template
 
 - name: Create motd directory
   file:
-    state: directory
     path: /etc/motd.d
+    state: directory
     mode: '0755'
   when:
     - ansible_facts.distribution_major_version | int >= 9
-    - motd_template | default(false)
+    - motd_template
 
 - name: Create motd file
   vars:
@@ -48,4 +44,4 @@
     src: "{{ motd_template }}"
     dest: "{{ motd_path }}"
     mode: '0644'
-  when: motd_template | default(false)
+  when: motd_template

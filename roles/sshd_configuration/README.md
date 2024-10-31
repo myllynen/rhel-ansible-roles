@@ -49,6 +49,7 @@ sshd_configuration_exclusive: false
 # List of recognized sshd configuration files
 # in addition to the role created 0-ansible.conf
 # Other files in sshd_config.d will be removed
+# NB. Ensure these files contain expected parameters!
 sshd_configuration_files_known:
   - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
   - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf

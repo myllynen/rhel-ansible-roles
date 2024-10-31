@@ -1,12 +1,4 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
-
 - name: Update coredump process size configuration
   lineinfile:
     path: /etc/systemd/coredump.conf
@@ -22,13 +14,10 @@
   register: storage_config
 
 - name: Restore system default coredump limit configuration
-  vars:
-    option_prefix: "{{ '#' if ansible_facts.distribution_major_version | int < 8 else '' }}"
-    option_value: "{{ '' if ansible_facts.distribution_major_version | int < 8 else '0:infinity' }}"
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)DefaultLimitCORE=.*'
-    line: '{{ option_prefix }}DefaultLimitCORE={{ option_value }}'
+    line: 'DefaultLimitCORE=0:infinity'
   register: core_config
 
 - name: Reload systemd to apply configuration changes

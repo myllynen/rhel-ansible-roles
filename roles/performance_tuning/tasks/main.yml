@@ -8,23 +8,23 @@
   when: ansible_facts.virtualization_role is not defined
 
 - name: Install tuned package
-  yum:
-    state: present
+  dnf:
     name: tuned
+    state: present
 
 - name: Gather package facts
   package_facts:
 
 - name: Enable tuned service
   service:
-    enabled: true
     name: tuned
+    enabled: true
   when: "'tuned' in ansible_facts.packages"
 
 - name: Start tuned service
   service:
-    state: started
     name: tuned
+    state: started
   when: "'tuned' in ansible_facts.packages"
 
 - name: Read current tuned profile

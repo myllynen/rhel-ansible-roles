@@ -1,19 +1,11 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
-
 - name: Gather service facts
   service_facts:
 
 - name: Disable nscd service
   service:
-    enabled: false
     name: nscd
+    enabled: false
   when:
     - "'nscd.service' in ansible_facts.services"
     - not dns_cache_enable | bool or
@@ -21,8 +13,8 @@
 
 - name: Stop nscd service
   service:
-    state: stopped
     name: nscd
+    state: stopped
   when:
     - "'nscd.service' in ansible_facts.services"
     - not dns_cache_enable | bool or
@@ -49,8 +41,8 @@
 
 - name: Disable systemd-resolved service
   service:
-    enabled: false
     name: systemd-resolved
+    enabled: false
   when:
     - "'systemd-resolved.service' in ansible_facts.services"
     - not dns_cache_enable | bool or
@@ -58,28 +50,15 @@
 
 - name: Stop systemd-resolved service
   service:
-    state: stopped
     name: systemd-resolved
+    state: stopped
   when:
     - "'systemd-resolved.service' in ansible_facts.services"
     - not dns_cache_enable | bool or
       dns_cache_component != 'systemd-resolved'
 
-# NetworkManager always activates systemd-resolved if present on RHEL 7
-- name: Remove systemd-resolved package (RHEL 7)
-  yum:
-    state: absent
-    name: systemd-resolved
-    #cacheonly: true
-  register: resolved_package
-  when:
-    - ansible_facts.distribution_major_version | int == 7
-    - not dns_cache_enable | bool or
-      dns_cache_component != 'systemd-resolved'
-
 - name: Reload NetworkManager to apply configuration changes
   service:
-    state: reloaded
     name: NetworkManager
-  when: nm_config is changed or
-        resolved_package is changed
+    state: reloaded
+  when: nm_config is changed

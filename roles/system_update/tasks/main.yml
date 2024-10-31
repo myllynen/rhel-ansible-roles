@@ -1,17 +1,9 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - pkg_mgr
-  when: ansible_facts.pkg_mgr is not defined
-
 - name: Update all packages
   # noqa: package-latest
-  yum:
-    state: latest
+  dnf:
     name: '*'
+    state: latest
     update_cache: true
   register: package_install
 
@@ -21,23 +13,10 @@
   when: system_update_display_updates | bool or
         system_update_email_report | bool
 
-- name: Set updated packages (RHEL 7)
-  vars:
-    el7_installed: "{{ ['Installed: '] | product(package_install.changes.installed | default([])) | map('join') | list }}"
-    el7_updated: "{{ ['Updated: '] | product(package_install.changes.updated | default([])) | map('join') | list }}"
-    el7_removed: "{{ ['Removed: '] | product(package_install.changes.removed | default([])) | map('join') | list }}"
-  set_fact:
-    package_updates: "{{ (el7_installed + el7_updated + el7_removed) | sort }}"
-  when:
-    - ansible_facts.pkg_mgr == 'yum'
-    - system_update_display_updates | bool or
-      system_update_email_report | bool
-
 - name: Set updated packages
   set_fact:
     package_updates: "{{ package_install.results | default([]) | sort }}"
   when:
-    - ansible_facts.pkg_mgr == 'dnf'
     - system_update_display_updates | bool or
       system_update_email_report | bool
 
@@ -52,19 +31,17 @@
     - package_updates | default(false)
 
 - name: Install yum-utils package
-  yum:
-    state: present
+  dnf:
     name: yum-utils
+    state: present
   when: system_update_reboot_policy == 'when_needed'
 
 - name: Gather package facts
   package_facts:
 
 - name: Check need for rebooting
-  vars:
-    plugin_opt: "{{ '--disableplugin=product-id,subscription-manager' if ansible_facts.pkg_mgr != 'yum' else '' }}"
   check_mode: false
-  command: needs-restarting {{ plugin_opt }} -r
+  command: needs-restarting --disableplugin=product-id,subscription-manager -r
   register: needs_restarting
   failed_when: false
   changed_when: false

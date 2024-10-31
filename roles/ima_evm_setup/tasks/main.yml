@@ -8,7 +8,7 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install grubby package
-  yum:
+  dnf:
     name: grubby
     state: present
   when:

@@ -1,9 +1,7 @@
 [libdefaults]
     default_realm = {{ domain_ad_domain | upper }}
-{% if ansible_facts.distribution_major_version | int >= 8 %}
     dns_canonicalize_hostname = false
     qualify_shortname = {{ ansible_facts.domain }}
-{% endif %}
     dns_lookup_realm = false
     dns_lookup_kdc = true
     dns_uri_lookup = true

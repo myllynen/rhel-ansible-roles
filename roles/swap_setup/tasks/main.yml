@@ -1,11 +1,11 @@
 ---
 - name: Create logical volume for swap
   community.general.lvol:
-    state: present
     vg: "{{ swap_setup_vg_name }}"
     lv: "{{ swap_setup_lv_name }}"
     size: "{{ swap_setup_lv_size }}"
-  when: swap_setup_vg_name | default (false)
+    state: present
+  when: swap_setup_vg_name
 
 - name: Check logical volume path
   command: >
@@ -15,43 +15,43 @@
   register: lvs_output
   failed_when: false
   changed_when: false
-  when: swap_setup_vg_name | default (false)
+  when: swap_setup_vg_name
 
 - name: Check swap area on logical volume
   command: blkid -L {{ swap_setup_lv_name }}
   register: blkid_output
   failed_when: false
   changed_when: false
-  when: swap_setup_vg_name | default (false)
+  when: swap_setup_vg_name
 
 - name: Setup swap area on logical volume
   command: mkswap -L swap {{ lvs_output.stdout }}
   changed_when: true
   when:
-    - swap_setup_vg_name | default (false)
+    - swap_setup_vg_name
     - "'swap' not in blkid_output.stdout"
 
 - name: Configure fstab swap device mount point
   ansible.posix.mount:
-    state: present
     src: "{{ lvs_output.stdout | trim }}"
     path: none
     fstype: swap
+    state: present
   register: fstab_config
-  when: swap_setup_vg_name | default (false)
+  when: swap_setup_vg_name
 
 - name: Check swap status
   command: swapon --noheadings --show=LABEL
   register: swapon_output
   failed_when: false
   changed_when: false
-  when: swap_setup_vg_name | default (false)
+  when: swap_setup_vg_name
 
 - name: Enable swap
   command: swapon -L {{ swap_setup_lv_name }}
   changed_when: true
   when:
-    - swap_setup_vg_name | default (false)
+    - swap_setup_vg_name
     - swap_setup_enable_swap | bool
     - swapon_output.stdout | trim != swap_setup_lv_name
 

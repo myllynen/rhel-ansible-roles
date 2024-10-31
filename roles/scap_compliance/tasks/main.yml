@@ -8,17 +8,17 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install OpenSCAP packages
-  yum:
-    state: "{{ scap_compliance_package_state }}"
+  dnf:
     name:
       - openscap
       - openscap-scanner
       - scap-security-guide
+    state: "{{ scap_compliance_package_state }}"
 
 - name: Create oscap results directory
   file:
-    state: directory
     path: "{{ scap_compliance_report_dir }}"
+    state: directory
     mode: '0700'
 
 - name: Create tailoring file
@@ -27,8 +27,8 @@
     dest: "{{ scap_compliance_tailoring_file_path }}"
     mode: '0600'
   when:
-    - scap_compliance_tailoring_file_template | default(false)
-    - scap_compliance_tailoring_file_path | default (false)
+    - scap_compliance_tailoring_file_template
+    - scap_compliance_tailoring_file_path
 
 - name: Display security profile name
   debug:
@@ -38,7 +38,7 @@
   vars:
     stig_file: "{{ scap_compliance_report_dir + '/remediate-results-stig.xml' }}"
     stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
-    tailoring_file: "{{ scap_compliance_tailoring_file_path | default(false) }}"
+    tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
     tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file | string, '', '') }}"
   shell: >
     set -o pipefail &&
@@ -79,7 +79,7 @@
   vars:
     stig_file: "{{ scap_compliance_report_dir + '/eval-results-stig.xml' }}"
     stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
-    tailoring_file: "{{ scap_compliance_tailoring_file_path | default(false) }}"
+    tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
     tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file | string, '', '') }}"
   shell: >
     set -o pipefail &&
@@ -104,7 +104,6 @@
       Compliance check result for {{ inventory_hostname }}:
       {{ scap_compliance_profile }} -
       {{ 'PASSED' if eval_status.rc == 0 else 'FAILED' }}
-  when: "'rc' in eval_status"
 
 - name: Find failed compliance check items
   shell: >
@@ -115,16 +114,12 @@
   register: grep_result
   failed_when: false
   changed_when: false
-  when:
-    - "'rc' in eval_status"
-    - eval_status.rc == 2
+  when: eval_status.rc == 2
 
 - name: Display failed compliance check items
   debug:
     msg: "{{ grep_result.stdout_lines }}"
-  when:
-    - "'rc' in eval_status"
-    - eval_status.rc == 2
+  when: eval_status.rc == 2
 
 - name: Display compliance check complete results
   debug:
@@ -136,5 +131,4 @@
     msg: "{{ scap_compliance_profile }} compliance check failed."
   when:
     - not scap_compliance_check_fail_role_pass | bool
-    - "'rc' in eval_status"
     - eval_status.rc == 2

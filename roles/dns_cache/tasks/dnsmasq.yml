@@ -8,9 +8,9 @@
   when: ansible_facts.domain is not defined
 
 - name: Install dnsmasq package
-  yum:
-    state: present
+  dnf:
     name: dnsmasq
+    state: present
 
 - name: Create NetworkManager dnsmasq configuration file
   template:
@@ -30,7 +30,7 @@
 
 - name: Reload NetworkManager to apply configuration changes
   service:
-    state: reloaded
     name: NetworkManager
+    state: reloaded
   when: dnsmasq_config is changed or
         nm_config is changed

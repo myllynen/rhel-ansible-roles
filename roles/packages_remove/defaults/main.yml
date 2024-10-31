@@ -30,7 +30,7 @@ packages_remove:
   #- webkit*
 
 # Remove all "leaf" packages no longer required,
-# see yum module autoremove parameter description
+# see dnf module autoremove parameter description
 packages_remove_autoremove: false
 
 # Display results on output

@@ -1,8 +1,8 @@
 ---
 - name: Install crypto-policies-scripts package
-  yum:
-    state: present
+  dnf:
     name: crypto-policies-scripts
+    state: present
 
 - name: Gather package facts
   package_facts:

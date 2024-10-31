@@ -1,28 +1,11 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - pkg_mgr
-  when: ansible_facts.pkg_mgr is not defined
-
 - name: Gather package facts
   package_facts:
-
-- name: Remove old kernel packages (RHEL 7)
-  command: package-cleanup -C --oldkernels --count=1 -y
-  changed_when: true
-  when:
-    - ansible_facts.pkg_mgr == 'yum'
-    - ansible_facts.packages['kernel'] | length > 1
 
 - name: Remove old kernel packages
   command: dnf -C remove --oldinstallonly -y
   changed_when: true
-  when:
-    - ansible_facts.pkg_mgr == 'dnf'
-    - ansible_facts.packages['kernel'] | length > 1
+  when: ansible_facts.packages['kernel'] | length > 1
 
 - name: Locate NIC ifcfg configuration files
   find:
@@ -39,7 +22,7 @@
     regexp: '^\ncheck_link_down\(\) {\n return 1; \n}\n$'
     replace: ''
   register: nic_config
-  loop: "{{ ifcfg_files.files | map(attribute='path') | list }}"
+  loop: "{{ ifcfg_files.files | map(attribute='path') }}"
 
 - name: Rebuild initramfs
   command: dracut -f --regenerate-all
@@ -69,7 +52,7 @@
 
 - name: Set list of installer leftover files
   set_fact:
-    installer_files: "{{ (root_files.files + kickstart_files.files) | map(attribute='path') | list }}"
+    installer_files: "{{ (root_files.files + kickstart_files.files) | map(attribute='path') }}"
   when: installer_logdir.stat.exists
 
 - name: Store installer leftover files
@@ -85,22 +68,19 @@
 
 - name: Relabel stored installer files
   community.general.sefcontext:
-    state: present
     target: /var/log/anaconda/{{ item | basename }}
     setype: var_log_t
+    state: present
   loop: "{{ installer_files }}"
   loop_control:
     label: /var/log/anaconda/{{ item | basename }}
   when:
-    - "'libselinux-python' in ansible_facts.packages or
-       'python3-libselinux' in ansible_facts.packages"
+    - "'python3-libselinux' in ansible_facts.packages"
     - installer_logdir.stat.exists
 
 - name: Locate leftover temp files
   find:
     paths: /tmp
-    hidden: true
-    file_type: any
     patterns:
       - '.cache'
       - '.vmware-*'
@@ -108,13 +88,15 @@
       - 'ks-script-*'
       - 'tmp.*'
       - 'vmware-root_*'
+    file_type: any
+    hidden: true
   register: leftover_files
 
 - name: Remove all leftover files
   file:
-    state: absent
     path: "{{ item }}"
-  loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') | list }}"
+    state: absent
+  loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') }}"
 
 - name: Reboot system
   reboot:

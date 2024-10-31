@@ -8,9 +8,9 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install systemd-resolved package
-  yum:
-    state: present
+  dnf:
     name: systemd-resolved
+    state: present
   when: ansible_facts.distribution_major_version | int != 8
 
 - name: Gather service facts
@@ -18,14 +18,14 @@
 
 - name: Enable systemd-resolved service
   service:
-    enabled: true
     name: systemd-resolved
+    enabled: true
   when: "'systemd-resolved.service' in ansible_facts.services"
 
 - name: Start systemd-resolved service
   service:
-    state: started
     name: systemd-resolved
+    state: started
   when: "'systemd-resolved.service' in ansible_facts.services"
 
 - name: Update NetworkManager DNS cache configuration
@@ -40,6 +40,6 @@
 
 - name: Reload NetworkManager to apply configuration changes
   service:
-    state: reloaded
     name: NetworkManager
+    state: reloaded
   when: nm_config is changed

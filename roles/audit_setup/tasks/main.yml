@@ -21,9 +21,9 @@
     - ansible_facts.cmdline['audit'] == '0'
 
 - name: Install audit package
-  yum:
-    state: present
+  dnf:
     name: audit
+    state: present
 
 - name: Gather package facts
   package_facts:
@@ -34,21 +34,21 @@
     dest: /etc/audit/auditd.conf
     mode: '0640'
   register: auditd_config
-  when: audit_setup_config_file | default(false)
+  when: audit_setup_config_file
 
 - name: Copy audit rules configuration file
   copy:
     src: "{{ audit_setup_rules_file }}"
     dest: /etc/audit/rules.d/zz-ansible.rules
     mode: '0600'
-  when: audit_setup_rules_file | default(false)
+  when: audit_setup_rules_file
 
 - name: Remove unrecognized audit rules files
   vars:
-    self_config: ['/etc/audit/rules.d/zz-ansible.rules']
+    self_config: /etc/audit/rules.d/zz-ansible.rules
     files_remove:
       - /etc/audit/rules.d/*
-    files_remove_exclude: "{{ self_config + audit_setup_files_known | default([], true) }}"
+    files_remove_exclude: "{{ [self_config] + audit_setup_files_known | default([], true) }}"
   include_role:
     name: files_remove
   when: audit_setup_exclusive | bool
@@ -78,14 +78,14 @@
 
 - name: Enable auditd service
   service:
-    enabled: true
     name: auditd
+    enabled: true
   when: "'audit' in ansible_facts.packages"
 
 - name: Start auditd service
   service:
-    state: started
     name: auditd
+    state: started
   register: service_start
   when: "'audit' in ansible_facts.packages"
 

@@ -10,28 +10,18 @@
 - name: Install required packages
   vars:
     security_packages:
-      - "{{ 'crypto-policies-scripts' if ansible_facts.distribution_major_version | int >= 8 else '' }}"
+      - crypto-policies-scripts
       - "{{ 'grubby' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
       - "{{ 'mokutil' if secure_boot_verify | bool else '' }}"
-    selinux_package_lists:
-      rhel7:
-        - libselinux-python
-        - libsemanage-python
-        - policycoreutils-python
-        - selinux-policy-targeted
-        - setools-console
-      default:
-        - python3-libselinux
-        - python3-libsemanage
-        - policycoreutils-python-utils
-        - selinux-policy-targeted
-        - setools-console
-    distro_id: "{{ 'rhel' + ansible_facts.distribution_major_version }}"
-    se_package_set: "{{ 'default' if distro_id not in selinux_package_lists else distro_id }}"
-    selinux_packages: "{{ selinux_package_lists[se_package_set] }}"
-  yum:
+    selinux_packages:
+      - python3-libselinux
+      - python3-libsemanage
+      - policycoreutils-python-utils
+      - selinux-policy-targeted
+      - setools-console
+  dnf:
+    name: "{{ security_packages | select | list + selinux_packages }}"
     state: present
-    name: "{{ security_packages | select() | list + selinux_packages }}"
 
 - name: Gather package facts
   package_facts:
@@ -59,9 +49,9 @@
     lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
   check_mode: true
   lineinfile:
-    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ lockdown_param }}(=| |")'
+    state: absent
   register: lockdown_check
   changed_when: false
   when: ansible_facts.distribution_major_version | int >= 9
@@ -82,27 +72,23 @@
 
 - name: Configure SELinux state
   ansible.posix.selinux:
-    state: "{{ selinux }}"
     policy: targeted
+    state: "{{ selinux }}"
   register: selinux_config
-  when: "'libselinux-python' in ansible_facts.packages or
-         'python3-libselinux' in ansible_facts.packages"
+  when: "'python3-libselinux' in ansible_facts.packages"
 
 - name: Check current crypto policy
   check_mode: false
   command: update-crypto-policies --show
   register: current_crypto_policy
   changed_when: false
-  when:
-    - "'crypto-policies-scripts' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version | int >= 8
+  when: "'crypto-policies-scripts' in ansible_facts.packages"
 
 - name: Configure crypto policy
   command: update-crypto-policies --no-reload --set {{ crypto_policy }}
   register: crypto_policy_config
   changed_when: true
   when:
-    - ansible_facts.distribution_major_version | int >= 8
     - "'crypto-policies-scripts' in ansible_facts.packages"
     - current_crypto_policy.stdout != crypto_policy
 

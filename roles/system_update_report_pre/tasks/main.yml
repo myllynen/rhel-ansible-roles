@@ -1,47 +1,23 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - pkg_mgr
-  when: ansible_facts.pkg_mgr is not defined
-
 - name: Check available package updates
   # noqa: package-latest
   check_mode: true
-  yum:
-    state: latest
+  dnf:
     name: '*'
+    state: latest
     update_cache: true
   register: package_install
-
-- name: Set available package updates (RHEL 7)
-  vars:
-    el7_installed: "{{ ['Installed: '] | product(package_install.changes.installed | default([])) | map('join') | list }}"
-    el7_updated: "{{ ['Updated: '] | product(package_install.changes.updated | default([])) | map('join') | list }}"
-    el7_removed: "{{ ['Removed: '] | product(package_install.changes.removed | default([])) | map('join') | list }}"
-  set_fact:
-    package_updates: "{{ (el7_installed + el7_updated + el7_removed) | sort }}"
-  when:
-    - ansible_facts.pkg_mgr == 'yum'
-    - system_update_report_pre_display_updates | bool or
-      system_update_report_pre_email_report | bool
 
 - name: Set available package updates
   set_fact:
     package_updates: "{{ package_install.results | default([]) | sort }}"
   when:
-    - ansible_facts.pkg_mgr == 'dnf'
     - system_update_report_pre_display_updates | bool or
       system_update_report_pre_email_report | bool
 
 - name: Display list of available package updates
-  vars:
-    output_old: "{{ (package_updates | join('\n')).split('\n') }}"
-    output_new: "{{ package_updates | join('\n') }}"
   debug:
-    msg: "{{ output_new if ansible_version.full is version('2.11', '>=') else output_old }}"
+    msg: "{{ package_updates | join('\n') }}"
   when:
     - system_update_report_pre_display_updates | bool
     - package_updates | default(false)

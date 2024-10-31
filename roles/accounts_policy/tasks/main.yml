@@ -1,57 +1,45 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
-
 - name: Create system-local new user defaults file
   template:
     src: "{{ useradd_defaults_file }}"
     dest: /etc/default/useradd
     mode: '0644'
-  when: useradd_defaults_file | default(false)
+  when: useradd_defaults_file
 
 - name: Create system-local login defaults file
   template:
     src: "{{ login_defs_config_file }}"
     dest: /etc/login.defs
     mode: '0644'
-  when: login_defs_config_file | default(false)
+  when: login_defs_config_file
 
 - name: Create system-local login access file
   template:
     src: "{{ login_access_config_file }}"
     dest: /etc/security/access.conf
     mode: '0644'
-  when: login_access_config_file | default(false)
+  when: login_access_config_file
 
 - name: Create system-local faillock configuration file
   template:
     src: "{{ faillock_config_file }}"
     dest: /etc/security/faillock.conf
     mode: '0644'
-  when:
-    - ansible_facts.distribution_major_version | int > 7
-    - faillock_config_file | default(false)
+  when: faillock_config_file
 
 - name: Create system-local password history requirements file
   template:
     src: "{{ pwhistory_config_file }}"
     dest: /etc/security/pwhistory.conf
     mode: '0644'
-  when:
-    - ansible_facts.distribution_major_version | int > 7
-    - pwhistory_config_file | default(false)
+  when: pwhistory_config_file
 
 - name: Create system-local password quality requirements file
   template:
     src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf
     mode: '0644'
-  when: pwquality_config_file | default(false)
+  when: pwquality_config_file
 
 - name: Create system-local user resource limits configuration file
   template:
@@ -65,28 +53,26 @@
     auth_packages:
       - authselect
       - "{{ 'oddjob-mkhomedir' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
-  yum:
+  dnf:
+    name: "{{ auth_packages | select }}"
     state: present
-    name: "{{ auth_packages | select() | list }}"
-  when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - system_auth_profile | default(false)
+  when: system_auth_profile
 
 - name: Gather package facts
   package_facts:
 
 - name: Enable oddjobd service
   service:
-    enabled: true
     name: oddjobd
+    enabled: true
   when:
     - "'oddjob-mkhomedir' in ansible_facts.packages"
     - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
 
 - name: Start oddjobd service
   service:
-    state: started
     name: oddjobd
+    state: started
   when:
     - "'oddjob-mkhomedir' in ansible_facts.packages"
     - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
@@ -98,8 +84,7 @@
     mode: '0644'
   register: custom_profile_copy
   when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - system_auth_profile | default(false)
+    - system_auth_profile
     - "'custom/' in system_auth_profile"
 
 - name: Check current system-local authentication profile in use
@@ -110,8 +95,7 @@
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version | int >= 8
-    - system_auth_profile | default(false)
+    - system_auth_profile
 
 - name: Check current system-local authentication profile status
   check_mode: false
@@ -121,8 +105,7 @@
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version | int >= 8
-    - system_auth_profile | default(false)
+    - system_auth_profile
     - "'No existing configuration' not in profile_current.stdout"
 
 - name: Prevent Centrify updating NSS configuration
@@ -147,8 +130,7 @@
   command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
   changed_when: true
   when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - system_auth_profile | default(false)
+    - system_auth_profile
     - current_config | trim != wanted_config | trim or
       'not valid' in profile_valid.stdout or
       custom_profile_copy is changed
@@ -160,4 +142,4 @@
     src: "{{ system_auth_pam_d_su_file }}"
     dest: /etc/pam.d/su
     mode: '0644'
-  when: system_auth_pam_d_su_file | default(false)
+  when: system_auth_pam_d_su_file

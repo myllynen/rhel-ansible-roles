@@ -4,4 +4,4 @@
     src: "{{ shell_profile_file }}"
     dest: /etc/profile.d/zz-ansible.sh
     mode: '0644'
-  when: shell_profile_file | default(false)
+  when: shell_profile_file

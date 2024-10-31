@@ -23,7 +23,6 @@ kernel_lockdown: disabled
 selinux: enforcing
 
 # System-wide crypto policy
-# NB. Supported RHEL versions: RHEL 8+
 crypto_policy: DEFAULT
 
 # Enable or disable SCP protocol (not scp(1))

@@ -6,10 +6,10 @@
   changed_when: registration.rc == 0 and 'has been unregistered' in registration.stdout
 
 - name: Remove Katello CA package
-  yum:
-    state: absent
+  dnf:
     name: katello-ca-consumer-*
-    #cacheonly: true
+    state: absent
+    cacheonly: true
     disable_plugin:
       - product-id
       - subscription-manager
@@ -17,8 +17,8 @@
 
 - name: Remove Katello CA certificates
   file:
-    state: absent
     path: "{{ item }}"
+    state: absent
   loop:
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
@@ -26,8 +26,8 @@
 - name: Locate RHSM cache files
   find:
     paths: /var/lib/rhsm
-    recurse: true
     file_type: file
+    recurse: true
     excludes:
       - redhat.repo
       - syspurpose.json
@@ -35,9 +35,9 @@
 
 - name: Remove RHSM cache files
   file:
-    state: absent
     path: "{{ item }}"
-  loop: "{{ rhsm_cache.files | map(attribute='path') | list }}"
+    state: absent
+  loop: "{{ rhsm_cache.files | map(attribute='path') }}"
 
 - name: Check RHSM configuration backup file
   stat:
@@ -54,6 +54,6 @@
 
 - name: Remove RHSM configuration backup file
   file:
-    state: absent
     path: /etc/rhsm/rhsm.conf.bak
+    state: absent
   when: rhsm_backup.stat.exists

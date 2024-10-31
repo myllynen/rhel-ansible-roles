@@ -14,7 +14,7 @@
     regexp: '^(#|){{ option_name }}=.*'
     line: '{{ option_name }}={{ watchdog_reboot_sec }}'
   register: watchdog_reboot
-  when: watchdog_reboot_sec | default(false)
+  when: watchdog_reboot_sec
 
 - name: Update system kexec watchdog configuration
   lineinfile:
@@ -24,7 +24,7 @@
   register: watchdog_kexec
   when:
     - ansible_facts.distribution_major_version | int >= 9
-    - watchdog_kexec_sec | default(false)
+    - watchdog_kexec_sec
 
 - name: Update system watchdog device configuration
   lineinfile:
@@ -34,7 +34,7 @@
   register: watchdog_device
   when:
     - ansible_facts.distribution_major_version | int >= 9
-    - watchdog_device | default(false)
+    - watchdog_device
 
 - name: Reload systemd to apply watchdog configuration changes
   systemd:

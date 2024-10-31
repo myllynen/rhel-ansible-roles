@@ -4,13 +4,13 @@
     src: "{{ item }}"
     dest: /etc/yum.repos.d/{{ item | basename }}
     mode: '0644'
-  loop: "{{ repository_setup_repo_files_copy | select() | list }}"
+  loop: "{{ repository_setup_repo_files_copy | select }}"
 
 - name: Remove repository configuration files
   file:
-    state: absent
     path: /etc/yum.repos.d/{{ item | basename }}
-  loop: "{{ repository_setup_repo_files_remove | select() | list }}"
+    state: absent
+  loop: "{{ repository_setup_repo_files_remove | select }}"
 
 - name: Enable Red Hat Subscription Management
   include_tasks: enable.yml

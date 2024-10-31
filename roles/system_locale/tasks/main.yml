@@ -12,10 +12,6 @@
     msg: "Only C.UTF-8, en_US.UTF-8, or auto are supported as system_locale setting."
   when: system_locale not in ['C.UTF-8', 'en_US.UTF-8', 'auto']
 
-- name: Check langpack support
-  set_fact:
-    langpacks: "{{ true if ansible_facts.distribution_major_version | int >= 8 else false }}"
-
 - name: Check C.UTF-8 support
   set_fact:
     c_utf_8: "{{ true if ansible_facts.distribution_major_version | int >= 9 else false }}"
@@ -25,10 +21,9 @@
     locale_packages:
       - glibc-minimal-langpack
       - "{{ 'glibc-langpack-en' if not c_utf_8 or system_locale == 'en_US.UTF-8' else '' }}"
-  yum:
+  dnf:
+    name: "{{ locale_packages | select }}"
     state: present
-    name: "{{ locale_packages | select() | list }}"
-  when: langpacks
 
 - name: Update system locale configuration
   vars:

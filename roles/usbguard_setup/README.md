@@ -23,7 +23,6 @@ usbguard_setup_policy: reject
 # Custom USBGuard configuration file
 # Role provided alternatives:
 # * usbguard-daemon_rhel.conf  - RHEL default config
-# * usbguard-daemon_rhel7.conf - RHEL 7 default config
 usbguard_setup_config_file:
 
 # Custom USBGuard rules file template to use
@@ -38,6 +37,7 @@ usbguard_setup_exclusive: false
 # List of recognized rules and IPC files
 # in addition to the role created ones
 # Other such config files will be removed
+# NB. Ensure these files are trustworthy!
 usbguard_setup_files_known:
 #  - /etc/usbguard/rules.d/50-os.conf
 </pre>

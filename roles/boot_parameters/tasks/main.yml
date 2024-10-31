@@ -8,50 +8,41 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install grubby package
-  yum:
-    state: present
+  dnf:
     name: grubby
+    state: present
+  when: false
 
 - name: Check enabled boot parameters
   check_mode: true
   lineinfile:
-    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
+    state: absent
   register: enable_check
   changed_when: false
-  loop: "{{ boot_parameters_enable | select() | list }}"
+  loop: "{{ boot_parameters_enable | select }}"
 
 - name: Check disabled boot parameters
   check_mode: true
   lineinfile:
-    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
+    state: absent
   register: disable_check
   changed_when: false
-  loop: "{{ boot_parameters_disable | select() | list }}"
+  loop: "{{ boot_parameters_disable | select }}"
 
 - name: Configure boot parameters
   command: >
     grubby
     --update-kernel=ALL
-    --args="{{ boot_parameters_enable | join(' ') }}"
-    --remove-args="{{ boot_parameters_disable | join(' ') }}"
+    --args="{{ boot_parameters_enable | default([], true) | join(' ') }}"
+    --remove-args="{{ boot_parameters_disable | default([], true) | join(' ') }}"
   register: boot_config
   changed_when: true
-  when: (0 in enable_check.results | map(attribute='found') | list) or
-        (1 in disable_check.results | map(attribute='found') | list)
-
-- name: Fix default kernel boot parameters (RHEL 7)
-  shell: |
-    set -o pipefail
-    eval $(grubby --info=DEFAULT | awk '/^args/ {print $0}')
-    sed -i -e "s,^GRUB_CMDLINE_LINUX=.*,GRUB_CMDLINE_LINUX=\"$args\"," /etc/default/grub
-  changed_when: true
-  when:
-    - ansible_facts.distribution_major_version | int == 7
-    - boot_config is changed
+  when: 0 in enable_check.results | map(attribute='found') or
+        1 in disable_check.results | map(attribute='found')
 
 - name: Update boot loader timeout configuration
   replace:
@@ -101,6 +92,12 @@
 
 - name: Reboot system
   reboot:
+  when:
+    - boot_parameters_reboot | bool
+    - boot_config is changed
+
+- name: Clear gathered facts
+  meta: clear_facts
   when:
     - boot_parameters_reboot | bool
     - boot_config is changed

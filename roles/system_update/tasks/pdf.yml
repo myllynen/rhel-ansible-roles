@@ -1,16 +1,16 @@
 ---
 - name: Remove local PDF directory
   file:
-    state: absent
     path: "{{ system_update_report_pdf_dir }}"
+    state: absent
   delegate_to: localhost
   run_once: true
   become: false
 
 - name: Create local PDF directory
   file:
-    state: directory
     path: "{{ system_update_report_pdf_dir }}"
+    state: directory
     mode: '0700'
   delegate_to: localhost
   run_once: true

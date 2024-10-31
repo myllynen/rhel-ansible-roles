@@ -4,24 +4,22 @@
     gather_subset:
       - '!all'
       - '!min'
-      - distribution_major_version
       - system
-  when: ansible_facts.distribution_major_version is not defined or
-        ansible_facts.domain is not defined or
+  when: ansible_facts.domain is not defined or
         ansible_facts.fqdn is not defined
 
 - name: Install required packages
-  yum:
-    state: present
+  dnf:
     name:
       - adcli
-      - "{{ 'authselect' if ansible_facts.distribution_major_version | int >= 8 else 'authconfig' }}"
+      - authselect
       - krb5-workstation
       - oddjob-mkhomedir
       - sssd
       - sssd-ad
       - sssd-kcm
       - sssd-tools
+    state: present
 
 - name: Gather package facts
   package_facts:
@@ -60,15 +58,12 @@
   register: computer_info
   failed_when: computer_info.rc != 0 and computer_info.rc != 5
   changed_when: false
-  when:
-    - "'adcli' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version | int >= 8
+  when: "'adcli' in ansible_facts.packages"
 
 - name: Fail if expected computer does not exist in AD domain
   fail:
     msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
   when:
     - "'adcli' in ansible_facts.packages"
-    - ansible_facts.distribution_major_version | int >= 8
     - not domain_ad_join_computer_create | bool
     - computer_info.rc != 0

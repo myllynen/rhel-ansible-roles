@@ -14,7 +14,6 @@ Below are the role default values from defaults/main.yml:
 # Role provided alternatives:
 # * auditd_cis.conf   - CIS Level 2 - Server compliant config
 # * auditd_rhel.conf  - RHEL default config
-# * auditd_rhel7.conf - RHEL 7 default config
 audit_setup_config_file:
 
 # Optional audit rules file to copy
@@ -30,6 +29,7 @@ audit_setup_exclusive: false
 # List of recognized audit rules files
 # in addition to the role created zz-ansible.rules
 # Other files in /etc/audit/rules.d will be removed
+# NB. Ensure these files contain expected parameters!
 # NB. This list must be updated for use with OpenSCAP!
 audit_setup_files_known:
   - /etc/audit/rules.d/audit.rules

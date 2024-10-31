@@ -4,17 +4,17 @@
 
 # This role may run before repositories are setup
 - name: Install grubby package
-  yum:
-    state: present
+  dnf:
     name: grubby
+    state: present
   when: "'grubby' not in ansible_facts.packages"
 
 - name: Check IPv6 boot parameter
   check_mode: true
   lineinfile:
-    state: absent
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| )ipv6.disable(=| |")'
+    state: absent
   register: boot_param_check
   changed_when: false
 
@@ -66,7 +66,7 @@
     regexp: '^IPV6INIT=.*'
     replace: 'IPV6INIT={{ disable_ipv6 }}'
   register: ifcfg_config
-  loop: "{{ ifcfg_files.files | map(attribute='path') | list }}"
+  loop: "{{ ifcfg_files.files | map(attribute='path') }}"
   when: ipv6_setup_configure_nm | bool
 
 - name: Update IPv6 configuration in NM connection files
@@ -79,7 +79,7 @@
     regexp: '^method=.*'
     replace: 'method={{ disable_ipv6 }}'
   register: nmconnection_config
-  loop: "{{ nmconnection_files.files | map(attribute='path') | list }}"
+  loop: "{{ nmconnection_files.files | map(attribute='path') }}"
   when: ipv6_setup_configure_nm | bool
 
 - name: Rebuild initramfs

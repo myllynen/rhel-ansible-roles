@@ -1,25 +1,19 @@
 ---
-- name: Gather needed facts
-  setup:
-    gather_subset:
-      - '!all'
-      - '!min'
-      - pkg_mgr
-  when: ansible_facts.pkg_mgr is not defined
-
 - name: Remove unwanted packages
-  yum:
+  dnf:
+    name: "{{ packages_remove | select }}"
     state: absent
-    name: "{{ packages_remove | select() | list }}"
     autoremove: false
-    #cacheonly: true
+    cacheonly: true
+    disablerepo: '*'
   register: package_remove
 
 - name: Remove unneeded leaf packages
-  yum:
+  dnf:
     state: absent
     autoremove: true
-    #cacheonly: true
+    cacheonly: true
+    disablerepo: '*'
   register: package_remove_leaf
   when: packages_remove_autoremove | bool
 

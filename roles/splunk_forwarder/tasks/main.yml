@@ -35,14 +35,14 @@
 - name: Create Splunk user
   user:
     name: splunk
-    comment: splunk user
     uid: "{{ splunk_user_uid | default(omit, true) }}"
+    comment: splunk user
   when: "'could not be found' not in user_status"
 
 - name: Install Splunk Forwarder package
-  yum:
-    state: "{{ splunk_forwarder_package_state }}"
+  dnf:
     name: splunkforwarder
+    state: "{{ splunk_forwarder_package_state }}"
   register: package_install
 
 - name: Gather package facts
@@ -96,21 +96,21 @@
 
 - name: Enable Splunk Forwarder service
   service:
-    enabled: true
     name: SplunkForwarder
+    enabled: true
   when: "'splunkforwarder' in ansible_facts.packages"
 
 - name: Start Splunk Forwarder service
   service:
-    state: started
     name: SplunkForwarder
+    state: started
   register: service_start
   when: "'splunkforwarder' in ansible_facts.packages"
 
 - name: Restart Splunk Forwarder to apply configuration changes
   service:
-    state: restarted
     name: SplunkForwarder
+    state: restarted
   when:
     - "'splunkforwarder' in ansible_facts.packages"
     - service_start is not changed

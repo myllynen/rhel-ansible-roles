@@ -7,7 +7,7 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
   register: create_directories
-  loop: "{{ files_create | selectattr('state', 'equalto', 'directory') | list }}"
+  loop: "{{ files_create | selectattr('state', 'equalto', 'directory') }}"
   loop_control:
     label: "{{ item.path }}"
 
@@ -21,7 +21,7 @@
     modification_time: preserve
     access_time: preserve
   register: create_files
-  loop: "{{ files_create | selectattr('state', 'equalto', 'file') | list }}"
+  loop: "{{ files_create | selectattr('state', 'equalto', 'file') }}"
   loop_control:
     label: "{{ item.path }}"
 
@@ -35,6 +35,6 @@
     force: "{{ item.force | default(omit) }}"
     follow: false
   register: create_links
-  loop: "{{ files_create | selectattr('state', 'equalto', 'link') | list }}"
+  loop: "{{ files_create | selectattr('state', 'equalto', 'link') }}"
   loop_control:
     label: "{{ item.dest + ' -> ' + item.src }}"

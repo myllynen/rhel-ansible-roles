@@ -28,15 +28,16 @@ accounts_local_users_create:
 #    home: /home/testuser
 #    shell: /bin/bash
 #    expires: -1
-#    #password_expire_min: 7
-#    #password_expire_max: 365
+#    password_expire_min: 7
+#    password_expire_max: 365
+#    #password_expire_warn: 14
 #    # Allow or not unlimited sudo for user, this
 #    # creates or removes /etc/sudoers.d/username
 #    sudo_allow_all: false
 #    # Require password or not for the above
 #    sudo_passwordless: false
 #    authorized_keys:
-#      - ssh-rsa ... user@cloud
+#      - ssh-ed25519 ... user@cloud
 #    authorized_keys_exclusive: false
 
 # Use true if providing crypted values,

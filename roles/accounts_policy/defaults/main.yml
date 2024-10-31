@@ -21,14 +21,12 @@ login_defs_config_file:
 login_access_config_file:
 
 # PAM faillock configuration file faillock.conf template
-# NB. Supported RHEL versions: RHEL 8+
 # Role provided alternatives:
 # * faillock_cis.conf      - CIS Level 2 - Server compliant config
 # * faillock_rhel.conf     - RHEL default config
 faillock_config_file:
 
 # PAM password history config file pwhistory.conf template
-# NB. This is supported only since RHEL 8.8 / RHEL 9.2
 # NB. This is currently not compatible with oscap(8)
 # Role provided alternatives:
 # * pwhistory.conf_cis.j2  - CIS Level 2 - Server compliant config
@@ -59,7 +57,6 @@ pwquality_config_file:
 # or copy and use a custom one. A custom profile must be
 # named as "custom/name". E.g., use "/srv/custom/strict"
 # to copy the profile custom/strict from local path /srv
-# NB. Supported RHEL versions: RHEL 8+
 # Role provided alternatives:
 # * custom/cis  -  CIS Level 2 - Server compliant profile
 #                  incl. optional support for Centrify.

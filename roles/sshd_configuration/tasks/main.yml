@@ -46,14 +46,14 @@
     reset_files:
       - ssh/sshd_config
       - ssh/sshd_config.d/50-redhat.conf
-      - "{{ 'sysconfig/sshd' if not sshd_sysconfig_file | default(false) else '' }}"
+      - "{{ 'sysconfig/sshd' if not sshd_sysconfig_file else '' }}"
   copy:
     src: "{{ item | basename }}"
     dest: /etc/{{ item }}
     mode: "{{ '0640' if item == 'sysconfig/sshd' else '0600' }}"
     validate: "{{ omit if item == 'sysconfig/sshd' else '/usr/sbin/sshd -tf %s' }}"
   register: files_reset
-  loop: "{{ reset_files | select() | list }}"
+  loop: "{{ reset_files | select }}"
   loop_control:
     label: /etc/{{ item }}
   when:
@@ -68,13 +68,13 @@
     mode: '0640'
   register: sysconfig_copy
   when:
-    - sshd_sysconfig_file | default(false)
+    - sshd_sysconfig_file
     - ansible_facts.distribution_major_version | int >= 9
 
 - name: Create sshd configuration file
   vars:
     file_content: |
-      {% for item in sshd | dict2items | select() | list if item.key not in sshd_disable %}
+      {% for item in sshd | dict2items | select if item.key not in sshd_disable %}
       {% if item.value is not string and item.value is not number %}
       {% if item.key.startswith('Match') %}
       {{ item.key }}
@@ -109,7 +109,7 @@
     mode: '0600'
     validate: /usr/sbin/sshd -tf %s
   register: enable_options
-  loop: "{{ sshd | dict2items | select() | list }}"
+  loop: "{{ sshd | dict2items | select }}"
   when:
     - item.key not in sshd_disable
     - item.key.split(' ')[0] not in ['HostKey', 'ListenAddress', 'Match']
@@ -117,21 +117,21 @@
 - name: Disable sshd configuration options
   vars:
     main_file: /etc/ssh/sshd_config
-    update_files: "{{ [main_file] + config_files.files | default([]) | map(attribute='path') | list }}"
+    update_files: "{{ [main_file] + config_files.files | default([]) | map(attribute='path') }}"
   replace:
     path: "{{ item.0 }}"
     regexp: '^({{ item.1 }} .*)'
     replace: '#\1'
     validate: /usr/sbin/sshd -tf %s
   register: disable_options
-  loop: "{{ update_files | sort | unique | product(sshd_disable) | list }}"
+  loop: "{{ update_files | sort | unique | product(sshd_disable) }}"
 
 - name: Remove unrecognized sshd configuration files
   vars:
-    self_config: ['/etc/ssh/sshd_config.d/0-ansible.conf']
+    self_config: /etc/ssh/sshd_config.d/0-ansible.conf
     files_remove:
       - /etc/ssh/sshd_config.d/*
-    files_remove_exclude: "{{ self_config + sshd_configuration_files_known | default([], true) }}"
+    files_remove_exclude: "{{ [self_config] + sshd_configuration_files_known | default([], true) }}"
   include_role:
     name: files_remove
   when:
@@ -140,8 +140,8 @@
 
 - name: Reload sshd to apply configuration changes
   service:
-    state: reloaded
     name: sshd
+    state: reloaded
   when: files_reset is changed or
         sysconfig_copy is changed or
         config_create is changed or

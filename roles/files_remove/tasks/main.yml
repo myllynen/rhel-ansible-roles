@@ -20,7 +20,7 @@
 - name: Fail if incorrect globbing pattern in use
   fail:
     msg: "Globbing only supported for the last element."
-  loop: "{{ files_remove | default([], true) | map('dirname') | select('search', '\\?|\\*|\\[') | list }}"
+  loop: "{{ files_remove | default([], true) | map('dirname') | select('search', '\\?|\\*|\\[') }}"
 
 - name: Locate globbed files and directories to be removed
   find:
@@ -30,7 +30,7 @@
     hidden: true
     recurse: "{{ files_remove_recursive | bool }}"
   register: remove_globs
-  loop: "{{ files_remove | select('search', '\\?|\\*|\\[') | list }}"
+  loop: "{{ files_remove | select('search', '\\?|\\*|\\[') }}"
 
 # Remove set paths from possible previous role execution
 - name: Initialize list of globbed files and directories
@@ -39,17 +39,17 @@
 
 - name: Set globbed files and directories to remove
   set_fact:
-    glob_paths: "{{ glob_paths + item.files | map(attribute='path') | list }}"
+    glob_paths: "{{ glob_paths + item.files | map(attribute='path') }}"
   loop: "{{ remove_globs.results }}"
   loop_control:
-    label: "{{ item.files | map(attribute='path') | list }}"
+    label: "{{ item.files | map(attribute='path') }}"
 
 - name: Remove files and directories
   vars:
-    plain_paths: "{{ files_remove | select() | reject('search', '\\?|\\*|\\[') | list }}"
+    plain_paths: "{{ files_remove | select | reject('search', '\\?|\\*|\\[') }}"
   file:
-    state: absent
     path: "{{ item }}"
+    state: absent
   register: remove_files
-  loop: "{{ (plain_paths + glob_paths) | select() | list }}"
+  loop: "{{ (plain_paths + glob_paths) | select }}"
   when: item not in files_remove_exclude | default([], true)
