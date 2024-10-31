@@ -6,18 +6,10 @@ Ansible roles for RHEL configuration.
 
 ## Quick Intro
 
-To install this collection from GitHub with Ansible 2.10 and newer:
+To install this collection from GitHub with Ansible 2.14 and newer:
 
 ```
 ansible-galaxy collection install git+https://github.com/myllynen/rhel-ansible-roles,master
-```
-
-To install this collection with Ansible 2.9:
-
-```
-git clone https://github.com/myllynen/rhel-ansible-roles.git
-ansible-galaxy collection build rhel-ansible-roles
-ansible-galaxy collection install myllynen-rhel_ansible_roles-$version.tar.gz
 ```
 
 Depending on the environment and requirements separate playbooks and/or
@@ -34,12 +26,10 @@ RHEL functionality (such as network and storage), see
 [Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
-These roles have been tested and verified to work against RHEL 7/8/9
-using Ansible 2.9 - 2.15. Certain roles only work with newer RHEL
-versions where the required functionality is not available on the
-earlier releases, such as [fapolicyd_setup](roles/fapolicyd_setup).
-READMEs of roles will list supported versions where needed, by
-default all roles support all supported RHEL versions.
+These roles have been tested and verified to work against RHEL 8/9
+using Ansible 2.14 - 2.18. READMEs of roles will list supported
+versions where needed, by default all roles support all supported
+RHEL versions.
 
 The roles will gather the minimum set of facts as needed meaning that
 they can be used in setups where fact gathering is disabled.
