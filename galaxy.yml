@@ -16,7 +16,7 @@ tags:
   - configuration
   - infrastructure
 dependencies:
-  ansible.posix: ">=1.4.0"
-  community.general: ">=5.5.0"
+  ansible.posix: ">=1.5.4"
+  community.general: ">=7.5.6"
 repository: https://www.github.com/myllynen/rhel-ansible-roles
 issues: https://www.github.com/myllynen/rhel-ansible-roles/issues
