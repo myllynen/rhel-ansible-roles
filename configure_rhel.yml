@@ -38,15 +38,16 @@
     #    home: /home/testuser
     #    shell: /bin/bash
     #    expires: -1
-    #    #password_expire_min: 7
-    #    #password_expire_max: 365
+    #    password_expire_min: 7
+    #    password_expire_max: 365
+    #    #password_expire_warn: 14
     #    # Allow or not unlimited sudo for user, this
     #    # creates or removes /etc/sudoers.d/username
     #    sudo_allow_all: false
     #    # Require password or not for the above
     #    sudo_passwordless: false
     #    authorized_keys:
-    #      - ssh-rsa ... user@cloud
+    #      - ssh-ed25519 ... user@cloud
     #    authorized_keys_exclusive: false
 
     # Use true if providing crypted values,
@@ -94,14 +95,12 @@
     login_access_config_file:
 
     # PAM faillock configuration file faillock.conf template
-    # NB. Supported RHEL versions: RHEL 8+
     # Role provided alternatives:
     # * faillock_cis.conf      - CIS Level 2 - Server compliant config
     # * faillock_rhel.conf     - RHEL default config
     faillock_config_file:
 
     # PAM password history config file pwhistory.conf template
-    # NB. This is supported only since RHEL 8.8 / RHEL 9.2
     # NB. This is currently not compatible with oscap(8)
     # Role provided alternatives:
     # * pwhistory.conf_cis.j2  - CIS Level 2 - Server compliant config
@@ -115,11 +114,23 @@
     pwquality_config_file:
 
 
+    # Resource limits configuration for users
+    # These will be configured in /etc/security/limits.d/95-ansible.conf
+    # All of the following are required for each entry:
+    #   domain type item value
+    # If user_resource_limits is undefined will do nothing.
+    # See the limits.conf(5) manual page for details.
+    #user_resource_limits:
+    #  - domain: "@student"
+    #    type: "-"
+    #    item: maxlogins
+    #    value: 4
+
+
     # Either use a system provided profile (e.g., "minimal")
     # or copy and use a custom one. A custom profile must be
     # named as "custom/name". E.g., use "/srv/custom/strict"
     # to copy the profile custom/strict from local path /srv
-    # NB. Supported RHEL versions: RHEL 8+
     # Role provided alternatives:
     # * custom/cis  -  CIS Level 2 - Server compliant profile
     #                  incl. optional support for Centrify.
@@ -156,7 +167,6 @@
     # Role provided alternatives:
     # * auditd_cis.conf   - CIS Level 2 - Server compliant config
     # * auditd_rhel.conf  - RHEL default config
-    # * auditd_rhel7.conf - RHEL 7 default config
     audit_setup_config_file:
 
     # Optional audit rules file to copy
@@ -172,6 +182,7 @@
     # List of recognized audit rules files
     # in addition to the role created zz-ansible.rules
     # Other files in /etc/audit/rules.d will be removed
+    # NB. Ensure these files contain expected parameters!
     # NB. This list must be updated for use with OpenSCAP!
     audit_setup_files_known:
       - /etc/audit/rules.d/audit.rules
@@ -234,6 +245,7 @@
     certificates_exclusive: false
 
     # List of additionally recognized cert files
+    # NB. Ensure these files are trustworthy!
     certificates_files_known:
     #  - /etc/pki/ca-trust/source/anchors/old.pem
 
@@ -328,11 +340,8 @@
     #
     # fapolicyd_setup
     #
-    # NB. Supported RHEL versions: RHEL 8+
-    #
-    # Enable or disable service after configuration
+    # Enable or not the service after configuration
     # to allow testing and verification before use.
-    # NB. See ima_evm_setup if planning to use IMA.
     fapolicyd_setup_enable_service: false
 
     # fapolicyd config file to copy
@@ -361,6 +370,7 @@
     # (zz-ansible.rules and zz-ansible.trust)
     # Other files in rules.d and trust.d will
     # be removed meaning this MUST be tested!
+    # NB. Ensure these files are trustworthy!
     fapolicyd_setup_files_known:
     #  - /etc/fapolicyd/rules.d/50-os.rules
     #  - /etc/fapolicyd/trust.d/50-os.trust
@@ -371,8 +381,6 @@
 
     #
     # fips_setup
-    #
-    # NB. Supported RHEL versions: RHEL 8+
     #
     # NB! It is best to enable FIPS mode during OS
     # installation in order to ensure all keys are
@@ -494,7 +502,7 @@
     #packages_install:
     #  -
 
-    # Enable or disable yum module 'install_weak_deps' parameter
+    # Enable or disable dnf module 'install_weak_deps' parameter
     packages_install_weak_deps: true
 
     # Display results on output
@@ -507,7 +515,7 @@
     #  -
 
     # Remove all "leaf" packages no longer required,
-    # see yum module autoremove parameter description
+    # see dnf module autoremove parameter description
     packages_remove_autoremove: false
 
     # Display results on output
@@ -630,7 +638,6 @@
     selinux: enforcing
 
     # System-wide crypto policy
-    # NB. Supported RHEL versions: RHEL 8+
     crypto_policy: DEFAULT
 
     # Enable or disable SCP protocol (not scp(1))
@@ -734,6 +741,7 @@
     # List of recognized sshd configuration files
     # in addition to the role created 0-ansible.conf
     # Other files in sshd_config.d will be removed
+    # NB. Ensure these files contain expected parameters!
     sshd_configuration_files_known:
       - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -750,6 +758,7 @@
 
     # Existing VG where to create LV for swap
     # If this is unset then role does nothing
+    # Image Builder uses by default VG rootvg
     swap_setup_vg_name:
 
     # LV for swap name
@@ -984,7 +993,6 @@
     # Custom USBGuard configuration file
     # Role provided alternatives:
     # * usbguard-daemon_rhel.conf  - RHEL default config
-    # * usbguard-daemon_rhel7.conf - RHEL 7 default config
     usbguard_setup_config_file:
 
     # Custom USBGuard rules file template to use
@@ -999,6 +1007,7 @@
     # List of recognized rules and IPC files
     # in addition to the role created ones
     # Other such config files will be removed
+    # NB. Ensure these files are trustworthy!
     usbguard_setup_files_known:
     #  - /etc/usbguard/rules.d/50-os.conf
 
