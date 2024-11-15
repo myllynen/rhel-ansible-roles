@@ -13,7 +13,7 @@
     line: 'Storage=none'
   register: storage_config
 
-- name: Restore system default coredump limit configuration
+- name: Update default coredump limit configuration
   lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)DefaultLimitCORE=.*'
