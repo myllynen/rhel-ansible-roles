@@ -13,6 +13,16 @@
     state: present
   when: false
 
+- name: Create default boot parameter configuration file
+  file:
+    path: /etc/default/grub
+    state: touch
+    owner: root
+    group: root
+    mode: '0644'
+    access_time: preserve
+    modification_time: preserve
+
 - name: Check enabled boot parameters
   check_mode: true
   lineinfile:
