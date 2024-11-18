@@ -2,24 +2,18 @@
     default_realm = {{ domain_ad_domain | upper }}
     dns_canonicalize_hostname = false
     qualify_shortname = {{ ansible_facts.domain }}
-    dns_lookup_realm = false
+    dns_lookup_realm = true
     dns_lookup_kdc = true
-    dns_uri_lookup = true
     ticket_lifetime = 24h
     renew_lifetime = 7d
     forwardable = true
-    rdns = false
+    #rdns = false
     udp_preference_limit = 0
     spake_preauth_groups = edwards25519
     pkinit_anchors = FILE:/etc/pki/tls/certs/ca-bundle.crt
 
 [realms]
     {{ domain_ad_domain | upper }} = {
+        default_domain = {{ domain_ad_domain | lower }}
         #kdc =
-        #master_kdc =
-        #admin_server =
     }
-
-[domain_realm]
-    .{{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}
-    {{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}
