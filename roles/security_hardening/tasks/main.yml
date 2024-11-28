@@ -42,7 +42,7 @@
   when:
     - "'mokutil' in ansible_facts.packages"
     - secure_boot_verify | bool
-    - "'Secure Boot enabled' not in sb_state.stdout"
+    - sb_state.stdout | regex_search("Secure?Boot enabled") is none
 
 - name: Check kernel lockdown configuration
   vars:
