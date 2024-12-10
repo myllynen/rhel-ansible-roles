@@ -17,7 +17,7 @@ Below are the role default values from defaults/main.yml:
 # with no questions asked! You have been warned.
 
 # List of files and directories to remove
-# Globbing is supported for last element,
+# Globbing is supported for the last element,
 # directories will be removed recursively
 # Registers variable: remove_files
 files_remove:

@@ -19,6 +19,7 @@ boot_parameters_disable:
   #- rd.lvm.lv
   #- resume
   - rhgb
+  - selinux
 
 boot_parameters_timeout: 1
 
