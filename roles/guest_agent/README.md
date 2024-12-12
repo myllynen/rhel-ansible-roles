@@ -19,6 +19,7 @@ Below are the role default values from defaults/main.yml:
 #     Currently recognized platforms are:
 #       - Azure
 #       - KVM/Qemu
+#       - Nutanix AVH
 #       - VMware
 guest_agent_enable: true
 

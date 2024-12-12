@@ -5,9 +5,11 @@
       - '!all'
       - '!min'
       - distribution_major_version
+      - hardware
       - virtualization_role
       - virtualization_type
   when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.system_vendor is not defined or
         ansible_facts.virtualization_role is not defined or
         ansible_facts.virtualization_type is not defined
 
@@ -70,6 +72,23 @@
     - ansible_facts.virtualization_type == "kvm"
     - guest_agent_enable | bool
 
+- name: Remove unneeded packages on Nutanix AVH
+  dnf:
+    name:
+      - 'hyperv*'
+      - qemu-guest-agent
+      - open-vm-tools
+      - spice-vdagent
+      - WALinuxAgent
+    state: absent
+    cacheonly: true
+    disablerepo: '*'
+  when:
+    - ansible_facts.virtualization_role == "guest"
+    - ansible_facts.virtualization_type == "kvm"
+    - ansible_facts.system_vendor == "Nutanix"
+    - guest_agent_enable | bool
+
 - name: Remove unneeded packages on VMware
   dnf:
     name:
@@ -115,6 +134,7 @@
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_packages
+    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
 
 - name: Gather service facts
@@ -138,6 +158,7 @@
     - ansible_facts.virtualization_type in agent_services
     - ansible_facts.virtualization_type in ['kvm', 'VirtualPC', 'VMware']
     - agent_services[ansible_facts.virtualization_type] in ansible_facts.services
+    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
 
 - name: Start virtual guest agent service
@@ -154,4 +175,5 @@
     - ansible_facts.virtualization_type in agent_services
     - ansible_facts.virtualization_type in ['kvm', 'VirtualPC', 'VMware']
     - agent_services[ansible_facts.virtualization_type] in ansible_facts.services
+    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
