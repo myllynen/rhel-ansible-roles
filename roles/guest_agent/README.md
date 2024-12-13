@@ -18,8 +18,8 @@ Below are the role default values from defaults/main.yml:
 #     are considered for un/installation
 #     Currently recognized platforms are:
 #       - Azure
-#       - KVM/Qemu
-#       - Nutanix AVH
+#       - KVM/QEMU
+#       - Nutanix AHV
 #       - VMware
 guest_agent_enable: true
 

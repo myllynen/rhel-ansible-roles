@@ -70,9 +70,10 @@
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "kvm"
+    - ansible_facts.system_vendor == "Nutanix"
     - guest_agent_enable | bool
 
-- name: Remove unneeded packages on Nutanix AVH
+- name: Remove unneeded packages on Nutanix AHV
   dnf:
     name:
       - 'hyperv*'
@@ -142,6 +143,7 @@
   when:
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in ['kvm', 'VirtualPC', 'VMware']
+    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
 
 - name: Enable virtual guest agent service
