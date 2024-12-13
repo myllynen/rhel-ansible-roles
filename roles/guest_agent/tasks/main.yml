@@ -68,9 +68,9 @@
     cacheonly: true
     disablerepo: '*'
   when:
+    - ansible_facts.system_vendor == "Nutanix"
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "kvm"
-    - ansible_facts.system_vendor == "Nutanix"
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on Nutanix AHV
@@ -85,9 +85,9 @@
     cacheonly: true
     disablerepo: '*'
   when:
+    - ansible_facts.system_vendor == "Nutanix"
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type == "kvm"
-    - ansible_facts.system_vendor == "Nutanix"
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on VMware
@@ -133,17 +133,17 @@
     name: "{{ agent_packages[ansible_facts.virtualization_type] }}"
     state: present
   when:
+    - ansible_facts.system_vendor != "Nutanix"
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_packages
-    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
 
 - name: Gather service facts
   service_facts:
   when:
+    - ansible_facts.system_vendor != "Nutanix"
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in ['kvm', 'VirtualPC', 'VMware']
-    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
 
 - name: Enable virtual guest agent service
@@ -156,11 +156,11 @@
     name: "{{ agent_services[ansible_facts.virtualization_type] }}"
     enabled: true
   when:
+    - ansible_facts.system_vendor != "Nutanix"
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_services
     - ansible_facts.virtualization_type in ['kvm', 'VirtualPC', 'VMware']
     - agent_services[ansible_facts.virtualization_type] in ansible_facts.services
-    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
 
 - name: Start virtual guest agent service
@@ -173,9 +173,9 @@
     name: "{{ agent_services[ansible_facts.virtualization_type] }}"
     state: started
   when:
+    - ansible_facts.system_vendor != "Nutanix"
     - ansible_facts.virtualization_role == "guest"
     - ansible_facts.virtualization_type in agent_services
     - ansible_facts.virtualization_type in ['kvm', 'VirtualPC', 'VMware']
     - agent_services[ansible_facts.virtualization_type] in ansible_facts.services
-    - ansible_facts.system_vendor != "Nutanix"
     - guest_agent_enable | bool
