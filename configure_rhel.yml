@@ -248,7 +248,7 @@
     # List of additionally recognized cert files
     # NB. Ensure these files are trustworthy!
     certificates_files_known:
-    #  - /etc/pki/ca-trust/source/anchors/old.pem
+      - /etc/pki/ca-trust/source/anchors/katello-server-ca.pem
 
     #
     # dns_cache
