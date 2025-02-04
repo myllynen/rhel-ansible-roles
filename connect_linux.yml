@@ -1,0 +1,23 @@
+---
+- name: Linux connectivity test
+  hosts: all
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Check host reachable
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        search_regex: OpenSSH
+        timeout: 10
+      delegate_to: localhost
+
+    - name: Check host access
+      ping:
+
+    - name: Check user privileges
+      become: true
+      command: /usr/bin/whoami
+      register: whoami_output
+      failed_when: whoami_output.stdout != 'root'
+      changed_when: false
