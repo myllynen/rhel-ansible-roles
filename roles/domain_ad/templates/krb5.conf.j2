@@ -8,12 +8,16 @@
     renew_lifetime = 7d
     forwardable = true
     #rdns = false
-    udp_preference_limit = 0
+    udp_preference_limit = 1
     spake_preauth_groups = edwards25519
     pkinit_anchors = FILE:/etc/pki/tls/certs/ca-bundle.crt
 
+[domain_realm]
+    {{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}
+
 [realms]
     {{ domain_ad_domain | upper }} = {
-        default_domain = {{ domain_ad_domain | lower }}
         #kdc =
+        #kdc =
+        #kpasswd_server =
     }
