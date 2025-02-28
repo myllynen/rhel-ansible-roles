@@ -12,12 +12,12 @@
     spake_preauth_groups = edwards25519
     pkinit_anchors = FILE:/etc/pki/tls/certs/ca-bundle.crt
 
-[domain_realm]
-    {{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}
-
 [realms]
     {{ domain_ad_domain | upper }} = {
         #kdc =
         #kdc =
         #kpasswd_server =
     }
+
+[domain_realm]
+    {{ domain_ad_domain | lower }} = {{ domain_ad_domain | upper }}
