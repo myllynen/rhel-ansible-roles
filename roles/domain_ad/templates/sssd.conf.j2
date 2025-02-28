@@ -6,13 +6,18 @@ domains = {{ domain_ad_domain | lower }}
 
 [nss]
 debug_level = 0
-entry_negative_timeout = 60
-entry_cache_nowait_percentage = 50
+filter_users = root, ansible
+filter_groups = root, ansible
+memcache_timeout = 3600
+enum_cache_timeout = 3600
+entry_negative_timeout = 3600
+entry_cache_nowait_percentage = 90
 
 [pam]
 debug_level = 0
 pam_verbosity = 1
 pam_id_timeout = 5
+pam_initgroups_scheme = never
 offline_credentials_expiration = 7
 
 [domain/{{ domain_ad_domain | lower }}]
@@ -33,11 +38,12 @@ case_sensitive = False
 
 ad_maximum_machine_account_password_age = 30
 
-subdomain_inherit = ignore_group_members
-ignore_group_members = False
-entry_cache_timeout = 3600
-ldap_deref_threshold = 10
+enumerate = False
 cache_credentials = True
+entry_cache_timeout = 3600
+subdomain_inherit = ignore_group_members
+ignore_group_members = True
+ldap_deref_threshold = 10
 
 min_id = 1000
 max_id = 0
