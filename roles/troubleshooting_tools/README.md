@@ -17,7 +17,6 @@ troubleshooting_tools:
   - ethtool
   - iotop
   - iproute
-  #- iptstate
   - lsof
   #- ltrace
   - man-pages
