@@ -1,9 +1,10 @@
 [libdefaults]
     default_realm = {{ domain_ad_domain | upper }}
     dns_canonicalize_hostname = false
-    qualify_shortname = {{ ansible_facts.domain }}
-    dns_lookup_realm = true
+    #qualify_shortname = {{ ansible_facts.domain }}
     dns_lookup_kdc = true
+    dns_lookup_realm = true
+    dns_uri_lookup = false
     ticket_lifetime = 24h
     renew_lifetime = 7d
     forwardable = true
