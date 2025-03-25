@@ -26,8 +26,7 @@ selinux: enforcing
 crypto_policy: DEFAULT
 
 # Enable or disable SCP protocol (not scp(1))
-# NB. Supported RHEL versions: RHEL 9 only
-scp_protocol_disable: false
+scp_protocol_enable: true
 </pre>
 
 ## License

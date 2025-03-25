@@ -92,20 +92,17 @@
     - "'crypto-policies-scripts' in ansible_facts.packages"
     - current_crypto_policy.stdout != crypto_policy
 
-- name: Check SCP configuration
+- name: Check SCP protocol configuration
   stat:
     path: /etc/ssh/disable_scp
   register: scp_state
-  when: ansible_facts.distribution_major_version | int >= 9
 
-- name: Configure SCP state
+- name: Configure SCP protocol state
   file:
-    state: "{{ 'touch' if scp_protocol_disable | bool else 'absent' }}"
+    state: "{{ 'absent' if scp_protocol_enable | bool else 'touch' }}"
     path: /etc/ssh/disable_scp
     mode: '0644'
-  when:
-    - ansible_facts.distribution_major_version | int >= 9
-    - scp_state.stat.exists != scp_protocol_disable | bool
+  when: scp_state.stat.exists == scp_protocol_enable | bool
 
 - name: Reboot system
   reboot:
