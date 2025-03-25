@@ -12,6 +12,9 @@ Below are the role default values from defaults/main.yml:
 ---
 # Enable or disable system-wide coredumps
 system_coredump_enable: false
+
+# System-wide ProcessSizeMax setting
+system_coredump_process_size_max: 4G
 </pre>
 
 ## License

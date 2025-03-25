@@ -41,7 +41,7 @@
   lineinfile:
     path: /etc/systemd/coredump.conf
     regexp: '^ProcessSizeMax=0'
-    line: '#ProcessSizeMax=2G'
+    line: 'ProcessSizeMax={{ system_coredump_process_size_max }}'
   register: process_config
 
 - name: Reload systemd to apply configuration changes
