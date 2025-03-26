@@ -20,6 +20,7 @@ secure_boot_verify: false
 kernel_lockdown: disabled
 
 # SELinux state
+# Allowed values: enforcing, permissive, disabled
 selinux: enforcing
 
 # System-wide crypto policy

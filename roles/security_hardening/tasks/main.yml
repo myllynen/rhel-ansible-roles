@@ -11,7 +11,7 @@
   vars:
     security_packages:
       - crypto-policies-scripts
-      - "{{ 'grubby' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+      - grubby
       - "{{ 'mokutil' if secure_boot_verify | bool else '' }}"
     selinux_packages:
       - python3-libselinux
@@ -74,8 +74,11 @@
   ansible.posix.selinux:
     policy: targeted
     state: "{{ selinux }}"
+    update_kernel_param: true
   register: selinux_config
-  when: "'python3-libselinux' in ansible_facts.packages"
+  when:
+    - "'grubby' in ansible_facts.packages"
+    - "'python3-libselinux' in ansible_facts.packages"
 
 - name: Check current crypto policy
   check_mode: false
