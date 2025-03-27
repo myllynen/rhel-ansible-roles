@@ -21,11 +21,8 @@
       system_update_email_report | bool
 
 - name: Display list of updated packages
-  vars:
-    output_old: "{{ (package_updates | join('\n')).split('\n') }}"
-    output_new: "{{ package_updates | join('\n') }}"
   debug:
-    msg: "{{ output_new if ansible_version.full is version('2.11', '>=') else output_old }}"
+    msg: "{{ package_updates | join('\n') }}"
   when:
     - system_update_display_updates | bool
     - package_updates | default(false)
