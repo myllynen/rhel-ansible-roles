@@ -13,10 +13,8 @@
 - name: Install IMA/EVM packages
   dnf:
     name:
-      - attr
       - grubby
       - ima-evm-utils
-      - keyutils
       - rpm-plugin-ima
     state: present
 
