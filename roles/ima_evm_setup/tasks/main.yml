@@ -4,27 +4,19 @@
     gather_subset:
       - '!all'
       - '!min'
-      - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
-
-- name: Install grubby package
-  dnf:
-    name: grubby
-    state: present
-  when:
-    - ansible_facts.distribution_major_version | int >= 8
-    - ima_evm_setup_enable is not none
+      - distribution_version
+  when: ansible_facts.distribution_version is not defined
 
 - name: Enable IMA/EVM
   include_tasks: enable.yml
   when:
-    - ansible_facts.distribution_major_version | int >= 8
+    - ansible_facts.distribution_version | float >= 9.5
     - ima_evm_setup_enable is not none
     - ima_evm_setup_enable | bool
 
 - name: Disable IMA/EVM
   include_tasks: disable.yml
   when:
-    - ansible_facts.distribution_major_version | int >= 8
+    - ansible_facts.distribution_version | float >= 9.5
     - ima_evm_setup_enable is not none
     - not ima_evm_setup_enable | bool

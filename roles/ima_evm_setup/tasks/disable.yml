@@ -1,87 +1,64 @@
 ---
-- name: Disable IMA custom policy configuration
+- name: Remove IMA policy configuration file
   file:
     path: /etc/ima/ima-policy
     state: absent
-  register: custom_policy
+  register: ima_policy
 
-- name: Check IMA/EVM boot parameters
-  lineinfile:
-    path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}='
+- name: Disable dracut integrity module
+  file:
+    path: /etc/dracut.conf.d/98-integrity.conf
     state: absent
-  check_mode: true
-  register: boot_params_check
-  changed_when: false
-  loop: "{{ __ima_boot_params }}"
-
-- name: Disable IMA/EVM boot parameters
-  command: >
-    grubby
-    --update-kernel=ALL
-    --remove-args="{{ __ima_boot_params | join(' ') }}"
-  register: boot_config
-  changed_when: true
-  when: 1 in boot_params_check.results | map(attribute='found')
-
-- name: Reboot system
-  reboot:
-  when: boot_config is changed or
-        custom_policy is changed
-
-- name: Gather package facts
-  package_facts:
-
-- name: Disable tpm2-abrmd service
-  service:
-    name: tpm2-abrmd
-    enabled: false
-  when: "'tpm2-abrmd' in ansible_facts.packages"
-
-- name: Stop tpm2-abrmd service
-  service:
-    name: tpm2-abrmd
-    state: stopped
-  when: "'tpm2-abrmd' in ansible_facts.packages"
+  register: dracut_config
 
 - name: Remove RPM IMA plugin package
   dnf:
     name: rpm-plugin-ima
-    state: absent
     cacheonly: true
-    disablerepo: '*'
+    state: absent
 
-- name: Check current IMA/EVM file attributes
-  command: getfattr -m - -d /usr/bin/getfattr
+- name: Rebuild initramfs
+  command: dracut -f --regenerate-all
+  changed_when: true
+  when: dracut_config is changed
+
+- name: Reboot system
+  reboot:
+  when: ima_policy is changed or
+        dracut_config is changed
+
+- name: Check current IMA policy configuration
+  check_mode: true
+  lineinfile:
+    path: /sys/kernel/security/ima/policy
+    regexp: '^appraise.*'
+    state: absent
+  register: ima_policy_check
+  changed_when: false
+
+- name: Fail if IMA policy loaded
+  fail:
+    msg: "IMA policy still loaded, cannot proceed."
+  when: ima_policy_check.found
+
+- name: Gather package facts
+  package_facts:
+
+- name: Check IMA security attributes on files
+  command: getfattr -m - -d /usr/bin/ima-setup
   check_mode: false
   register: fattr_info
   changed_when: false
   when: "'attr' in ansible_facts.packages"
 
-- name: Remove EVM file security attributes
+- name: Remove IMA security attributes from files
   shell: |
     set -o pipefail
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
-      xargs -0 setfattr -x security.evm > /dev/null 2>&1 || :
-  register: evm_attrs
-  failed_when: false
-  changed_when: true
-  when: ima_evm_setup_sign_files | bool or
-        (fattr_info.stdout is defined and 'security.evm' in fattr_info.stdout)
-
-- name: Remove IMA file security attributes
-  shell: |
-    set -o pipefail
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -uid 0 -print0 | \
+    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -print0 | \
       xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
   register: ima_attrs
   failed_when: false
   changed_when: true
-  when: ima_evm_setup_sign_files | bool or
-        (fattr_info.stdout is defined and 'security.ima' in fattr_info.stdout)
-
-- name: Rebuild initramfs
-  command: dracut -f --regenerate-all
-  changed_when: true
-  when: evm_attrs is changed or
-        ima_attrs is changed
+  when:
+    - fattr_info.stdout is defined
+    - "'security.ima' in fattr_info.stdout"

@@ -437,6 +437,26 @@
     guest_agent_remove_firmware: true
 
     #
+    # ima_evm_setup
+    #
+    # NB. Applicable RHEL versions: RHEL 9.5+
+    # NB. Any legacy RPMs which do not contain IMA signatures
+    #     *must* be installed after enabling IMA, not before.
+    #
+    # Enable or disable IMA/EVM
+    # Set to null to leave the current setup untouched
+    ima_evm_setup_enable: null
+
+    # IMA policy configuration file to use
+    # Role provided alternatives:
+    # * ima-policy  - appraise executable files and libraries
+    ima_evm_setup_policy_config_file: ima-policy
+
+    # Reboot system after enabling IMA
+    # NB. A reboot is mandatory when disabling IMA
+    ima_evm_setup_reboot: false
+
+    #
     # insights_client
     #
     # Register or unregister the system with Red Hat Insights
@@ -1057,7 +1077,7 @@
     - certificates
     #- { role: domain_ad, when: domain_ad_admin_username is defined }
     #- { role: ipaclient, state: present, when: ipaclient_domain is defined }
-    ##- ima_evm_setup
+    #- ima_evm_setup
     #- fapolicyd_setup
     #- fips_setup
     - firewall
