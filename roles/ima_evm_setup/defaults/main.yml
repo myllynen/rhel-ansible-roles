@@ -12,6 +12,12 @@ ima_evm_setup_enable: null
 # * ima-policy  - appraise executable files and libraries
 ima_evm_setup_policy_config_file: ima-policy
 
+# Verify new IMA policy configuration file on the target
+# This is recommended but this works by appending the
+# new policy (if valid) to the current policy so prior
+# rebooting the combined policy will be in use.
+ima_evm_setup_verify_policy: true
+
 # Reboot system after enabling IMA
 # NB. A reboot is mandatory when disabling IMA
 ima_evm_setup_reboot: false

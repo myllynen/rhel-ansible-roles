@@ -27,11 +27,12 @@
     state: directory
     mode: '0755'
 
-- name: Create IMA policy configuration file
+- name: Create pending IMA policy configuration file
   template:
     src: "{{ ima_evm_setup_policy_config_file }}"
     dest: /etc/ima/ima-policy.ansible
     mode: '0600'
+  register: policy_config_file
 
 # Assume IMA attributes present if ima-setup itself has it
 - name: Check IMA security attributes on files
@@ -48,7 +49,14 @@
     - fattr_info.stdout is defined
     - "'security.ima' not in fattr_info.stdout"
 
-- name: Update IMA policy configuration file
+- name: Verify pending IMA policy configuration file
+  shell: echo /etc/ima/ima-policy.ansible > /sys/kernel/security/integrity/ima/policy
+  changed_when: true
+  when:
+    - ima_evm_setup_verify_policy | bool
+    - policy_config_file is changed
+
+- name: Update systemd IMA policy configuration file
   template:
     src: "{{ ima_evm_setup_policy_config_file }}"
     dest: /etc/ima/ima-policy
