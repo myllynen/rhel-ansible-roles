@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -9,7 +9,7 @@
         ansible_facts.fqdn is not defined
 
 - name: Install required packages
-  dnf:
+  ansible.builtin.dnf:
     name:
       - adcli
       - authselect
@@ -22,23 +22,23 @@
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Check Kerberos keytab file
-  stat:
+  ansible.builtin.stat:
     path: /etc/krb5.keytab
   register: krb5_keytab
 
 - name: Discover AD domain information
   check_mode: false
-  shell: >
+  ansible.builtin.shell: >
     adcli info -v {{ domain_ad_domain }}
   register: domain_info
   changed_when: false
   when: "'adcli' in ansible_facts.packages"
 
 - name: Fail if AD domain controller not usable
-  fail:
+  ansible.builtin.fail:
     msg: "AD domain reports domain controller not usable."
   when:
     - "'adcli' in ansible_facts.packages"
@@ -47,7 +47,7 @@
 - name: Check computer status in AD domain
   check_mode: false
   no_log: true
-  shell: >
+  ansible.builtin.shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
     adcli -v show-computer
@@ -61,7 +61,7 @@
   when: "'adcli' in ansible_facts.packages"
 
 - name: Fail if expected computer does not exist in AD domain
-  fail:
+  ansible.builtin.fail:
     msg: "Computer {{ ansible_facts.fqdn }} does not exist in AD domain."
   when:
     - "'adcli' in ansible_facts.packages"

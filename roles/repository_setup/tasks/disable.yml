@@ -1,12 +1,12 @@
 ---
 - name: Unregister from Red Hat Subscription Management
-  command: subscription-manager unregister
+  ansible.builtin.command: subscription-manager unregister
   register: registration
   failed_when: registration.rc != 0 and 'currently not registered' not in registration.stderr
   changed_when: registration.rc == 0 and 'has been unregistered' in registration.stdout
 
 - name: Remove Katello CA package
-  dnf:
+  ansible.builtin.dnf:
     name: katello-ca-consumer-*
     state: absent
     cacheonly: true
@@ -16,7 +16,7 @@
     disablerepo: '*'
 
 - name: Remove Katello CA certificates
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
@@ -24,7 +24,7 @@
     - /etc/rhsm/ca/katello-server-ca.pem
 
 - name: Locate RHSM cache files
-  find:
+  ansible.builtin.find:
     paths: /var/lib/rhsm
     file_type: file
     recurse: true
@@ -34,18 +34,18 @@
   register: rhsm_cache
 
 - name: Remove RHSM cache files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop: "{{ rhsm_cache.files | map(attribute='path') }}"
 
 - name: Check RHSM configuration backup file
-  stat:
+  ansible.builtin.stat:
     path: /etc/rhsm/rhsm.conf.bak
   register: rhsm_backup
 
 - name: Restore RHSM configuration backup file
-  copy:
+  ansible.builtin.copy:
     src: /etc/rhsm/rhsm.conf.bak
     dest: /etc/rhsm/rhsm.conf
     mode: '0644'
@@ -53,7 +53,7 @@
   when: rhsm_backup.stat.exists
 
 - name: Remove RHSM configuration backup file
-  file:
+  ansible.builtin.file:
     path: /etc/rhsm/rhsm.conf.bak
     state: absent
   when: rhsm_backup.stat.exists

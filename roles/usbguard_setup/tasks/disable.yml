@@ -1,15 +1,15 @@
 ---
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Disable usbguard service
-  service:
+  ansible.builtin.service:
     name: usbguard
     enabled: false
   when: "'usbguard' in ansible_facts.packages"
 
 - name: Stop usbguard service
-  service:
+  ansible.builtin.service:
     name: usbguard
     state: stopped
   when: "'usbguard' in ansible_facts.packages"

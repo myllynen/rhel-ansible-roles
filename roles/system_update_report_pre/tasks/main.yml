@@ -2,28 +2,28 @@
 - name: Check available package updates
   # noqa: package-latest
   check_mode: true
-  dnf:
+  ansible.builtin.dnf:
     name: '*'
     state: latest
     update_cache: true
   register: package_install
 
 - name: Set available package updates
-  set_fact:
+  ansible.builtin.set_fact:
     package_updates: "{{ package_install.results | default([]) | sort }}"
   when:
     - system_update_report_pre_display_updates | bool or
       system_update_report_pre_email_report | bool
 
 - name: Display list of available package updates
-  debug:
+  ansible.builtin.debug:
     msg: "{{ package_updates | join('\n') }}"
   when:
     - system_update_report_pre_display_updates | bool
     - package_updates | default(false)
 
 - name: Send email report
-  include_tasks: report.yml
+  ansible.builtin.include_tasks: report.yml
   when:
     - system_update_report_pre_email_report | bool
     - package_updates | default(false)

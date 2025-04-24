@@ -1,6 +1,6 @@
 ---
 - name: Create shell profile file
-  template:
+  ansible.builtin.template:
     src: "{{ shell_profile_file }}"
     dest: /etc/profile.d/zz-ansible.sh
     mode: '0644'

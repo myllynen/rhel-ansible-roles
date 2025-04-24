@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -19,16 +19,16 @@
       - policycoreutils-python-utils
       - selinux-policy-targeted
       - setools-console
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ security_packages | select | list + selinux_packages }}"
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Check Secure Boot state
   check_mode: false
-  command: mokutil --sb-state
+  ansible.builtin.command: mokutil --sb-state
   register: sb_state
   failed_when: false
   changed_when: false
@@ -37,7 +37,7 @@
     - secure_boot_verify | bool
 
 - name: Fail if Secure Boot not enabled
-  fail:
+  ansible.builtin.fail:
     msg: "Secure Boot not enabled."
   when:
     - "'mokutil' in ansible_facts.packages"
@@ -48,7 +48,7 @@
   vars:
     lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ lockdown_param }}(=| |")'
     state: absent
@@ -57,7 +57,7 @@
   when: ansible_facts.distribution_major_version | int >= 9
 
 - name: Configure kernel lockdown
-  command: >
+  ansible.builtin.command: >
     grubby
     --update-kernel=ALL
     --remove-args=lockdown
@@ -82,13 +82,13 @@
 
 - name: Check current crypto policy
   check_mode: false
-  command: update-crypto-policies --show
+  ansible.builtin.command: update-crypto-policies --show
   register: current_crypto_policy
   changed_when: false
   when: "'crypto-policies-scripts' in ansible_facts.packages"
 
 - name: Configure crypto policy
-  command: update-crypto-policies --no-reload --set {{ crypto_policy }}
+  ansible.builtin.command: update-crypto-policies --no-reload --set {{ crypto_policy }}
   register: crypto_policy_config
   changed_when: true
   when:
@@ -96,19 +96,19 @@
     - current_crypto_policy.stdout != crypto_policy
 
 - name: Check SCP protocol configuration
-  stat:
+  ansible.builtin.stat:
     path: /etc/ssh/disable_scp
   register: scp_state
 
 - name: Configure SCP protocol state
-  file:
+  ansible.builtin.file:
     state: "{{ 'absent' if scp_protocol_enable | bool else 'touch' }}"
     path: /etc/ssh/disable_scp
     mode: '0644'
   when: scp_state.stat.exists == scp_protocol_enable | bool
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when: lockdown_config is changed or
         (selinux_config.reboot_required is defined and selinux_config.reboot_required) or
         crypto_policy_config is changed

@@ -1,4 +1,4 @@
 ---
 - name: Enable FIPS mode
-  include_tasks: enable.yml
+  ansible.builtin.include_tasks: enable.yml
   when: fips_setup_enable | bool

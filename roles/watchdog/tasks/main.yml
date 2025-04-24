@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,9 +8,9 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Enable system watchdog
-  include_tasks: enable.yml
+  ansible.builtin.include_tasks: enable.yml
   when: watchdog_enable | bool
 
 - name: Disable system watchdog
-  include_tasks: disable.yml
+  ansible.builtin.include_tasks: disable.yml
   when: not watchdog_enable | bool

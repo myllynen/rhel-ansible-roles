@@ -24,35 +24,35 @@
   register: suid_config
 
 - name: Update default coredump limit configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)DefaultLimitCORE=.*'
     line: 'DefaultLimitCORE=infinity'
   register: core_config
 
 - name: Update coredump storage configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/coredump.conf
     regexp: '^Storage=none'
     line: '#Storage=external'
   register: storage_config
 
 - name: Update coredump process size configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/coredump.conf
     regexp: '^ProcessSizeMax=0'
     line: 'ProcessSizeMax={{ system_coredump_process_size_max }}'
   register: process_config
 
 - name: Reload systemd to apply configuration changes
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   when: core_config is changed or
         storage_config is changed or
         process_config is changed
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: pattern_config is changed or
         limit_config is changed or

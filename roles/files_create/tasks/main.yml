@@ -1,6 +1,6 @@
 ---
 - name: Create directories
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ item.path }}"
     owner: "{{ item.owner | default(omit) }}"
@@ -12,7 +12,7 @@
     label: "{{ item.path }}"
 
 - name: Create files
-  file:
+  ansible.builtin.file:
     state: touch
     path: "{{ item.path }}"
     owner: "{{ item.owner | default(omit) }}"
@@ -26,7 +26,7 @@
     label: "{{ item.path }}"
 
 - name: Create symlinks
-  file:
+  ansible.builtin.file:
     state: link
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"

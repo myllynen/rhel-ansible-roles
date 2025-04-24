@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -10,12 +10,12 @@
         ansible_facts.fqdn is not defined
 
 - name: Fail if hostname is too long
-  fail:
+  ansible.builtin.fail:
     msg: "Maximum hostname length allowed is 63 characters."
   when: system_hostname | length > 63
 
 - name: Fail if hostname is invalid
-  fail:
+  ansible.builtin.fail:
     msg: "The provided hostname is invalid."
   when: system_hostname | regex_search("[^a-zA-Z0-9-.:]") is not none or
         system_hostname.startswith('-') or
@@ -24,7 +24,7 @@
         system_hostname.endswith('.')
 
 - name: Configure system hostname
-  hostname:
+  ansible.builtin.hostname:
     name: "{{ system_hostname }}"
     use: systemd
   register: hostname_config
@@ -34,6 +34,6 @@
     - system_hostname != 'localhost.localdomain'
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: hostname_config is changed

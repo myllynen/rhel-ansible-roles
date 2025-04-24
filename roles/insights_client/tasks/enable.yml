@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -18,25 +18,25 @@
       "{{ ['insights-client'] +
           (rhc_packages if insights_client_rhc_enable | bool else []) +
           (openscap_packages if insights_client_scap_enable | bool else []) }}"
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ required_packages | select }}"
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Update insights-client proxy server configuration
   vars:
     proxy_set: 'proxy={{ insights_client_proxy_server }}'
     proxy_not: '#proxy='
-  replace:
+  ansible.builtin.replace:
     path: /etc/insights-client/insights-client.conf
     regexp: '^(|#)proxy=.*'
     replace: '{{ proxy_set if insights_client_proxy_server else proxy_not }}'
   when: "'insights-client' in ansible_facts.packages"
 
 - name: Register system to Red Hat Insights
-  command:
+  ansible.builtin.command:
     cmd: >
       insights-client
       --register
@@ -48,7 +48,7 @@
   vars:
     tags_data: "{{ insights_client_tags | default({}, true) }}"
     tags_content: "{{ tags_data.keys() | zip(tags_data.values()) | map('join', ': ') | sort | unique | join('\n') }}"
-  copy:
+  ansible.builtin.copy:
     content: "{{ '' if not tags_content else tags_content + '\n' }}"
     dest: /etc/insights-client/tags.yaml
     mode: '0644'
@@ -56,14 +56,14 @@
   when: "'insights-client' in ansible_facts.packages"
 
 - name: Upload new data to Red Hat Insights
-  command: insights-client --silent
+  ansible.builtin.command: insights-client --silent
   changed_when: true
   when: tags_file is changed
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2175793
 - name: Check Red Hat Subscription Management configuration
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^hostname\s?=\s?subscription.rhsm.redhat.com'
     state: absent
@@ -71,7 +71,7 @@
   changed_when: false
 
 - name: Disable rhcd service
-  service:
+  ansible.builtin.service:
     name: rhcd
     enabled: false
   when:
@@ -79,7 +79,7 @@
     - registration_redhat.found == 0
 
 - name: Stop rhcd service
-  service:
+  ansible.builtin.service:
     name: rhcd
     state: stopped
   when:
@@ -87,7 +87,7 @@
     - registration_redhat.found == 0
 
 - name: Enable rhcd service
-  service:
+  ansible.builtin.service:
     name: rhcd
     enabled: true
   when:
@@ -96,7 +96,7 @@
     - registration_redhat.found == 1
 
 - name: Start rhcd service
-  service:
+  ansible.builtin.service:
     name: rhcd
     state: started
   when:

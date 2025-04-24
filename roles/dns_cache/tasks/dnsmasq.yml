@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,19 +8,19 @@
   when: ansible_facts.domain is not defined
 
 - name: Install dnsmasq package
-  dnf:
+  ansible.builtin.dnf:
     name: dnsmasq
     state: present
 
 - name: Create NetworkManager dnsmasq configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ dns_cache_nm_dnsmasq_config_file | default('dnsmasq.conf.j2', true) }}"
     dest: /etc/NetworkManager/dnsmasq.d/95-ansible.conf
     mode: '0644'
   register: dnsmasq_config
 
 - name: Update NetworkManager DNS cache configuration
-  copy:
+  ansible.builtin.copy:
     content: |
       [main]
       dns=dnsmasq
@@ -29,7 +29,7 @@
   register: nm_config
 
 - name: Reload NetworkManager to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: NetworkManager
     state: reloaded
   when: dnsmasq_config is changed or

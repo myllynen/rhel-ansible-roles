@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,7 +8,7 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install OpenSCAP packages
-  dnf:
+  ansible.builtin.dnf:
     name:
       - openscap
       - openscap-scanner
@@ -16,13 +16,13 @@
     state: "{{ scap_compliance_package_state }}"
 
 - name: Create oscap results directory
-  file:
+  ansible.builtin.file:
     path: "{{ scap_compliance_report_dir }}"
     state: directory
     mode: '0700'
 
 - name: Create tailoring file
-  template:
+  ansible.builtin.template:
     src: "{{ scap_compliance_tailoring_file_template }}"
     dest: "{{ scap_compliance_tailoring_file_path }}"
     mode: '0600'
@@ -31,7 +31,7 @@
     - scap_compliance_tailoring_file_path
 
 - name: Display security profile name
-  debug:
+  ansible.builtin.debug:
     var: scap_compliance_profile
 
 - name: Configure system security profile
@@ -40,7 +40,7 @@
     stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
     tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
     tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file | string, '', '') }}"
-  shell: >
+  ansible.builtin.shell: >
     set -o pipefail &&
     oscap xccdf eval --remediate
     --profile xccdf_org.ssgproject.content_profile_{{ scap_compliance_profile }}
@@ -60,17 +60,17 @@
   when: scap_compliance_remediate | bool
 
 - name: Display remediation results
-  debug:
+  ansible.builtin.debug:
     msg: "{{ remediate_status.stdout_lines }}"
   when: remediate_status is changed
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: remediate_status is changed
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when:
     - scap_compliance_remediate_reboot | bool
     - remediate_status is changed
@@ -81,7 +81,7 @@
     stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
     tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
     tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file | string, '', '') }}"
-  shell: >
+  ansible.builtin.shell: >
     set -o pipefail &&
     oscap xccdf eval
     --profile xccdf_org.ssgproject.content_profile_{{ scap_compliance_profile }}
@@ -99,14 +99,14 @@
   changed_when: false
 
 - name: Display compliance check result
-  debug:
+  ansible.builtin.debug:
     msg: >-
       Compliance check result for {{ inventory_hostname }}:
       {{ scap_compliance_profile }} -
       {{ 'PASSED' if eval_status.rc == 0 else 'FAILED' }}
 
 - name: Find failed compliance check items
-  shell: >
+  ansible.builtin.shell: >
     set -o pipefail ;
     grep -B 3 'fail$' {{ scap_compliance_report_dir }}/oscap-eval-output.txt
     | tr -d '\r'
@@ -117,17 +117,17 @@
   when: eval_status.rc == 2
 
 - name: Display failed compliance check items
-  debug:
+  ansible.builtin.debug:
     msg: "{{ grep_result.stdout_lines }}"
   when: eval_status.rc == 2
 
 - name: Display compliance check complete results
-  debug:
+  ansible.builtin.debug:
     var: eval_status
   when: scap_compliance_check_result_show_all | bool
 
 - name: Fail on compliance check failure if requested
-  fail:
+  ansible.builtin.fail:
     msg: "{{ scap_compliance_profile }} compliance check failed."
   when:
     - not scap_compliance_check_fail_role_pass | bool

@@ -1,14 +1,14 @@
 ---
 - name: Install firewalld package
-  dnf:
+  ansible.builtin.dnf:
     name: firewalld
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Disallow zone drifting configuration
-  replace:
+  ansible.builtin.replace:
     path: /etc/firewalld/firewalld.conf
     regexp: '^AllowZoneDrifting=yes'
     replace: 'AllowZoneDrifting=no'
@@ -16,20 +16,20 @@
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Enable firewalld service
-  service:
+  ansible.builtin.service:
     name: firewalld
     enabled: true
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Start firewalld service
-  service:
+  ansible.builtin.service:
     name: firewalld
     state: started
   register: service_start
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Reload firewalld to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: firewalld
     state: reloaded
   when:
@@ -38,15 +38,15 @@
     - firewalld_config is changed
 
 - name: Gather service facts
-  service_facts:
+  ansible.builtin.service_facts:
 
 - name: Configure default firewall zone
-  command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
+  ansible.builtin.command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
   register: firewall_cmd_result
   changed_when: "'ZONE_ALREADY_SET' not in firewall_cmd_result.stderr"
 
 - name: Set list of ports to open
-  set_fact:
+  ansible.builtin.set_fact:
     ports_to_open: "{{ firewall_open_ports | default([], true) | select | unique }}"
 
 - name: Open configured ports in firewall
@@ -61,7 +61,7 @@
 
 - name: Check open ports in firewall
   check_mode: false
-  command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
+  ansible.builtin.command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
   register: open_ports
   changed_when: false
   when:
@@ -85,7 +85,7 @@
 - name: Display unconfigured ports left open
   vars:
     unclosed_ports: "{{ open_ports.stdout.split(' ') | select | difference(ports_to_open) }}"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ unclosed_ports | join(' ') }}"
   when:
     - not firewall_close_unconfigured | bool
@@ -93,7 +93,7 @@
     - unclosed_ports | length > 0
 
 - name: Set list of services to open
-  set_fact:
+  ansible.builtin.set_fact:
     services_to_open: "{{ firewall_open_services | default([], true) | select | unique }}"
 
 - name: Open configured services in firewall
@@ -108,7 +108,7 @@
 
 - name: Check open services in firewall
   check_mode: false
-  command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
+  ansible.builtin.command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
   register: open_services
   changed_when: false
   when:
@@ -133,7 +133,7 @@
 - name: Display unconfigured services left open
   vars:
     unclosed_services: "{{ open_services.stdout.split(' ') | select | difference(services_to_open) | difference(['ssh']) }}"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ unclosed_services | join(' ') }}"
   when:
     - not firewall_close_unconfigured | bool

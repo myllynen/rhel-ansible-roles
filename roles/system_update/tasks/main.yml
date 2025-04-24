@@ -1,44 +1,44 @@
 ---
 - name: Update all packages
   # noqa: package-latest
-  dnf:
+  ansible.builtin.dnf:
     name: '*'
     state: latest
     update_cache: true
   register: package_install
 
 - name: Set package update timestamp
-  set_fact:
+  ansible.builtin.set_fact:
     patch_time: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
   when: system_update_display_updates | bool or
         system_update_email_report | bool
 
 - name: Set updated packages
-  set_fact:
+  ansible.builtin.set_fact:
     package_updates: "{{ package_install.results | default([]) | sort }}"
   when:
     - system_update_display_updates | bool or
       system_update_email_report | bool
 
 - name: Display list of updated packages
-  debug:
+  ansible.builtin.debug:
     msg: "{{ package_updates | join('\n') }}"
   when:
     - system_update_display_updates | bool
     - package_updates | default(false)
 
 - name: Install yum-utils package
-  dnf:
+  ansible.builtin.dnf:
     name: yum-utils
     state: present
   when: system_update_reboot_policy == 'when_needed'
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Check need for rebooting
   check_mode: false
-  command: needs-restarting --disableplugin=product-id,subscription-manager -r
+  ansible.builtin.command: needs-restarting --disableplugin=product-id,subscription-manager -r
   register: needs_restarting
   failed_when: false
   changed_when: false
@@ -47,7 +47,7 @@
     - system_update_reboot_policy == 'when_needed'
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   register: system_reboot
   when: (system_update_reboot_policy == 'always') or
         (system_update_reboot_policy == 'when_updated' and package_install is changed) or
@@ -56,7 +56,7 @@
          needs_restarting.rc != 0)
 
 - name: Send email report
-  include_tasks: report.yml
+  ansible.builtin.include_tasks: report.yml
   when:
     - system_update_email_report | bool
     - package_updates | default(false)

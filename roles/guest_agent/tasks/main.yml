@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -21,7 +21,7 @@
       - 'lib*firmware*'
       - 'n*firmware*'
       - "{{ 'linux-firmware-whence' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ firmware_packages | select }}"
     state: absent
     cacheonly: true
@@ -31,7 +31,7 @@
     - guest_agent_remove_firmware | bool
 
 - name: Remove all virtual guest packages
-  dnf:
+  ansible.builtin.dnf:
     name:
       - 'hyperv*'
       - open-vm-tools
@@ -45,7 +45,7 @@
         not guest_agent_enable | bool
 
 - name: Remove unneeded packages on Azure/Hyper-V
-  dnf:
+  ansible.builtin.dnf:
     name:
       - open-vm-tools
       - qemu-guest-agent
@@ -59,7 +59,7 @@
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on KVM
-  dnf:
+  ansible.builtin.dnf:
     name:
       - 'hyperv*'
       - open-vm-tools
@@ -74,7 +74,7 @@
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on Nutanix AHV
-  dnf:
+  ansible.builtin.dnf:
     name:
       - 'hyperv*'
       - qemu-guest-agent
@@ -91,7 +91,7 @@
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on VMware
-  dnf:
+  ansible.builtin.dnf:
     name:
       - 'hyperv*'
       - qemu-guest-agent
@@ -106,7 +106,7 @@
     - guest_agent_enable | bool
 
 - name: Remove unneeded packages on other VMs
-  dnf:
+  ansible.builtin.dnf:
     name:
       - 'hyperv*'
       - open-vm-tools
@@ -129,7 +129,7 @@
         - hyperv-daemons
         - WALinuxAgent
       VMware: open-vm-tools
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ agent_packages[ansible_facts.virtualization_type] }}"
     state: present
   when:
@@ -139,7 +139,7 @@
     - guest_agent_enable | bool
 
 - name: Gather service facts
-  service_facts:
+  ansible.builtin.service_facts:
   when:
     - ansible_facts.system_vendor != "Nutanix"
     - ansible_facts.virtualization_role == "guest"
@@ -152,7 +152,7 @@
       kvm: qemu-guest-agent.service
       VirtualPC: waagent.service
       VMware: vmtoolsd.service
-  service:
+  ansible.builtin.service:
     name: "{{ agent_services[ansible_facts.virtualization_type] }}"
     enabled: true
   when:
@@ -169,7 +169,7 @@
       kvm: qemu-guest-agent.service
       VirtualPC: waagent.service
       VMware: vmtoolsd.service
-  service:
+  ansible.builtin.service:
     name: "{{ agent_services[ansible_facts.virtualization_type] }}"
     state: started
   when:

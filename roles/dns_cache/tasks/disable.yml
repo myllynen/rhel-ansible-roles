@@ -1,9 +1,9 @@
 ---
 - name: Gather service facts
-  service_facts:
+  ansible.builtin.service_facts:
 
 - name: Disable nscd service
-  service:
+  ansible.builtin.service:
     name: nscd
     enabled: false
   when:
@@ -12,7 +12,7 @@
       dns_cache_component != 'nscd'
 
 - name: Stop nscd service
-  service:
+  ansible.builtin.service:
     name: nscd
     state: stopped
   when:
@@ -21,13 +21,13 @@
       dns_cache_component != 'nscd'
 
 - name: Read NetworkManager DNS cache configuration
-  slurp:
+  ansible.builtin.slurp:
     src: /etc/NetworkManager/conf.d/95-dns-cache.conf
   register: current_config
   failed_when: false
 
 - name: Update NetworkManager DNS cache configuration
-  copy:
+  ansible.builtin.copy:
     content: |
       [main]
       #dns=
@@ -40,7 +40,7 @@
        dns_cache_component not in current_config.content | b64decode)
 
 - name: Disable systemd-resolved service
-  service:
+  ansible.builtin.service:
     name: systemd-resolved
     enabled: false
   when:
@@ -49,7 +49,7 @@
       dns_cache_component != 'systemd-resolved'
 
 - name: Stop systemd-resolved service
-  service:
+  ansible.builtin.service:
     name: systemd-resolved
     state: stopped
   when:
@@ -58,7 +58,7 @@
       dns_cache_component != 'systemd-resolved'
 
 - name: Reload NetworkManager to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: NetworkManager
     state: reloaded
   when: nm_config is changed

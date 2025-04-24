@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,13 +8,13 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install grubby package
-  dnf:
+  ansible.builtin.dnf:
     name: grubby
     state: present
   when: false
 
 - name: Create default boot parameter configuration file
-  file:
+  ansible.builtin.file:
     path: /etc/default/grub
     state: touch
     owner: root
@@ -25,7 +25,7 @@
 
 - name: Check enabled boot parameters
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
     state: absent
@@ -35,7 +35,7 @@
 
 - name: Check disabled boot parameters
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
     state: absent
@@ -44,7 +44,7 @@
   loop: "{{ boot_parameters_disable | select }}"
 
 - name: Configure boot parameters
-  command: >
+  ansible.builtin.command: >
     grubby
     --update-kernel=ALL
     --args="{{ boot_parameters_enable | default([], true) | join(' ') }}"
@@ -55,7 +55,7 @@
         1 in disable_check.results | map(attribute='found')
 
 - name: Update boot loader timeout configuration
-  replace:
+  ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^GRUB_TIMEOUT=.*'
     replace: 'GRUB_TIMEOUT={{ boot_parameters_timeout }}'
@@ -65,7 +65,7 @@
     - boot_parameters_timeout | int >= 1
 
 - name: Determine platform type
-  stat:
+  ansible.builtin.stat:
     path: /sys/firmware/efi
   register: efi_dir
 
@@ -73,12 +73,12 @@
   vars:
     old_rhel: "{{ true if ansible_facts.distribution_major_version | int < 9 else false }}"
     efi_path: "{{ true if old_rhel and efi_dir.stat.exists else false }}"
-  set_fact:
+  ansible.builtin.set_fact:
     grub_config: "{{ '/boot/grub2/grub.cfg' if not efi_path else '/boot/efi/EFI/redhat/grub.cfg' }}"
     user_config: "{{ '/boot/grub2/user.cfg' if not efi_path else '/boot/efi/EFI/redhat/user.cfg' }}"
 
 - name: Update boot loader password configuration
-  copy:
+  ansible.builtin.copy:
     content: |
       GRUB2_PASSWORD={{ boot_parameters_password }}
     dest: "{{ user_config }}"
@@ -87,27 +87,27 @@
   when: boot_parameters_password | default(false)
 
 - name: Remove boot loader password configuration
-  file:
+  ansible.builtin.file:
     state: absent
     path: "{{ user_config }}"
   register: password_remove
   when: not boot_parameters_password | default(true)
 
 - name: Write boot loader configuration
-  command: grub2-mkconfig -o {{ grub_config }}
+  ansible.builtin.command: grub2-mkconfig -o {{ grub_config }}
   changed_when: true
   when: boot_timeout is changed or
         password_remove is changed or
         password_update is changed
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when:
     - boot_parameters_reboot | bool
     - boot_config is changed
 
 - name: Clear gathered facts
-  meta: clear_facts
+  ansible.builtin.meta: clear_facts
   when:
     - boot_parameters_reboot | bool
     - boot_config is changed

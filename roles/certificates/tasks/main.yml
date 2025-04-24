@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,7 +8,7 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Copy certificate anchor files
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: /etc/pki/ca-trust/source/anchors/{{ item | basename }}
     mode: '0644'
@@ -18,7 +18,7 @@
 - name: Copy certificate blocklist files
   vars:
     block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: /etc/pki/ca-trust/source/{{ block_dir }}/{{ item | basename }}
     mode: '0644'
@@ -26,7 +26,7 @@
   loop: "{{ certificates_files_blocklist | default([], true) }}"
 
 - name: Copy certificate extended format files
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: /etc/pki/ca-trust/source/{{ item | basename }}
     mode: '0644'
@@ -45,17 +45,17 @@
       - /etc/pki/ca-trust/source/anchors/*
       - /etc/pki/ca-trust/source/{{ block_dir }}/*
       - /etc/pki/ca-trust/source/*
-    files_remove_exclude: "{{ system_files +
+    files_remove_exclude: "{{ system_files | list +
                               certificates_files_known | default([], true) +
                               anchor_files.results | map(attribute='invocation.module_args.dest') | list +
                               blocklist_files.results | map(attribute='invocation.module_args.dest') | list +
                               ext_files.results | map(attribute='invocation.module_args.dest') | list }}"
-  include_role:
+  ansible.builtin.include_role:
     name: files_remove
   when: certificates_exclusive | bool
 
 - name: Write extracted certificate configuration files
-  command: update-ca-trust extract
+  ansible.builtin.command: update-ca-trust extract
   changed_when: true
   when: (anchor_files is changed or blocklist_files is changed or ext_files is changed) or
         (certificates_exclusive | bool and remove_files is changed)

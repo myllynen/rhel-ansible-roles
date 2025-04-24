@@ -1,13 +1,13 @@
 ---
 - name: Remove dracut-config-rescue package
-  dnf:
+  ansible.builtin.dnf:
     name: dracut-config-rescue
     state: absent
     cacheonly: true
     disablerepo: '*'
 
 - name: Locate rescue images
-  find:
+  ansible.builtin.find:
     paths:
       - /boot
       - /boot/loader/entries
@@ -15,7 +15,7 @@
   register: rescue_images
 
 - name: Remove rescue images
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop: "{{ rescue_images.files | map(attribute='path') }}"

@@ -1,6 +1,6 @@
 ---
 - name: Remove unwanted packages
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ packages_remove | select }}"
     state: absent
     autoremove: false
@@ -9,7 +9,7 @@
   register: package_remove
 
 - name: Remove unneeded leaf packages
-  dnf:
+  ansible.builtin.dnf:
     state: absent
     autoremove: true
     cacheonly: true
@@ -18,7 +18,7 @@
   when: packages_remove_autoremove | bool
 
 - name: Display package changes
-  include_tasks: display.yml
+  ansible.builtin.include_tasks: display.yml
   when:
     - packages_remove_display_results | bool
     - package_remove is changed or

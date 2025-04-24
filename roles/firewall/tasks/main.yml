@@ -1,12 +1,12 @@
 ---
 - name: Enable firewall
-  include_tasks: enable.yml
+  ansible.builtin.include_tasks: enable.yml
   when:
     - firewall_enable is not none
     - firewall_enable | bool
 
 - name: Disable firewall
-  include_tasks: disable.yml
+  ansible.builtin.include_tasks: disable.yml
   when:
     - firewall_enable is not none
     - not firewall_enable | bool

@@ -1,13 +1,13 @@
 ---
 - name: Install wanted packages
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ packages_install | select }}"
     state: present
     install_weak_deps: "{{ packages_install_weak_deps | bool }}"
   register: package_install
 
 - name: Display package changes
-  include_tasks: display.yml
+  ansible.builtin.include_tasks: display.yml
   when:
     - packages_install_display_results | bool
     - package_install is changed

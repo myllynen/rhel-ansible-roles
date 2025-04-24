@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,33 +8,33 @@
   when: ansible_facts.virtualization_role is not defined
 
 - name: Install tuned package
-  dnf:
+  ansible.builtin.dnf:
     name: tuned
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Enable tuned service
-  service:
+  ansible.builtin.service:
     name: tuned
     enabled: true
   when: "'tuned' in ansible_facts.packages"
 
 - name: Start tuned service
-  service:
+  ansible.builtin.service:
     name: tuned
     state: started
   when: "'tuned' in ansible_facts.packages"
 
 - name: Read current tuned profile
-  slurp:
+  ansible.builtin.slurp:
     src: /etc/tuned/active_profile
   register: active_profile
   when: "'tuned' in ansible_facts.packages"
 
 - name: Configure tuned profile
-  command: tuned-adm profile {{ tuned_profile }}
+  ansible.builtin.command: tuned-adm profile {{ tuned_profile }}
   changed_when: true
   when:
     - "'tuned' in ansible_facts.packages"

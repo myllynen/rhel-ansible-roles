@@ -12,14 +12,14 @@
       {% if resolver_options %}
       options={{ resolver_options | join(',') }}
       {% endif %}
-  copy:
+  ansible.builtin.copy:
     content: "{{ nm_resolver_conf_content }}"
     dest: /etc/NetworkManager/conf.d/50-resolver.conf
     mode: '0644'
   register: nm_resolver_config
 
 - name: Update NetworkManager resolver management configuration
-  copy:
+  ansible.builtin.copy:
     content: |
       [main]
       rc-manager=file
@@ -28,7 +28,7 @@
   register: nm_rc_manager_config
 
 - name: Reload NetworkManager to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: NetworkManager
     state: reloaded
   when: nm_resolver_config is changed or

@@ -1,6 +1,6 @@
 ---
 - name: Create PDF report
-  include_tasks: pdf.yml
+  ansible.builtin.include_tasks: pdf.yml
   when: system_update_report_pre_pdf | bool
 
 - name: Send email notification about upcoming updates
@@ -30,7 +30,7 @@
   become: false
 
 - name: Remove local PDF directory
-  file:
+  ansible.builtin.file:
     path: "{{ system_update_report_pre_pdf_dir }}"
     state: absent
   delegate_to: localhost

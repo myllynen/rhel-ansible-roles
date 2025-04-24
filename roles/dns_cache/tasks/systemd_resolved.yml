@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,28 +8,28 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Install systemd-resolved package
-  dnf:
+  ansible.builtin.dnf:
     name: systemd-resolved
     state: present
   when: ansible_facts.distribution_major_version | int != 8
 
 - name: Gather service facts
-  service_facts:
+  ansible.builtin.service_facts:
 
 - name: Enable systemd-resolved service
-  service:
+  ansible.builtin.service:
     name: systemd-resolved
     enabled: true
   when: "'systemd-resolved.service' in ansible_facts.services"
 
 - name: Start systemd-resolved service
-  service:
+  ansible.builtin.service:
     name: systemd-resolved
     state: started
   when: "'systemd-resolved.service' in ansible_facts.services"
 
 - name: Update NetworkManager DNS cache configuration
-  copy:
+  ansible.builtin.copy:
     content: |
       [main]
       dns=systemd-resolved
@@ -39,7 +39,7 @@
   register: nm_config
 
 - name: Reload NetworkManager to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: NetworkManager
     state: reloaded
   when: nm_config is changed

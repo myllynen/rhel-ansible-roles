@@ -1,14 +1,14 @@
 ---
 - name: Install troubleshooting tools
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ troubleshooting_tools | select }}"
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Enable performance metrics monitoring
-  service:
+  ansible.builtin.service:
     name: pmcd
     state: started
     enabled: true
@@ -18,7 +18,7 @@
     - troubleshooting_tools_enable_perf_metrics | bool
 
 - name: Enable performance metrics archiving
-  service:
+  ansible.builtin.service:
     name: pmlogger
     state: started
     enabled: true

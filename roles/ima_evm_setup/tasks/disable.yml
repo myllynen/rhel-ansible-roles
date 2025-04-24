@@ -1,35 +1,35 @@
 ---
 - name: Remove IMA policy configuration file
-  file:
+  ansible.builtin.file:
     path: /etc/ima/ima-policy
     state: absent
   register: ima_policy
 
 - name: Disable dracut integrity module
-  file:
+  ansible.builtin.file:
     path: /etc/dracut.conf.d/98-integrity.conf
     state: absent
   register: dracut_config
 
 - name: Remove RPM IMA plugin package
-  dnf:
+  ansible.builtin.dnf:
     name: rpm-plugin-ima
     cacheonly: true
     state: absent
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: dracut_config is changed
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when: ima_policy is changed or
         dracut_config is changed
 
 - name: Check current IMA policy configuration
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /sys/kernel/security/ima/policy
     regexp: '^appraise.*'
     state: absent
@@ -37,22 +37,22 @@
   changed_when: false
 
 - name: Fail if IMA policy loaded
-  fail:
+  ansible.builtin.fail:
     msg: "IMA policy still loaded, cannot proceed."
   when: ima_policy_check.found
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Check IMA security attributes on files
-  command: getfattr -m - -d /usr/bin/ima-setup
+  ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
   check_mode: false
   register: fattr_info
   changed_when: false
   when: "'attr' in ansible_facts.packages"
 
 - name: Remove IMA security attributes from files
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -print0 | \
       xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :

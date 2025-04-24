@@ -1,8 +1,8 @@
 ---
 - name: Disable USBGuard
-  include_tasks: disable.yml
+  ansible.builtin.include_tasks: disable.yml
   when: usbguard_setup_policy == 'allow'
 
 - name: Enable USBGuard
-  include_tasks: enable.yml
+  ansible.builtin.include_tasks: enable.yml
   when: usbguard_setup_policy != 'allow'

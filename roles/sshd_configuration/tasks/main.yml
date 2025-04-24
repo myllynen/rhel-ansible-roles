@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -10,11 +10,11 @@
         ansible_facts.distribution_major_version is not defined
 
 - name: Set sshd options to enable
-  set_fact:
+  ansible.builtin.set_fact:
     sshd: "{{ sshd_options | default({}, true) }}"
 
 - name: Fail if root trying to block root access completely
-  fail:
+  ansible.builtin.fail:
     msg: "Refusing to configure 'PermitRootLogin no' when connected as root."
   when:
     - "'SUDO_USER' not in ansible_facts.env"
@@ -22,20 +22,20 @@
     - "sshd.PermitRootLogin == 'no'"
 
 - name: Set sshd options to disable
-  set_fact:
+  ansible.builtin.set_fact:
     sshd_disable: "{{ sshd_options_disable | default([], true) }}"
 
 - name: Check sshd_config.d directory
-  stat:
+  ansible.builtin.stat:
     path: /etc/ssh/sshd_config.d
   register: config_dir
 
 - name: Set sshd configuration file to use
-  set_fact:
+  ansible.builtin.set_fact:
     config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-ansible.conf' }}"
 
 - name: Locate other sshd configuration files
-  find:
+  ansible.builtin.find:
     paths: /etc/ssh/sshd_config.d
     patterns: '*.conf'
   register: config_files
@@ -47,7 +47,7 @@
       - ssh/sshd_config
       - ssh/sshd_config.d/50-redhat.conf
       - "{{ 'sysconfig/sshd' if not sshd_sysconfig_file else '' }}"
-  copy:
+  ansible.builtin.copy:
     src: "{{ item | basename }}"
     dest: /etc/{{ item }}
     mode: "{{ '0640' if item == 'sysconfig/sshd' else '0600' }}"
@@ -62,7 +62,7 @@
     - ansible_facts.distribution_major_version | int >= 9
 
 - name: Copy sshd sysconfig file
-  copy:
+  ansible.builtin.copy:
     src: "{{ sshd_sysconfig_file }}"
     dest: /etc/sysconfig/sshd
     mode: '0640'
@@ -90,7 +90,7 @@
       {{ item.key }} {{ item.value }}
       {% endif %}
       {% endfor %}
-  copy:
+  ansible.builtin.copy:
     content: "{{ file_content }}"
     dest: "{{ config_file }}"
     mode: '0600'
@@ -101,7 +101,7 @@
     - ansible_facts.distribution_major_version | int >= 9
 
 - name: Enable sshd configuration options
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ config_file }}"
     regexp: '^(|#){{ item.key }} .*'
     line: '{{ item.key + " " + item.value | string }}'
@@ -118,7 +118,7 @@
   vars:
     main_file: /etc/ssh/sshd_config
     update_files: "{{ [main_file] + config_files.files | default([]) | map(attribute='path') }}"
-  replace:
+  ansible.builtin.replace:
     path: "{{ item.0 }}"
     regexp: '^({{ item.1 }} .*)'
     replace: '#\1'
@@ -132,14 +132,14 @@
     files_remove:
       - /etc/ssh/sshd_config.d/*
     files_remove_exclude: "{{ [self_config] + sshd_configuration_files_known | default([], true) }}"
-  include_role:
+  ansible.builtin.include_role:
     name: files_remove
   when:
     - config_dir.stat.exists
     - sshd_configuration_exclusive | bool
 
 - name: Reload sshd to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: sshd
     state: reloaded
   when: files_reset is changed or

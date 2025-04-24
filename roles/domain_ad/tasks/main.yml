@@ -1,16 +1,16 @@
 ---
 - name: Prepare for AD domain operation
-  include_tasks: prepare.yml
+  ansible.builtin.include_tasks: prepare.yml
   when: domain_ad_domain
 
 - name: Join AD domain
-  include_tasks: join.yml
+  ansible.builtin.include_tasks: join.yml
   when:
     - domain_ad_domain
     - domain_ad_action == 'join'
 
 - name: Leave AD domain
-  include_tasks: leave.yml
+  ansible.builtin.include_tasks: leave.yml
   when:
     - domain_ad_domain
     - domain_ad_action == 'leave'

@@ -1,14 +1,14 @@
 ---
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Remove old kernel packages
-  command: dnf -C remove --oldinstallonly -y
+  ansible.builtin.command: dnf -C remove --oldinstallonly -y
   changed_when: true
   when: ansible_facts.packages['kernel'] | length > 1
 
 - name: Locate NIC ifcfg configuration files
-  find:
+  ansible.builtin.find:
     paths: /etc/sysconfig/network-scripts
     patterns:
       - 'ifcfg-e*'
@@ -17,7 +17,7 @@
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2050704
 - name: Fix VMware NIC configuration
-  replace:
+  ansible.builtin.replace:
     path: "{{ item }}"
     regexp: '^\ncheck_link_down\(\) {\n return 1; \n}\n$'
     replace: ''
@@ -25,17 +25,17 @@
   loop: "{{ ifcfg_files.files | map(attribute='path') }}"
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: nic_config is changed
 
 - name: Check installer log directory
-  stat:
+  ansible.builtin.stat:
     path: /var/log/anaconda
   register: installer_logdir
 
 - name: Locate installer leftover root files
-  find:
+  ansible.builtin.find:
     paths: /root
     patterns:
       - '*-ks.cfg'
@@ -43,7 +43,7 @@
   register: root_files
 
 - name: Locate installer leftover kickstart files
-  find:
+  ansible.builtin.find:
     paths: /tmp
     patterns:
       - 'ks-script-*'
@@ -51,12 +51,12 @@
   when: installer_logdir.stat.exists
 
 - name: Set list of installer leftover files
-  set_fact:
+  ansible.builtin.set_fact:
     installer_files: "{{ (root_files.files + kickstart_files.files) | map(attribute='path') }}"
   when: installer_logdir.stat.exists
 
 - name: Store installer leftover files
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: /var/log/anaconda
     mode: '0700'
@@ -79,7 +79,7 @@
     - installer_logdir.stat.exists
 
 - name: Locate leftover temp files
-  find:
+  ansible.builtin.find:
     paths: /tmp
     patterns:
       - '.cache'
@@ -93,27 +93,27 @@
   register: leftover_files
 
 - name: Remove all leftover files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') }}"
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when:
     - "'reboot' in system_init_final_actions"
     - inventory_hostname != 'localhost'
 
 # Use removes: to only run on registered systems
 - name: Update RHSM system facts
-  command:
+  ansible.builtin.command:
     cmd: subscription-manager facts --update
     removes: /var/lib/rhsm/facts/facts.json
   failed_when: false
   changed_when: true
 
 - name: Mark system initialized
-  copy:
+  ansible.builtin.copy:
     content: "This system was initialized by system_init on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
     dest: "{{ __system_init_file }}"
     mode: '0644'

@@ -8,7 +8,7 @@
   when: swap_setup_vg_name
 
 - name: Check logical volume path
-  command: >
+  ansible.builtin.command: >
     lvs
     --no-headings --readonly -o lv_dm_path
     --select vg_name={{ swap_setup_vg_name }},lv_name={{ swap_setup_lv_name }}
@@ -18,14 +18,14 @@
   when: swap_setup_vg_name
 
 - name: Check swap area on logical volume
-  command: blkid -L {{ swap_setup_lv_name }}
+  ansible.builtin.command: blkid -L {{ swap_setup_lv_name }}
   register: blkid_output
   failed_when: false
   changed_when: false
   when: swap_setup_vg_name
 
 - name: Setup swap area on logical volume
-  command: mkswap -L swap {{ lvs_output.stdout }}
+  ansible.builtin.command: mkswap -L swap {{ lvs_output.stdout }}
   changed_when: true
   when:
     - swap_setup_vg_name
@@ -41,14 +41,14 @@
   when: swap_setup_vg_name
 
 - name: Check swap status
-  command: swapon --noheadings --show=LABEL
+  ansible.builtin.command: swapon --noheadings --show=LABEL
   register: swapon_output
   failed_when: false
   changed_when: false
   when: swap_setup_vg_name
 
 - name: Enable swap
-  command: swapon -L {{ swap_setup_lv_name }}
+  ansible.builtin.command: swapon -L {{ swap_setup_lv_name }}
   changed_when: true
   when:
     - swap_setup_vg_name
@@ -56,6 +56,6 @@
     - swapon_output.stdout | trim != swap_setup_lv_name
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: fstab_config is changed

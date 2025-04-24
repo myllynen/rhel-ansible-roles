@@ -1,46 +1,46 @@
 ---
 - name: Install crypto-policies-scripts package
-  dnf:
+  ansible.builtin.dnf:
     name: crypto-policies-scripts
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Check FIPS mode
   check_mode: false
-  command: fips-mode-setup --is-enabled
+  ansible.builtin.command: fips-mode-setup --is-enabled
   register: fips_mode
   failed_when: false
   changed_when: false
   when: "'crypto-policies-scripts' in ansible_facts.packages"
 
 - name: Configure FIPS mode
-  command: fips-mode-setup --enable
+  ansible.builtin.command: fips-mode-setup --enable
   changed_when: true
   when: fips_mode.rc != 0
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when: fips_mode.rc != 0
 
 - name: Verify FIPS mode (CPU)
   check_mode: false
-  command: grep -w aes /proc/cpuinfo
+  ansible.builtin.command: grep -w aes /proc/cpuinfo
   register: cpu_flags
   failed_when: "'aes' not in cpu_flags.stdout"
   changed_when: false
 
 - name: Verify FIPS mode (system)
   check_mode: false
-  command: fips-mode-setup --is-enabled
+  ansible.builtin.command: fips-mode-setup --is-enabled
   register: fips_mode
   failed_when: fips_mode.rc != 0
   changed_when: false
 
 - name: Verify FIPS mode (crypto policies)
   check_mode: false
-  command: update-crypto-policies --show
+  ansible.builtin.command: update-crypto-policies --show
   register: crypto_policies
   failed_when: "'FIPS' not in crypto_policies.stdout"
   changed_when: false

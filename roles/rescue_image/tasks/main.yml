@@ -1,8 +1,8 @@
 ---
 - name: Enable rescue image
-  include_tasks: enable.yml
+  ansible.builtin.include_tasks: enable.yml
   when: rescue_image_enable | bool
 
 - name: Disable rescue image
-  include_tasks: disable.yml
+  ansible.builtin.include_tasks: disable.yml
   when: not rescue_image_enable | bool

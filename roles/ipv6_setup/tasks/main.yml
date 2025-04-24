@@ -1,17 +1,17 @@
 ---
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 # This role may run before repositories are setup
 - name: Install grubby package
-  dnf:
+  ansible.builtin.dnf:
     name: grubby
     state: present
   when: "'grubby' not in ansible_facts.packages"
 
 - name: Check IPv6 boot parameter
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| )ipv6.disable(=| |")'
     state: absent
@@ -19,7 +19,7 @@
   changed_when: false
 
 - name: Remove IPv6 boot parameter
-  command: >
+  ansible.builtin.command: >
     grubby
     --update-kernel=ALL
     --remove-args="ipv6.disable"
@@ -32,7 +32,7 @@
     disable_ipv6: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
     loopback_disable_ipv6: >
       {{ '1' if not ipv6_setup_enable | bool and not ipv6_setup_loopback_persist | bool else '0' }}
-  copy:
+  ansible.builtin.copy:
     content: |
       net.ipv6.conf.all.disable_ipv6 = {{ disable_ipv6 }}
       net.ipv6.conf.default.disable_ipv6 = {{ disable_ipv6 }}
@@ -42,7 +42,7 @@
   register: sysctl_config
 
 - name: Locate NIC ifcfg configuration files
-  find:
+  ansible.builtin.find:
     paths: /etc/sysconfig/network-scripts
     patterns:
       - 'ifcfg-e*'
@@ -51,7 +51,7 @@
   when: ipv6_setup_configure_nm | bool
 
 - name: Locate NM connection configuration files
-  find:
+  ansible.builtin.find:
     paths: /etc/NetworkManager/system-connections
     patterns:
       - '*.nmconnection'
@@ -61,7 +61,7 @@
 - name: Update IPv6 configuration in NIC ifcfg files
   vars:
     disable_ipv6: "{{ 'yes' if ipv6_setup_enable | bool else 'no' }}"
-  replace:
+  ansible.builtin.replace:
     path: "{{ item }}"
     regexp: '^IPV6INIT=.*'
     replace: 'IPV6INIT={{ disable_ipv6 }}'
@@ -72,7 +72,7 @@
 - name: Update IPv6 configuration in NM connection files
   vars:
     disable_ipv6: "{{ 'auto' if ipv6_setup_enable | bool else 'disabled' }}"
-  replace:
+  ansible.builtin.replace:
     path: "{{ item }}"
     after: '\[ipv6\]'
     before: '\[proxy\]'
@@ -83,12 +83,12 @@
   when: ipv6_setup_configure_nm | bool
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: sysctl_config is changed
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when: boot_config is changed or
         sysctl_config is changed or
         ifcfg_config is changed or

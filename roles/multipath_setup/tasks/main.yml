@@ -1,11 +1,11 @@
 ---
 - name: Install multipath packages
-  dnf:
+  ansible.builtin.dnf:
     name: device-mapper-multipath
     state: present
 
 - name: Copy multipath configuration file
-  copy:
+  ansible.builtin.copy:
     src: "{{ multipath_setup_config_file }}"
     dest: /etc/multipath.conf
     mode: '0600'
@@ -13,13 +13,13 @@
   when: multipath_setup_config_file
 
 - name: Enable multipathd service
-  service:
+  ansible.builtin.service:
     name: multipathd
     enabled: true
   when: multipath_setup_config_file
 
 - name: Start multipathd service
-  service:
+  ansible.builtin.service:
     name: multipathd
     state: started
   register: service_start
@@ -28,7 +28,7 @@
     - not multipath_setup_reboot | bool
 
 - name: Reload multipathd to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: multipathd
     state: reloaded
   when:
@@ -37,12 +37,12 @@
     - multipath_config is changed
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: multipath_config is changed
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when:
     - multipath_setup_reboot | bool
     - multipath_config is changed

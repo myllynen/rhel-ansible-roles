@@ -3,7 +3,7 @@
   vars:
     leave_action: "{{ 'delete-computer' if domain_ad_leave_computer_delete | bool else 'reset-computer' }}"
   no_log: true
-  shell: >
+  ansible.builtin.shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
     adcli -v {{ leave_action }}
@@ -15,42 +15,42 @@
   when: krb5_keytab.stat.exists
 
 - name: Disable sssd-kcm socket
-  service:
+  ansible.builtin.service:
     name: sssd-kcm.socket
     enabled: false
   when: "'sssd-kcm' in ansible_facts.packages"
 
 - name: Disable sssd service
-  service:
+  ansible.builtin.service:
     name: sssd
     enabled: false
   when: "'sssd' in ansible_facts.packages"
 
 - name: Stop sssd service
-  service:
+  ansible.builtin.service:
     name: sssd
     state: stopped
   when: "'sssd' in ansible_facts.packages"
 
 - name: Disable oddjobd service
-  service:
+  ansible.builtin.service:
     name: oddjobd
     enabled: false
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Stop oddjobd service
-  service:
+  ansible.builtin.service:
     name: oddjobd
     state: stopped
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Remove Kerberos keytab file
-  file:
+  ansible.builtin.file:
     path: /etc/krb5.keytab
     state: absent
 
 - name: Remove SSSD cache files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:

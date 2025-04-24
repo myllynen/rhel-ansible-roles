@@ -1,29 +1,29 @@
 ---
 - name: Fail if unsafe globbing in use
-  fail:
+  ansible.builtin.fail:
     msg: "Refusing to expand unsafe globbing '*'."
   when: "'*' in files_remove | default([], true) or
          '/*' in files_remove | default([], true)"
 
 - name: Fail if incorrect path format in use
-  fail:
+  ansible.builtin.fail:
     msg: "Path must contain '/'."
   loop: "{{ files_remove | default([], true) + files_remove_exclude | default([], true) }}"
   when: "'/' not in item"
 
 - name: Fail if incorrect exclude format in use
-  fail:
+  ansible.builtin.fail:
     msg: "Globbing not supported for exclusion."
   loop: "{{ files_remove_exclude | default([], true) }}"
   when: "'*' in item or '?' in item or '[' in item"
 
 - name: Fail if incorrect globbing pattern in use
-  fail:
+  ansible.builtin.fail:
     msg: "Globbing only supported for the last element."
   loop: "{{ files_remove | default([], true) | map('dirname') | select('search', '\\?|\\*|\\[') }}"
 
 - name: Locate globbed files and directories to be removed
-  find:
+  ansible.builtin.find:
     paths: "{{ item | dirname }}"
     patterns: "{{ item | basename }}"
     file_type: any
@@ -34,11 +34,11 @@
 
 # Remove set paths from possible previous role execution
 - name: Initialize list of globbed files and directories
-  set_fact:
+  ansible.builtin.set_fact:
     glob_paths: []
 
 - name: Set globbed files and directories to remove
-  set_fact:
+  ansible.builtin.set_fact:
     glob_paths: "{{ glob_paths + item.files | map(attribute='path') }}"
   loop: "{{ remove_globs.results }}"
   loop_control:
@@ -47,7 +47,7 @@
 - name: Remove files and directories
   vars:
     plain_paths: "{{ files_remove | select | reject('search', '\\?|\\*|\\[') }}"
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   register: remove_files

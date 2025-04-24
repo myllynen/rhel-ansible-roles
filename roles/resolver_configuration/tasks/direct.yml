@@ -1,12 +1,12 @@
 ---
 - name: Remove NetworkManager resolver configuration options file
-  file:
+  ansible.builtin.file:
     path: /etc/NetworkManager/conf.d/50-resolver.conf
     state: absent
   register: nm_resolver_config
 
 - name: Update NetworkManager resolver management configuration
-  copy:
+  ansible.builtin.copy:
     content: |
       [main]
       rc-manager=unmanaged
@@ -15,7 +15,7 @@
   register: nm_rc_manager_config
 
 - name: Reload NetworkManager to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: NetworkManager
     state: reloaded
   when: nm_resolver_config is changed or
@@ -33,7 +33,7 @@
       {% if resolver_options %}
       options {{ resolver_options | join(' ') }}
       {% endif %}
-  copy:
+  ansible.builtin.copy:
     content: "{{ etc_resolv_conf_content }}"
     dest: /etc/resolv.conf
     mode: '0644'

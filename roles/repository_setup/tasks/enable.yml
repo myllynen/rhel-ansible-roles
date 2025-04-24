@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -9,14 +9,14 @@
 
 - name: Configure Red Hat subscription using curl URL
   # noqa: command-instead-of-module
-  shell: set -o pipefail ; curl {{ repository_setup_rhsm_curl_args }} | bash
+  ansible.builtin.shell: set -o pipefail ; curl {{ repository_setup_rhsm_curl_args }} | bash
   register: curl_command
   failed_when: curl_command.rc != 0 and 'already registered' not in curl_command.stderr
   changed_when: "'already registered' not in curl_command.stderr"
   when: repository_setup_rhsm_curl_args
 
 - name: Install katello-ca-consumer-latest package
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ repository_setup_rhsm_parameters.rhsm_baseurl }}/pub/katello-ca-consumer-latest.noarch.rpm"
     state: present
     disable_gpg_check: true
@@ -83,7 +83,7 @@
     - repository_setup_rhsm_repositories_enable
 
 - name: Update RHSM system facts
-  command: subscription-manager facts --update
+  ansible.builtin.command: subscription-manager facts --update
   changed_when: true
   when: repository_setup_rhsm_facts_update_always | bool or
         subscription_state is changed or
@@ -94,17 +94,17 @@
 - name: Update subscription-manager package profile update policy configuration
   vars:
     option_value: "{{ '1' if repository_setup_package_profile_on_trans | bool else '0' }}"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/rhsm/rhsm.conf
     regexp: '^(#|)package_profile_on_trans\s?=.*'
     line: 'package_profile_on_trans = {{ option_value }}'
 
 - name: Enable rhsmcertd service
-  service:
+  ansible.builtin.service:
     name: rhsmcertd
     enabled: true
 
 - name: Start rhsmcertd service
-  service:
+  ansible.builtin.service:
     name: rhsmcertd
     state: started

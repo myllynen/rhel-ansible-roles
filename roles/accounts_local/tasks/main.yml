@@ -1,19 +1,19 @@
 ---
 - name: Delete local user
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     state: absent
     remove: true
   loop: "{{ accounts_local_users_delete | select }}"
 
 - name: Delete local group
-  group:
+  ansible.builtin.group:
     name: "{{ item }}"
     state: absent
   loop: "{{ accounts_local_groups_delete | select }}"
 
 - name: Create local group
-  group:
+  ansible.builtin.group:
     name: "{{ item.name }}"
     state: present
     gid: "{{ item.gid }}"
@@ -21,14 +21,14 @@
 
 - name: Create passwordless list of local users to create
   no_log: "{{ accounts_local_no_log }}"
-  set_fact:
+  ansible.builtin.set_fact:
     create_users: "{{ create_users | default([]) + [item | dict2items | rejectattr('key', 'equalto', 'password') | items2dict] }}"
   loop: "{{ accounts_local_users_create | select }}"
   loop_control:
     label: "{{ item.name }}"
 
 - name: Create local user
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     state: present
     uid: "{{ item.uid }}"
@@ -55,7 +55,7 @@
     pw_omitted: "{{ pw_string.startswith('__omit') }}"
     pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', rand_salt) }}"
   no_log: "{{ accounts_local_no_log }}"
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     password: "{{ pw_encrypted }}"
   loop: "{{ accounts_local_users_create | select | selectattr('password', 'defined') }}"
@@ -63,11 +63,11 @@
     label: "{{ item.name }}"
 
 - name: Get local user information
-  getent:
+  ansible.builtin.getent:
     database: passwd
 
 - name: Add local user to supplementary groups
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     groups: "{{ item.groups }}"
     append: "{{ item.append }}"
@@ -75,7 +75,7 @@
   when: item.name in getent_passwd
 
 - name: Delete local user sudo configuration
-  file:
+  ansible.builtin.file:
     path: /etc/sudoers.d/{{ item.name }}
     state: absent
   loop: "{{ create_users | default([]) | select }}"
@@ -86,7 +86,7 @@
 - name: Create local user sudo configuration
   vars:
     pw_require: "{{ 'NOPASSWD' if item.sudo_passwordless | default(false) else 'PASSWD' }}"
-  copy:
+  ansible.builtin.copy:
     content: |
       {{ item.name }} ALL=(ALL) {{ pw_require }}: ALL
     dest: /etc/sudoers.d/{{ item.name }}

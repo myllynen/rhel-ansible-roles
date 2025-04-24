@@ -1,6 +1,6 @@
 ---
 - name: Verify correct role configuration
-  assert:
+  ansible.builtin.assert:
     that:
       - resolver_configuration_method in ['nm', 'direct', 'remove', 'nothing']
       - resolver_configuration_method in ['remove', 'nothing'] or
@@ -8,13 +8,13 @@
     quiet: true
 
 - name: Remove NetworkManager resolver configuration
-  include_tasks: remove.yml
+  ansible.builtin.include_tasks: remove.yml
   when: resolver_configuration_method == 'remove'
 
 - name: Configure resolver without NetworkManager
-  include_tasks: direct.yml
+  ansible.builtin.include_tasks: direct.yml
   when: resolver_configuration_method == 'direct'
 
 - name: Configure resolver using NetworkManager
-  include_tasks: nm.yml
+  ansible.builtin.include_tasks: nm.yml
   when: resolver_configuration_method == 'nm'

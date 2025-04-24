@@ -1,6 +1,6 @@
 ---
 - name: Remove local PDF directory
-  file:
+  ansible.builtin.file:
     path: "{{ system_update_report_pre_pdf_dir }}"
     state: absent
   delegate_to: localhost
@@ -8,7 +8,7 @@
   become: false
 
 - name: Create local PDF directory
-  file:
+  ansible.builtin.file:
     path: "{{ system_update_report_pre_pdf_dir }}"
     state: directory
     mode: '0700'
@@ -17,19 +17,19 @@
   become: false
 
 - name: Read OS release info
-  slurp:
+  ansible.builtin.slurp:
     src: /etc/redhat-release
   register: os_release
 
 - name: Set timestamp and file names
-  set_fact:
+  ansible.builtin.set_fact:
     pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
     server_pdf: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
     server_ps: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.ps' }}"
     server_txt: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.txt' }}"
 
 - name: Write report to text file
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     printf "{{ system_update_report_pre_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ server_txt }}
     sed -i -e 's,<HOST>,{{ inventory_hostname }},g' {{ server_txt }}
@@ -42,13 +42,13 @@
   become: false
 
 - name: Convert text file to PostScript file
-  command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ inventory_hostname }} -T 4 -o {{ server_ps }} {{ server_txt }}
+  ansible.builtin.command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ inventory_hostname }} -T 4 -o {{ server_ps }} {{ server_txt }}
   changed_when: true
   delegate_to: localhost
   become: false
 
 - name: Convert PostScript file to PDF file
-  command: ps2pdf {{ server_ps }} {{ server_pdf }}
+  ansible.builtin.command: ps2pdf {{ server_ps }} {{ server_pdf }}
   changed_when: true
   delegate_to: localhost
   become: false

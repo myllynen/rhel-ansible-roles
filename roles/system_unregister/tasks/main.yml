@@ -1,33 +1,33 @@
 ---
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Disable rhcd service
-  service:
+  ansible.builtin.service:
     name: rhcd
     enabled: false
   when: "'rhc' in ansible_facts.packages"
 
 - name: Stop rhcd service
-  service:
+  ansible.builtin.service:
     name: rhcd
     state: stopped
   when: "'rhc' in ansible_facts.packages"
 
 - name: Unregister system from Red Hat Insights
-  command:
+  ansible.builtin.command:
     cmd: insights-client --unregister
     removes: /etc/insights-client/.registered
   when: "'insights-client' in ansible_facts.packages"
 
 - name: Unregister from Red Hat Subscription Management
-  command: subscription-manager unregister
+  ansible.builtin.command: subscription-manager unregister
   register: registration
   failed_when: registration.rc != 0 and 'currently not registered' not in registration.stderr
   changed_when: registration.rc == 0 and 'has been unregistered' in registration.stdout
 
 - name: Remove Katello CA package
-  dnf:
+  ansible.builtin.dnf:
     name: katello-ca-consumer-*
     state: absent
     cacheonly: true
@@ -37,7 +37,7 @@
     disablerepo: '*'
 
 - name: Remove Katello CA certificates
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
@@ -45,7 +45,7 @@
     - /etc/rhsm/ca/katello-server-ca.pem
 
 - name: Locate RHSM cache files
-  find:
+  ansible.builtin.find:
     paths: /var/lib/rhsm
     file_type: file
     recurse: true
@@ -55,23 +55,23 @@
   register: rhsm_cache
 
 - name: Remove RHSM cache files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop: "{{ rhsm_cache.files | map(attribute='path') }}"
 
 - name: Clean package manager caches
-  command: dnf -C clean all
+  ansible.builtin.command: dnf -C clean all
   changed_when: true
 
 - name: Check RHSM configuration backup files
-  find:
+  ansible.builtin.find:
     paths: /etc/rhsm
     patterns: 'rhsm.conf.*'
   register: rhsm_backups
 
 - name: Restore RHSM configuration backup files
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.path }}"
     dest: /etc/rhsm/rhsm.conf
     mode: '0644'
@@ -82,7 +82,7 @@
   when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']
 
 - name: Remove RHSM configuration backup files
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
   loop: "{{ rhsm_backups.files | sort(attribute='path') }}"

@@ -1,7 +1,7 @@
 ---
 - name: Check system authentication configuration
   check_mode: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     state: absent
     path: /etc/pam.d/system-auth
     regexp: '^auth.*pam_sss.so.*'
@@ -9,14 +9,14 @@
   changed_when: false
 
 - name: Create Kerberos configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ domain_ad_krb5_config_file | default('krb5.conf.j2', true) }}"
     dest: /etc/krb5.conf.d/zz-ansible.conf
     mode: '0644'
   register: krb5_config
 
 - name: Create SSSD configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ domain_ad_sssd_config_file | default('sssd.conf.j2', true) }}"
     dest: /etc/sssd/conf.d/zz-ansible.conf
     mode: '0600'
@@ -24,13 +24,13 @@
 
 - name: Run SSSD configuration check
   check_mode: false
-  command: sssctl config-check
+  ansible.builtin.command: sssctl config-check
   changed_when: false
   when: "'sssd' in ansible_facts.packages"
 
 - name: Join AD domain
   no_log: true
-  shell: >
+  ansible.builtin.shell: >
     set -o pipefail ;
     echo '{{ domain_ad_admin_password }}' |
     adcli -v join
@@ -42,38 +42,38 @@
   when: not krb5_keytab.stat.exists
 
 - name: Enable oddjobd service
-  service:
+  ansible.builtin.service:
     name: oddjobd
     enabled: true
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Start oddjobd service
-  service:
+  ansible.builtin.service:
     name: oddjobd
     state: started
   when: "'oddjob-mkhomedir' in ansible_facts.packages"
 
 - name: Enable sssd-kcm socket
-  service:
+  ansible.builtin.service:
     name: sssd-kcm.socket
     enabled: true
   when: "'sssd-kcm' in ansible_facts.packages"
 
 - name: Enable sssd service
-  service:
+  ansible.builtin.service:
     name: sssd
     enabled: true
   when: "'sssd' in ansible_facts.packages"
 
 - name: Start sssd service
-  service:
+  ansible.builtin.service:
     name: sssd
     state: started
   register: service_start
   when: "'sssd' in ansible_facts.packages"
 
 - name: Restart sssd to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: sssd
     state: restarted
   when:
@@ -84,7 +84,7 @@
       sssd_config is changed
 
 - name: Configure system-wide authentication
-  command: authselect select -f sssd {{ domain_ad_auth_select_parameters }}
+  ansible.builtin.command: authselect select -f sssd {{ domain_ad_auth_select_parameters }}
   changed_when: true
   when:
     - domain_ad_auth_config_update | bool

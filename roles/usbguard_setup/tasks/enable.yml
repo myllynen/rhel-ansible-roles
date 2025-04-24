@@ -1,14 +1,14 @@
 ---
 - name: Install USBGuard packages
-  dnf:
+  ansible.builtin.dnf:
     name: usbguard
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Copy reject-all USBGuard configuration file
-  copy:
+  ansible.builtin.copy:
     content: |
       ImplicitPolicyTarget=reject
       PresentDevicePolicy=reject
@@ -22,7 +22,7 @@
   when: usbguard_setup_policy == 'reject'
 
 - name: Copy custom USBGuard configuration file
-  copy:
+  ansible.builtin.copy:
     src: "{{ usbguard_setup_config_file }}"
     dest: /etc/usbguard/usbguard-daemon.conf
     mode: '0600'
@@ -32,7 +32,7 @@
     - usbguard_setup_config_file
 
 - name: Clear default USBGuard rules file
-  copy:
+  ansible.builtin.copy:
     content: ''
     dest: /etc/usbguard/rules.conf
     mode: '0600'
@@ -42,7 +42,7 @@
       not usbguard_setup_rules_file
 
 - name: Create custom USBGuard rules file
-  template:
+  ansible.builtin.template:
     src: "{{ usbguard_setup_rules_file }}"
     dest: /etc/usbguard/rules.d/zz-ansible.conf
     mode: '0600'
@@ -52,7 +52,7 @@
     - usbguard_setup_rules_file
 
 - name: Create custom USBGuard IPC access control file
-  template:
+  ansible.builtin.template:
     src: "{{ usbguard_setup_ipc_access_file }}"
     dest: /etc/usbguard/IPCAccessControl.d/zz-ansible.conf
     mode: '0600'
@@ -67,25 +67,25 @@
     files_remove_exclude: "{{ ['/etc/usbguard/rules.d/zz-ansible.conf'] +
                               ['/etc/usbguard/IPCAccessControl.d/zz-ansible.conf'] +
                               usbguard_setup_files_known | default([], true) }}"
-  include_role:
+  ansible.builtin.include_role:
     name: files_remove
   when: usbguard_setup_exclusive | bool
 
 - name: Enable usbguard service
-  service:
+  ansible.builtin.service:
     name: usbguard
     enabled: true
   when: "'usbguard' in ansible_facts.packages"
 
 - name: Start usbguard service
-  service:
+  ansible.builtin.service:
     name: usbguard
     state: started
   register: service_start
   when: "'usbguard' in ansible_facts.packages"
 
 - name: Restart usbguard to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: usbguard
     state: restarted
   when:

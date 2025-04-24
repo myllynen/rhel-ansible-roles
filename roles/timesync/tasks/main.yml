@@ -1,17 +1,17 @@
 ---
 - name: Check timesync configuration
-  set_fact:
+  ansible.builtin.set_fact:
     timesync_old_var: "{{ true if timesync_ntp_servers is not defined and ntp_servers is defined else false }}"
 
 - name: Migrate legacy timesync configuration
-  set_fact:
+  ansible.builtin.set_fact:
     timesync_ntp_servers: "{{ timesync_ntp_servers | default([]) + [{'hostname': item, 'iburst': true}] }}"
   loop: "{{ ntp_servers }}"
   when: timesync_old_var
 
 - name: Configure timesync
-  include_role:
+  ansible.builtin.include_role:
     name: redhat.rhel_system_roles.timesync
 
 - name: Apply timesync configuration changes
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers

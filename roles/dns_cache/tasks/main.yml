@@ -1,21 +1,21 @@
 ---
 - name: Disable DNS cache
-  include_tasks: disable.yml
+  ansible.builtin.include_tasks: disable.yml
 
 - name: Enable DNS cache using dnsmasq
-  include_tasks: dnsmasq.yml
+  ansible.builtin.include_tasks: dnsmasq.yml
   when:
     - dns_cache_enable | bool
     - dns_cache_component == 'dnsmasq'
 
 - name: Enable DNS cache using nscd
-  include_tasks: nscd.yml
+  ansible.builtin.include_tasks: nscd.yml
   when:
     - dns_cache_enable | bool
     - dns_cache_component == 'nscd'
 
 - name: Enable DNS cache using systemd-resolved
-  include_tasks: systemd_resolved.yml
+  ansible.builtin.include_tasks: systemd_resolved.yml
   when:
     - dns_cache_enable | bool
     - dns_cache_component == 'systemd-resolved'

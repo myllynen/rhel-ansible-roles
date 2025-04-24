@@ -1,48 +1,48 @@
 ---
 - name: Create system-local new user defaults file
-  template:
+  ansible.builtin.template:
     src: "{{ useradd_defaults_file }}"
     dest: /etc/default/useradd
     mode: '0644'
   when: useradd_defaults_file
 
 - name: Create system-local login defaults file
-  template:
+  ansible.builtin.template:
     src: "{{ login_defs_config_file }}"
     dest: /etc/login.defs
     mode: '0644'
   when: login_defs_config_file
 
 - name: Create system-local login access file
-  template:
+  ansible.builtin.template:
     src: "{{ login_access_config_file }}"
     dest: /etc/security/access.conf
     mode: '0644'
   when: login_access_config_file
 
 - name: Create system-local faillock configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ faillock_config_file }}"
     dest: /etc/security/faillock.conf
     mode: '0644'
   when: faillock_config_file
 
 - name: Create system-local password history requirements file
-  template:
+  ansible.builtin.template:
     src: "{{ pwhistory_config_file }}"
     dest: /etc/security/pwhistory.conf
     mode: '0644'
   when: pwhistory_config_file
 
 - name: Create system-local password quality requirements file
-  template:
+  ansible.builtin.template:
     src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf
     mode: '0644'
   when: pwquality_config_file
 
 - name: Create system-local user resource limits configuration file
-  template:
+  ansible.builtin.template:
     src: limits.conf.j2
     dest: /etc/security/limits.d/95-ansible.conf
     mode: '0644'
@@ -53,16 +53,16 @@
     auth_packages:
       - authselect
       - "{{ 'oddjob-mkhomedir' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
-  dnf:
+  ansible.builtin.dnf:
     name: "{{ auth_packages | select }}"
     state: present
   when: system_auth_profile
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Enable oddjobd service
-  service:
+  ansible.builtin.service:
     name: oddjobd
     enabled: true
   when:
@@ -70,7 +70,7 @@
     - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
 
 - name: Start oddjobd service
-  service:
+  ansible.builtin.service:
     name: oddjobd
     state: started
   when:
@@ -78,7 +78,7 @@
     - "'with-mkhomedir' in system_auth_profile_parameters | default('', true)"
 
 - name: Copy custom authentication profile
-  copy:
+  ansible.builtin.copy:
     src: "{{ system_auth_profile }}"
     dest: /etc/authselect/custom
     mode: '0644'
@@ -89,7 +89,7 @@
 
 - name: Check current system-local authentication profile in use
   check_mode: false
-  command: authselect current -r
+  ansible.builtin.command: authselect current -r
   register: profile_current
   failed_when: profile_current.rc != 0 and 'No existing configuration' not in profile_current.stdout
   changed_when: false
@@ -99,7 +99,7 @@
 
 - name: Check current system-local authentication profile status
   check_mode: false
-  command: authselect check
+  ansible.builtin.command: authselect check
   register: profile_valid
   failed_when: false
   changed_when: false
@@ -109,14 +109,14 @@
     - "'No existing configuration' not in profile_current.stdout"
 
 - name: Prevent Centrify updating NSS configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/centrifydc/centrifydc.conf
     regexp: '^(|#|# )adclient.autoedit.nss:.*'
     line: 'adclient.autoedit.nss: false'
   when: "'with-centrify' in system_auth_profile_parameters | default('', true)"
 
 - name: Prevent Centrify updating PAM configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/centrifydc/centrifydc.conf
     regexp: '^(|#|# )adclient.autoedit.pam:.*'
     line: 'adclient.autoedit.pam: false'
@@ -127,7 +127,7 @@
     profile_name: "{{ system_auth_profile | regex_replace('.*custom/', 'custom/') }}"
     current_config: "{{ profile_current.stdout }}"
     wanted_config: "{{ profile_name }} {{ system_auth_profile_parameters }}"
-  command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
+  ansible.builtin.command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
   changed_when: true
   when:
     - system_auth_profile
@@ -138,7 +138,7 @@
 - name: Create PAM su configuration file
   vars:
     enable_centrify: "{{ true if 'with-centrify' in system_auth_profile_parameters | default('', true) else false }}"
-  template:
+  ansible.builtin.template:
     src: "{{ system_auth_pam_d_su_file }}"
     dest: /etc/pam.d/su
     mode: '0644'

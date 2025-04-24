@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -43,13 +43,13 @@
       {{ line }}
       {% endif %}
       {% endfor %}
-  copy:
+  ansible.builtin.copy:
     content: "{{ etc_hosts_content }}"
     dest: /etc/hosts
     mode: '0644'
   register: hosts_file
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: hosts_file is changed

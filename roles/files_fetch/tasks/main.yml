@@ -1,6 +1,6 @@
 ---
 - name: Fetch files
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     flat: "{{ item.flat | default(omit) }}"

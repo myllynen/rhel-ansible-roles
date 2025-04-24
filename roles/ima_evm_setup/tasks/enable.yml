@@ -1,9 +1,9 @@
 ---
 - name: Gather service facts
-  service_facts:
+  ansible.builtin.service_facts:
 
 - name: Fail if fapolicyd enabled
-  fail:
+  ansible.builtin.fail:
     msg: "IMA/EVM should be setup before fapolicyd."
   when:
     - "'fapolicyd.service' in ansible_facts.services"
@@ -11,7 +11,7 @@
       ansible_facts.services['fapolicyd.service'].status == 'running'
 
 - name: Install IMA/EVM packages
-  dnf:
+  ansible.builtin.dnf:
     name:
       - grubby
       - ima-evm-utils
@@ -19,16 +19,16 @@
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Create IMA configuration directory
-  file:
+  ansible.builtin.file:
     path: /etc/ima
     state: directory
     mode: '0755'
 
 - name: Create pending IMA policy configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ ima_evm_setup_policy_config_file }}"
     dest: /etc/ima/ima-policy.ansible
     mode: '0600'
@@ -36,47 +36,48 @@
 
 # Assume IMA attributes present if ima-setup itself has it
 - name: Check IMA security attributes on files
-  command: getfattr -m - -d /usr/bin/ima-setup
+  ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
   check_mode: false
   register: fattr_info
   changed_when: false
   when: "'attr' in ansible_facts.packages"
 
 - name: Configure IMA
-  command: /usr/bin/ima-setup --policy=/etc/ima/ima-policy.ansible --reinstall_threshold=100000
+  ansible.builtin.command: /usr/bin/ima-setup --policy=/etc/ima/ima-policy.ansible --reinstall_threshold=100000
   register: ima_setup
+  changed_when: true
   when:
     - fattr_info.stdout is defined
     - "'security.ima' not in fattr_info.stdout"
 
 - name: Verify pending IMA policy configuration file
-  shell: echo /etc/ima/ima-policy.ansible > /sys/kernel/security/integrity/ima/policy
+  ansible.builtin.shell: echo /etc/ima/ima-policy.ansible > /sys/kernel/security/integrity/ima/policy
   changed_when: true
   when:
     - ima_evm_setup_verify_policy | bool
     - policy_config_file is changed
 
 - name: Update systemd IMA policy configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ ima_evm_setup_policy_config_file }}"
     dest: /etc/ima/ima-policy
     mode: '0600'
   register: ima_policy
 
 - name: Enable dracut integrity module
-  shell: |
+  ansible.builtin.shell: |
     diff -q /usr/share/ima/dracut-98-integrity.conf /etc/dracut.conf.d/98-integrity.conf > /dev/null 2>&1 || \
       (cp -a /usr/share/ima/dracut-98-integrity.conf /etc/dracut.conf.d/98-integrity.conf && echo changed)
   register: dracut_config
   changed_when: "'changed' in dracut_config.stdout"
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: dracut_config is changed
 
 - name: Reboot system
-  reboot:
+  ansible.builtin.reboot:
   when:
     - ima_evm_setup_reboot | bool
     - ima_setup is changed or
@@ -84,7 +85,7 @@
       dracut_config is changed
 
 - name: Verify IMA security attributes on files
-  command: getfattr -m - -d /usr/bin/ima-setup
+  ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
   check_mode: false
   register: fattr_info
   failed_when: "'security.ima' not in fattr_info.stdout"

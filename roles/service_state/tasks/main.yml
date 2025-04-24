@@ -3,38 +3,38 @@
 - name: Get list of known systemd units
   check_mode: false
   # noqa: command-instead-of-module
-  command: systemctl list-unit-files
+  ansible.builtin.command: systemctl list-unit-files
   register: unit_files
   changed_when: false
 
 - name: Mask service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     masked: true
   loop: "{{ service_state_mask | select }}"
 
 - name: Unmask service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     masked: false
   loop: "{{ service_state_unmask | select }}"
 
 - name: Disable service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: false
   loop: "{{ service_state_disable | select }}"
   when: item in unit_files.stdout
 
 - name: Stop service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     state: stopped
   loop: "{{ service_state_disable | select }}"
   when: item in unit_files.stdout
 
 - name: Enable service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
   loop: "{{ service_state_enable | select }}"
@@ -42,7 +42,7 @@
         item in unit_files.stdout
 
 - name: Start service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ item }}"
     state: started
   loop: "{{ service_state_enable | select }}"

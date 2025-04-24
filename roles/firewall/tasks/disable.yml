@@ -1,15 +1,15 @@
 ---
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Disable firewalld service
-  service:
+  ansible.builtin.service:
     name: firewalld
     enabled: false
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Stop firewalld service
-  service:
+  ansible.builtin.service:
     name: firewalld
     state: stopped
   when: "'firewalld' in ansible_facts.packages"

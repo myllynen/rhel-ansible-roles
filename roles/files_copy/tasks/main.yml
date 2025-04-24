@@ -1,6 +1,6 @@
 ---
 - name: Copy files
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: "{{ item.owner | default(omit) }}"
@@ -15,7 +15,7 @@
     label: "{{ item.src + ' -> ' + item.dest }}"
 
 - name: Create files from templates
-  template:
+  ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: "{{ item.owner | default(omit) }}"

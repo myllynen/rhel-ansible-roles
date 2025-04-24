@@ -1,6 +1,6 @@
 ---
 - name: Gather needed facts
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - '!all'
       - '!min'
@@ -8,28 +8,28 @@
   when: ansible_facts.distribution_major_version is not defined
 
 - name: Create issue directory
-  file:
+  ansible.builtin.file:
     path: /etc/issue.d
     state: directory
     mode: '0755'
   when: issue_template
 
 - name: Create issue file
-  template:
+  ansible.builtin.template:
     src: "{{ issue_template }}"
     dest: /etc/issue.d/zz-ansible.issue
     mode: '0644'
   when: issue_template
 
 - name: Create issue.net file
-  template:
+  ansible.builtin.template:
     src: "{{ issue_template }}"
     dest: /etc/issue.net
     mode: '0644'
   when: issue_template
 
 - name: Create motd directory
-  file:
+  ansible.builtin.file:
     path: /etc/motd.d
     state: directory
     mode: '0755'
@@ -40,7 +40,7 @@
 - name: Create motd file
   vars:
     motd_path: "{{ '/etc/motd.d/zz-ansible.motd' if ansible_facts.distribution_major_version | int >= 9 else '/etc/motd' }}"
-  template:
+  ansible.builtin.template:
     src: "{{ motd_template }}"
     dest: "{{ motd_path }}"
     mode: '0644'

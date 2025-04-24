@@ -1,8 +1,8 @@
 ---
 - name: Enable system-wide coredumps
-  include_tasks: enable.yml
+  ansible.builtin.include_tasks: enable.yml
   when: system_coredump_enable | bool
 
 - name: Disable system-wide coredumps
-  include_tasks: disable.yml
+  ansible.builtin.include_tasks: disable.yml
   when: not system_coredump_enable | bool

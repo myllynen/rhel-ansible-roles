@@ -1,34 +1,34 @@
 ---
 - name: Install nscd package
-  dnf:
+  ansible.builtin.dnf:
     name: nscd
     state: present
 
 - name: Gather package facts
-  package_facts:
+  ansible.builtin.package_facts:
 
 - name: Create nscd configuration file
-  template:
+  ansible.builtin.template:
     src: "{{ dns_cache_nscd_config_file | default('nscd.conf.j2', true) }}"
     dest: /etc/nscd.conf
     mode: '0644'
   register: daemon_config
 
 - name: Enable nscd service
-  service:
+  ansible.builtin.service:
     name: nscd
     enabled: true
   when: "'nscd' in ansible_facts.packages"
 
 - name: Start nscd service
-  service:
+  ansible.builtin.service:
     name: nscd
     state: started
   register: service_start
   when: "'nscd' in ansible_facts.packages"
 
 - name: Reload nscd to apply configuration changes
-  service:
+  ansible.builtin.service:
     name: nscd
     state: reloaded
   when:

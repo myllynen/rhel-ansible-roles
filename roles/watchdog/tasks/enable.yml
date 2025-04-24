@@ -1,6 +1,6 @@
 ---
 - name: Update system runtime watchdog configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)RuntimeWatchdogSec=.*'
     line: 'RuntimeWatchdogSec={{ watchdog_runtime_sec }}'
@@ -9,7 +9,7 @@
 - name: Update system reboot watchdog configuration
   vars:
     option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version | int >= 9 else 'ShutdownWatchdogSec' }}"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|){{ option_name }}=.*'
     line: '{{ option_name }}={{ watchdog_reboot_sec }}'
@@ -17,7 +17,7 @@
   when: watchdog_reboot_sec
 
 - name: Update system kexec watchdog configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)KExecWatchdogSec=.*'
     line: 'KExecWatchdogSec={{ watchdog_kexec_sec }}'
@@ -27,7 +27,7 @@
     - watchdog_kexec_sec
 
 - name: Update system watchdog device configuration
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/system.conf
     regexp: '^(#|)WatchdogDevice=.*'
     line: 'WatchdogDevice={{ watchdog_device }}'
@@ -37,7 +37,7 @@
     - watchdog_device
 
 - name: Reload systemd to apply watchdog configuration changes
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   when: watchdog_runtime is changed or
         watchdog_reboot is changed or
@@ -45,7 +45,7 @@
         watchdog_device is changed
 
 - name: Rebuild initramfs
-  command: dracut -f --regenerate-all
+  ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
   when: watchdog_runtime is changed or
         watchdog_reboot is changed or
