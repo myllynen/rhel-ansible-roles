@@ -770,28 +770,6 @@
       - /etc/ssh/sshd_config.d/50-redhat.conf
 
     #
-    # swap_setup
-    #
-    # NB. This is a (hopefully) temporary helper role to
-    # setup swap on VMs created by RHEL Image Builder with
-    # no swap partition, see this issue for current status:
-    # https://issues.redhat.com/browse/RHEL-4636
-
-    # Existing VG where to create LV for swap
-    # If this is unset then role does nothing
-    # Image Builder uses by default VG rootvg
-    swap_setup_vg_name:
-
-    # LV for swap name
-    swap_setup_lv_name: swap
-
-    # LV for swap size
-    swap_setup_lv_size: 2G
-
-    # Enable swap after LV/fstab configuration
-    swap_setup_enable_swap: true
-
-    #
     # system_coredump
     #
     # Enable or disable system-wide coredumps
