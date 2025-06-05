@@ -72,7 +72,7 @@
     groups: "{{ item.groups }}"
     append: "{{ item.append }}"
   loop: "{{ accounts_local_users_groups | select }}"
-  when: item.name in getent_passwd
+  when: item.name in ansible_facts.getent_passwd
 
 - name: Delete local user sudo configuration
   ansible.builtin.file:
@@ -107,4 +107,4 @@
   loop: "{{ create_users | default([]) | subelements('authorized_keys', 'skip_missing=true') }}"
   loop_control:
     label: "{{ item.0.name }}"
-  when: item.0.name in getent_passwd
+  when: item.0.name in ansible_facts.getent_passwd
