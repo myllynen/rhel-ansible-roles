@@ -23,7 +23,7 @@ they support.
 See the example playbook [configure_rhel.yml](configure_rhel.yml) how
 these roles could be used together. For additional roles to configure
 RHEL functionality (such as network and storage), see
-[Red Hat provided RHEL system roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles)
+[Red Hat provided RHEL system roles](https://access.redhat.com/articles/3050101)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
 These roles have been tested and verified to work against RHEL 8/9
@@ -52,6 +52,9 @@ See also
 
 See also
 [https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles).
+
+See also
+[https://access.redhat.com/articles/3050101](https://access.redhat.com/articles/3050101).
 
 ## License
 
