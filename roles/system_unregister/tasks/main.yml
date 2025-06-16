@@ -22,9 +22,14 @@
 
 - name: Unregister from Red Hat Subscription Management
   ansible.builtin.command: subscription-manager unregister
-  register: registration
-  failed_when: registration.rc != 0 and 'currently not registered' not in registration.stderr
-  changed_when: registration.rc == 0 and 'has been unregistered' in registration.stdout
+  register: unregister
+  failed_when: unregister.rc != 0 and 'currently not registered' not in unregister.stderr
+  changed_when: unregister.rc == 0 and 'has been unregistered' in unregister.stdout
+  ignore_errors: true
+
+- name: Remove all Subscription Management local data
+  ansible.builtin.command: subscription-manager clean
+  changed_when: unregister is failed
 
 - name: Remove Katello CA package
   ansible.builtin.dnf:
@@ -61,8 +66,9 @@
   loop: "{{ rhsm_cache.files | map(attribute='path') }}"
 
 - name: Clean package manager caches
-  ansible.builtin.command: dnf -C clean all
-  changed_when: true
+  ansible.builtin.command: dnf --disableplugin=product-id,subscription-manager -C clean all
+  register: pkg_cache
+  changed_when: not pkg_cache.stdout.startswith('0 files removed')
 
 - name: Check RHSM configuration backup files
   ansible.builtin.find:
