@@ -23,23 +23,55 @@
     sysctl_set: true
   register: suid_config
 
+- name: Create coredump configuration directory
+  ansible.builtin.file:
+    path: "{{ coredump_conf | dirname }}"
+    state: directory
+    mode: '0755'
+  when: ansible_facts.distribution_major_version | int >= 10
+
+- name: Initialize coredump configuration file
+  ansible.builtin.lineinfile:
+    path: "{{ coredump_conf }}"
+    line: '[Coredump]'
+    insertbefore: '^'
+    create: true
+    mode: '0644'
+  when: ansible_facts.distribution_major_version | int >= 10
+
+- name: Create system configuration directory
+  ansible.builtin.file:
+    path: "{{ system_conf | dirname }}"
+    state: directory
+    mode: '0755'
+  when: ansible_facts.distribution_major_version | int >= 10
+
+- name: Initialize system configuration file
+  ansible.builtin.lineinfile:
+    path: "{{ system_conf }}"
+    line: '[Manager]'
+    insertbefore: '^'
+    create: true
+    mode: '0644'
+  when: ansible_facts.distribution_major_version | int >= 10
+
 - name: Update default coredump limit configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/system.conf
+    path: "{{ system_conf }}"
     regexp: '^(#|)DefaultLimitCORE=.*'
     line: 'DefaultLimitCORE=infinity'
   register: core_config
 
 - name: Update coredump storage configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/coredump.conf
+    path: "{{ coredump_conf }}"
     regexp: '^Storage=none'
     line: '#Storage=external'
   register: storage_config
 
 - name: Update coredump process size configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/coredump.conf
+    path: "{{ coredump_conf }}"
     regexp: '^ProcessSizeMax=0'
     line: 'ProcessSizeMax={{ system_coredump_process_size_max }}'
   register: process_config

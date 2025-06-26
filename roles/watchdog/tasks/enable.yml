@@ -1,7 +1,23 @@
 ---
+- name: Create watchdog configuration directory
+  ansible.builtin.file:
+    path: "{{ watchdog_conf | dirname }}"
+    state: directory
+    mode: '0755'
+  when: ansible_facts.distribution_major_version | int >= 10
+
+- name: Initialize watchdog configuration file
+  ansible.builtin.lineinfile:
+    path: "{{ watchdog_conf }}"
+    line: '[Manager]'
+    insertbefore: '^'
+    create: true
+    mode: '0644'
+  when: ansible_facts.distribution_major_version | int >= 10
+
 - name: Update system runtime watchdog configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/system.conf
+    path: "{{ watchdog_conf }}"
     regexp: '^(#|)RuntimeWatchdogSec=.*'
     line: 'RuntimeWatchdogSec={{ watchdog_runtime_sec }}'
   register: watchdog_runtime
@@ -10,33 +26,37 @@
   vars:
     option_name: "{{ 'RebootWatchdogSec' if ansible_facts.distribution_major_version | int >= 9 else 'ShutdownWatchdogSec' }}"
   ansible.builtin.lineinfile:
-    path: /etc/systemd/system.conf
+    path: "{{ watchdog_conf }}"
     regexp: '^(#|){{ option_name }}=.*'
     line: '{{ option_name }}={{ watchdog_reboot_sec }}'
   register: watchdog_reboot
-  when: watchdog_reboot_sec
+  when:
+    - watchdog_reboot_sec is not none
+    - watchdog_reboot_sec | length > 0
 
 - name: Update system kexec watchdog configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/system.conf
+    path: "{{ watchdog_conf }}"
     regexp: '^(#|)KExecWatchdogSec=.*'
     line: 'KExecWatchdogSec={{ watchdog_kexec_sec }}'
   register: watchdog_kexec
   when:
     - ansible_facts.distribution_major_version | int >= 9
-    - watchdog_kexec_sec
+    - watchdog_kexec_sec is not none
+    - watchdog_kexec_sec | length > 0
 
 - name: Update system watchdog device configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/system.conf
+    path: "{{ watchdog_conf }}"
     regexp: '^(#|)WatchdogDevice=.*'
     line: 'WatchdogDevice={{ watchdog_device }}'
   register: watchdog_device
   when:
     - ansible_facts.distribution_major_version | int >= 9
-    - watchdog_device
+    - watchdog_device is not none
+    - watchdog_device | length > 0
 
-- name: Reload systemd to apply watchdog configuration changes
+- name: Reload systemd to apply configuration changes
   ansible.builtin.systemd:
     daemon_reload: true
   when: watchdog_runtime is changed or

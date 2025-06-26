@@ -1,24 +1,27 @@
 ---
 - name: Update coredump process size configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/coredump.conf
+    path: "{{ coredump_conf }}"
     regexp: '^(#|)ProcessSizeMax=.*'
     line: 'ProcessSizeMax=0'
   register: process_config
+  when: coredump_check.stat.exists
 
 - name: Update coredump storage configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/coredump.conf
+    path: "{{ coredump_conf }}"
     regexp: '^(#|)Storage=.*'
     line: 'Storage=none'
   register: storage_config
+  when: coredump_check.stat.exists
 
 - name: Update default coredump limit configuration
   ansible.builtin.lineinfile:
-    path: /etc/systemd/system.conf
+    path: "{{ system_conf }}"
     regexp: '^(#|)DefaultLimitCORE=.*'
     line: 'DefaultLimitCORE=0:infinity'
   register: core_config
+  when: system_check.stat.exists
 
 - name: Reload systemd to apply configuration changes
   ansible.builtin.systemd:

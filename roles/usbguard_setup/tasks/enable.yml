@@ -29,7 +29,8 @@
   register: daemon_config_custom
   when:
     - usbguard_setup_policy == 'custom'
-    - usbguard_setup_config_file
+    - usbguard_setup_config_file is not none
+    - usbguard_setup_config_file | length > 0
 
 - name: Clear default USBGuard rules file
   ansible.builtin.copy:
@@ -37,9 +38,8 @@
     dest: /etc/usbguard/rules.conf
     mode: '0600'
   register: rules_config_default
-  when:
-    - usbguard_setup_rules_file is none or
-      not usbguard_setup_rules_file
+  when: usbguard_setup_rules_file is none or
+        usbguard_setup_rules_file | length == 0
 
 - name: Create custom USBGuard rules file
   ansible.builtin.template:
@@ -49,7 +49,8 @@
   register: rules_config_custom
   when:
     - usbguard_setup_policy == 'custom'
-    - usbguard_setup_rules_file
+    - usbguard_setup_rules_file is not none
+    - usbguard_setup_rules_file | length > 0
 
 - name: Create custom USBGuard IPC access control file
   ansible.builtin.template:
@@ -57,7 +58,9 @@
     dest: /etc/usbguard/IPCAccessControl.d/zz-ansible.conf
     mode: '0600'
   register: ipc_access_custom
-  when: usbguard_setup_ipc_access_file
+  when:
+    - usbguard_setup_ipc_access_file is not none
+    - usbguard_setup_ipc_access_file | length > 0
 
 - name: Remove unrecognized rules and IPC access control files
   vars:

@@ -25,7 +25,7 @@
     msg: "{{ package_updates | join('\n') }}"
   when:
     - system_update_display_updates | bool
-    - package_updates | default(false)
+    - package_updates | length > 0
 
 - name: Install yum-utils package
   ansible.builtin.dnf:
@@ -59,4 +59,4 @@
   ansible.builtin.include_tasks: report.yml
   when:
     - system_update_email_report | bool
-    - package_updates | default(false)
+    - package_updates | length > 0

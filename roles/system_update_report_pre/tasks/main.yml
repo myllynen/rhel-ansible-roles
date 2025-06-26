@@ -20,10 +20,10 @@
     msg: "{{ package_updates | join('\n') }}"
   when:
     - system_update_report_pre_display_updates | bool
-    - package_updates | default(false)
+    - package_updates | length > 0
 
 - name: Send email report
   ansible.builtin.include_tasks: report.yml
   when:
     - system_update_report_pre_email_report | bool
-    - package_updates | default(false)
+    - package_updates | length > 0

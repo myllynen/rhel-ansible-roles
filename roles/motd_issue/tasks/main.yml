@@ -12,21 +12,27 @@
     path: /etc/issue.d
     state: directory
     mode: '0755'
-  when: issue_template
+  when:
+    - issue_template is not none
+    - issue_template | length > 0
 
 - name: Create issue file
   ansible.builtin.template:
     src: "{{ issue_template }}"
     dest: /etc/issue.d/zz-ansible.issue
     mode: '0644'
-  when: issue_template
+  when:
+    - issue_template is not none
+    - issue_template | length > 0
 
 - name: Create issue.net file
   ansible.builtin.template:
     src: "{{ issue_template }}"
     dest: /etc/issue.net
     mode: '0644'
-  when: issue_template
+  when:
+    - issue_template is not none
+    - issue_template | length > 0
 
 - name: Create motd directory
   ansible.builtin.file:
@@ -35,7 +41,8 @@
     mode: '0755'
   when:
     - ansible_facts.distribution_major_version | int >= 9
-    - motd_template
+    - motd_template is not none
+    - motd_template | length > 0
 
 - name: Create motd file
   vars:
@@ -44,4 +51,6 @@
     src: "{{ motd_template }}"
     dest: "{{ motd_path }}"
     mode: '0644'
-  when: motd_template
+  when:
+    - motd_template is not none
+    - motd_template | length > 0

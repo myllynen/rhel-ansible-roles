@@ -32,7 +32,8 @@
 
 - name: Set sshd configuration file to use
   ansible.builtin.set_fact:
-    config_file: "{{ '/etc/ssh/sshd_config' if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-ansible.conf' }}"
+    config_file: "{{ '/etc/ssh/sshd_config'
+                     if not config_dir.stat.exists else '/etc/ssh/sshd_config.d/0-ansible.conf' }}"
 
 - name: Locate other sshd configuration files
   ansible.builtin.find:
@@ -43,12 +44,14 @@
 
 - name: Reset sshd configuration files to RPM defaults
   vars:
+    suffix: "{{ '' if ansible_facts.distribution_major_version | int >= 10 else '_rhel89' }}"
     reset_files:
       - ssh/sshd_config
+      - "{{ 'ssh/sshd_config.d/40-redhat-crypto-policies.conf' if ansible_facts.distribution_major_version | int >= 10 else '' }}"
       - ssh/sshd_config.d/50-redhat.conf
       - "{{ 'sysconfig/sshd' if not sshd_sysconfig_file else '' }}"
   ansible.builtin.copy:
-    src: "{{ item | basename }}"
+    src: "{{ item | basename + suffix }}"
     dest: /etc/{{ item }}
     mode: "{{ '0640' if item == 'sysconfig/sshd' else '0600' }}"
     validate: "{{ omit if item == 'sysconfig/sshd' else '/usr/sbin/sshd -tf %s' }}"
@@ -68,30 +71,13 @@
     mode: '0640'
   register: sysconfig_copy
   when:
-    - sshd_sysconfig_file
+    - sshd_sysconfig_file is not none
+    - sshd_sysconfig_file | length > 0
     - ansible_facts.distribution_major_version | int >= 9
 
 - name: Create sshd configuration file
-  vars:
-    file_content: |
-      {% for item in sshd | dict2items | select if item.key not in sshd_disable %}
-      {% if item.value is not string and item.value is not number %}
-      {% if item.key.startswith('Match') %}
-      {{ item.key }}
-      {% for value in item.value %}
-          {{ value }}
-      {% endfor %}
-      {% else %}
-      {% for value in item.value %}
-      {{ item.key }} {{ value }}
-      {% endfor %}
-      {% endif %}
-      {% else %}
-      {{ item.key }} {{ item.value }}
-      {% endif %}
-      {% endfor %}
-  ansible.builtin.copy:
-    content: "{{ file_content }}"
+  ansible.builtin.template:
+    src: sshd_config.j2
     dest: "{{ config_file }}"
     mode: '0600'
     validate: /usr/sbin/sshd -tf %s

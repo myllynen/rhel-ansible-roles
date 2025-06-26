@@ -13,6 +13,7 @@ Below are the role default values from defaults/main.yml:
 # List of directories, files and symlinks
 # to create. Files will be created empty,
 # permissions on targets will be updated.
+# Uses Ansible built-in file module
 # Registers variables:
 # create_directories, create_files, create_links
 files_create:

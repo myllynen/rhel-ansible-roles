@@ -43,6 +43,7 @@
   loop: "{{ remove_globs.results }}"
   loop_control:
     label: "{{ item.files | map(attribute='path') }}"
+  when: item.files | length > 0
 
 - name: Remove files and directories
   vars:

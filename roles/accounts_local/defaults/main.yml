@@ -37,7 +37,7 @@ accounts_local_users_create:
 #    # Require password or not for the above
 #    sudo_passwordless: false
 #    authorized_keys:
-#      - ssh-ed25519 ... user@cloud
+#      - ssh-ed25519 ... id_ed25519.pub
 #    authorized_keys_exclusive: false
 
 # Use true if providing crypted values,

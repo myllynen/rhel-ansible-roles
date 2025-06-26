@@ -27,8 +27,10 @@
     dest: "{{ scap_compliance_tailoring_file_path }}"
     mode: '0600'
   when:
-    - scap_compliance_tailoring_file_template
-    - scap_compliance_tailoring_file_path
+    - scap_compliance_tailoring_file_template is not none
+    - scap_compliance_tailoring_file_template | length > 0
+    - scap_compliance_tailoring_file_path is not none
+    - scap_compliance_tailoring_file_path | length > 0
 
 - name: Display security profile name
   ansible.builtin.debug:

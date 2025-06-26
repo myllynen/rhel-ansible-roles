@@ -4,6 +4,7 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     flat: "{{ item.flat | default(omit) }}"
+    fail_on_missing: "{{ item.fail_on_missing | default(omit) }}"
     validate_checksum: "{{ item.validate_checksum | default(omit) }}"
   register: fetch_files
   loop: "{{ files_fetch | default([], true) }}"

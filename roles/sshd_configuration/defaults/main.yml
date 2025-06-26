@@ -28,7 +28,6 @@ sshd_sysconfig_file:
 # cause idempotency issues with option disabling,
 # this only resets RPM provided files, not others
 # Consider using the file_copy role on older RHEL
-# Default files used by this role from: RHEL 9.3
 sshd_configuration_config_reset: false
 
 # Remove unrecognized sshd configuration files
@@ -43,4 +42,5 @@ sshd_configuration_files_known:
   - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
   - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
   - /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+  - /etc/ssh/sshd_config.d/40-redhat-crypto-policies.conf
   - /etc/ssh/sshd_config.d/50-redhat.conf

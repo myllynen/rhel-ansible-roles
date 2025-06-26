@@ -14,7 +14,7 @@ Below are the role default values from defaults/main.yml:
 dns_cache_enable: true
 
 # DNS caching component (dnsmasq recommended)
-# Allowed values: dnsmasq, nscd, systemd-resolved
+# Allowed values: dnsmasq, systemd-resolved, nscd (RHEL < 10)
 # See https://access.redhat.com/solutions/2189381
 dns_cache_component: dnsmasq
 

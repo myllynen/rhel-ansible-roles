@@ -1,4 +1,29 @@
 ---
+- name: Gather needed facts
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - distribution_major_version
+  when: ansible_facts.distribution_major_version is not defined
+
+- name: Set configuration files
+  ansible.builtin.set_fact:
+    coredump_conf: "{{ '/etc/systemd/coredump.conf.d/95-ansible.conf'
+                       if ansible_facts.distribution_major_version | int >= 10 else '/etc/systemd/coredump.conf' }}"
+    system_conf: "{{ '/etc/systemd/system.conf.d/95-ansible.conf'
+                      if ansible_facts.distribution_major_version | int >= 10 else '/etc/systemd/system.conf' }}"
+
+- name: Check coredump configuration file
+  ansible.builtin.stat:
+    path: "{{ coredump_conf }}"
+  register: coredump_check
+
+- name: Check system configuration file
+  ansible.builtin.stat:
+    path: "{{ system_conf }}"
+  register: system_check
+
 - name: Enable system-wide coredumps
   ansible.builtin.include_tasks: enable.yml
   when: system_coredump_enable | bool

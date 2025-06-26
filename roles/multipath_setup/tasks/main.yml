@@ -10,13 +10,17 @@
     dest: /etc/multipath.conf
     mode: '0600'
   register: multipath_config
-  when: multipath_setup_config_file
+  when:
+    - multipath_setup_config_file is not none
+    - multipath_setup_config_file | length > 0
 
 - name: Enable multipathd service
   ansible.builtin.service:
     name: multipathd
     enabled: true
-  when: multipath_setup_config_file
+  when:
+    - multipath_setup_config_file is not none
+    - multipath_setup_config_file | length > 0
 
 - name: Start multipathd service
   ansible.builtin.service:
@@ -24,8 +28,9 @@
     state: started
   register: service_start
   when:
-    - multipath_setup_config_file
     - not multipath_setup_reboot | bool
+    - multipath_setup_config_file is not none
+    - multipath_setup_config_file | length > 0
 
 - name: Reload multipathd to apply configuration changes
   ansible.builtin.service:

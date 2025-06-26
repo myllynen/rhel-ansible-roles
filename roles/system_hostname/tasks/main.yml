@@ -30,8 +30,8 @@
   register: hostname_config
   when:
     - "':' not in system_hostname"
-    - system_hostname | regex_search('[a-zA-Z]')
     - system_hostname != 'localhost.localdomain'
+    - system_hostname | regex_search('[a-zA-Z]') is not none
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
