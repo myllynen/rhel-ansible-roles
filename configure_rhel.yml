@@ -47,7 +47,7 @@
     #    # Require password or not for the above
     #    sudo_passwordless: false
     #    authorized_keys:
-    #      - ssh-ed25519 ... user@cloud
+    #      - ssh-ed25519 ... id_ed25519.pub
     #    authorized_keys_exclusive: false
 
     # Use true if providing crypted values,
@@ -79,46 +79,56 @@
 
     # New user defaults file useradd template
     # Role provided alternatives:
-    # * useradd_cis.j2         - CIS Level 2 - Server compliant config
-    # * useradd_rhel.j2        - RHEL default config
+    # * useradd_cis.j2             - CIS Level 2 - Server compliant config
+    # * useradd_rhel.j2            - RHEL default config
     useradd_defaults_file:
 
     # Shadow configuration file login.defs template
     # Role provided alternatives:
-    # * login.defs_cis.j2      - CIS Level 2 - Server compliant config
-    # * login.defs_rhel.j2     - RHEL default config
+    # * login.defs_cis_rhel89.j2   - CIS Level 2 - Server compliant config - RHEL 8/9
+    # * login.defs_cis_rhel10.j2   - CIS Level 2 - Server compliant config - RHEL 10
+    # * login.defs_rhel_rhel8.j2   - RHEL 8 default config
+    # * login.defs_rhel_rhel9.j2   - RHEL 9 default config
+    # * login.defs_rhel_rhel10.j2  - RHEL 10 default config
     login_defs_config_file:
 
     # PAM login access control file access.conf template
     # Role provided alternatives:
-    # * access.conf_rhel.j2    - RHEL default config (empty table)
+    # * access.conf_rhel.j2        - RHEL default config
     login_access_config_file:
 
     # PAM faillock configuration file faillock.conf template
     # Role provided alternatives:
-    # * faillock_cis.conf      - CIS Level 2 - Server compliant config
-    # * faillock_rhel.conf     - RHEL default config
+    # * faillock_cis.conf          - CIS Level 2 - Server compliant config
+    # * faillock_rhel.conf         - RHEL default config
     faillock_config_file:
 
     # PAM password history config file pwhistory.conf template
     # NB. This is currently not compatible with oscap(8)
     # Role provided alternatives:
-    # * pwhistory.conf_cis.j2  - CIS Level 2 - Server compliant config
-    # * pwhistory.conf_rhel.j2 - RHEL default config
+    # * pwhistory.conf_cis.j2      - CIS Level 2 - Server compliant config
+    # * pwhistory.conf_rhel.j2     - RHEL default config
     pwhistory_config_file:
 
     # PAM password quality config file pwquality.conf template
     # Role provided alternatives:
-    # * pwquality.conf_cis.j2  - CIS Level 2 - Server compliant config
-    # * pwquality.conf_rhel.j2 - RHEL default config
+    # * pwquality.conf_cis.j2      - CIS Level 2 - Server compliant config
+    # * pwquality.conf_rhel.j2     - RHEL default config
     pwquality_config_file:
 
 
     # Resource limits configuration for users
+
+    # User resource limits config file limits.conf template
+    # See the limits.conf(5) manual page for details and file priorities!
+    # Role provided alternatives:
+    # * limits.conf_rhel.j2        - RHEL default config (no limits set)
+    limits_config_file:
+
     # These will be configured in /etc/security/limits.d/95-ansible.conf
     # All of the following are required for each entry:
     #   domain type item value
-    # If user_resource_limits is undefined will do nothing.
+    # If user_resource_limits is not defined will do nothing.
     # See the limits.conf(5) manual page for details.
     #user_resource_limits:
     #  - domain: "@student"
@@ -149,24 +159,13 @@
     system_auth_pam_d_su_file:
 
     #
-    # aide_setup
-    #
-    # aide config file to copy, if defined
-    aide_setup_config_file:
-
-    # Initialize aide database if not present
-    aide_setup_initialize_database: true
-
-    # Enable daily aide check using cron
-    aide_setup_cron_setup: true
-
-    #
     # audit_setup
     #
     # Optional auditd config file to copy
     # Role provided alternatives:
-    # * auditd_cis.conf   - CIS Level 2 - Server compliant config
-    # * auditd_rhel.conf  - RHEL default config
+    # * auditd_rhel.conf       - RHEL default config
+    # * auditd_cis.conf        - CIS Level 2 - Server compliant config - RHEL 8 & 10
+    # * auditd_cis.conf_rhel9  - CIS Level 2 - Server compliant config - RHEL 9
     audit_setup_config_file:
 
     # Optional audit rules file to copy
@@ -256,7 +255,7 @@
     dns_cache_enable: true
 
     # DNS caching component (dnsmasq recommended)
-    # Allowed values: dnsmasq, nscd, systemd-resolved
+    # Allowed values: dnsmasq, systemd-resolved, nscd (RHEL < 10)
     # See https://access.redhat.com/solutions/2189381
     dns_cache_component: dnsmasq
 
@@ -338,57 +337,8 @@
     etc_hosts_omit_entries: none
 
     #
-    # fapolicyd_setup
+    # files_{acl,copy,create,fetch,get,remove,properties} - omitted here for brevity
     #
-    # Enable or not the service after configuration
-    # to allow testing and verification before use.
-    fapolicyd_setup_enable_service: false
-
-    # fapolicyd config file to copy
-    # Role provided alternatives:
-    # * fapolicyd.conf  - RHEL default config file
-    fapolicyd_setup_config_file:
-
-    # fapolicyd rules file to copy
-    fapolicyd_setup_rules_file:
-
-    # fapolicyd trust file to copy
-    # Role provided alternatives:
-    # * fapolicyd.trust - RHEL default trust file
-    fapolicyd_setup_trust_file:
-
-    # fapolicyd RPM filter file to copy
-    # Role provided alternatives:
-    # * rpm-filter.conf - RHEL default trust file
-    fapolicyd_setup_rpm_filter_file:
-
-    # Remove unrecognized rules and trust files
-    fapolicyd_setup_exclusive: false
-
-    # List of recognized rules and trust files
-    # in addition to the role created ones
-    # (zz-ansible.rules and zz-ansible.trust)
-    # Other files in rules.d and trust.d will
-    # be removed meaning this MUST be tested!
-    # NB. Ensure these files are trustworthy!
-    fapolicyd_setup_files_known:
-    #  - /etc/fapolicyd/rules.d/50-os.rules
-    #  - /etc/fapolicyd/trust.d/50-os.trust
-
-    #
-    # files_{copy,create,fetch,get,remove} - omitted here for brevity
-    #
-
-    #
-    # fips_setup
-    #
-    # NB! It is best to enable FIPS mode during OS
-    # installation in order to ensure all keys are
-    # being generated with FIPS-compliant algorithms.
-
-    # Enable & check or not FIPS mode
-    # Disabling FIPS mode is unsupported
-    fips_setup_enable: false
 
     #
     # firewall
@@ -452,33 +402,15 @@
     # * ima-policy  - appraise executable files and libraries
     ima_evm_setup_policy_config_file: ima-policy
 
+    # Verify new IMA policy configuration file on the target
+    # This is recommended but this works by appending the
+    # new policy (if valid) to the current policy so prior
+    # rebooting the combined policy will be in use.
+    ima_evm_setup_verify_policy: true
+
     # Reboot system after enabling IMA
     # NB. A reboot is mandatory when disabling IMA
     ima_evm_setup_reboot: false
-
-    #
-    # insights_client
-    #
-    # Register or unregister the system with Red Hat Insights
-    # See https://access.redhat.com/products/red-hat-insights
-    insights_client_register: true
-
-    # Optional tag/value pairs to apply for the system
-    insights_client_tags:
-    #  group: prod
-    #  security: strict
-    #  network_performance: latency
-
-    # Enable remote host configuration (rhc)
-    # See https://access.redhat.com/articles/rhc
-    insights_client_rhc_enable: true
-
-    # Install OpenSCAP packages to allow compliance scanning
-    # See https://access.redhat.com/articles/4602981
-    insights_client_scap_enable: true
-
-    # Proxy server to use with insights-client
-    insights_client_proxy_server:
 
     #
     # ipv6_setup
@@ -540,7 +472,7 @@
     packages_remove_autoremove: false
 
     # Display results on output
-    packages_remove_display_results: false
+    packages_remove_display_results: true
 
     #
     # performance_tuning
@@ -650,6 +582,10 @@
     # Fails if UEFI Secure Boot is not enabled
     secure_boot_verify: false
 
+    # Verify FIPS enabled
+    # Fails if FIPS mode is not enabled
+    fips_mode_verify: false
+
     # One of: disabled, integrity, confidentiality
     # NB. Enabling lockdown will prevent using kdump
     # NB. Supported RHEL versions: RHEL 9+
@@ -660,6 +596,7 @@
     selinux: enforcing
 
     # System-wide crypto policy
+    # NB. FIPS mode must be enabled during installation
     crypto_policy: DEFAULT
 
     # Enable or disable SCP protocol (not scp(1))
@@ -752,7 +689,6 @@
     # cause idempotency issues with option disabling,
     # this only resets RPM provided files, not others
     # Consider using the file_copy role on older RHEL
-    # Default files used by this role from: RHEL 9.3
     sshd_configuration_config_reset: false
 
     # Remove unrecognized sshd configuration files
@@ -767,6 +703,7 @@
       - /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       - /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
       - /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+      - /etc/ssh/sshd_config.d/40-redhat-crypto-policies.conf
       - /etc/ssh/sshd_config.d/50-redhat.conf
 
     #
@@ -1027,11 +964,10 @@
 
   roles:
     #- system_hostname
-    #- swap_setup
     - ipv6_setup
     - etc_hosts
-    #- redhat.rhel_system_roles.rhc
     #- repository_setup
+    #- redhat.rhel_system_roles.rhc
     - guest_agent
     #- redhat.rhel_system_roles.network
     #- dns_cache
@@ -1040,6 +976,7 @@
     - timesync
     - packages_remove
     - boot_parameters
+    #- redhat.rhel_system_roles.bootloader
     #- system_keyboard
     - system_locale
     - audit_setup
@@ -1049,15 +986,14 @@
     #- redhat.rhel_system_roles.kdump
     #- system_update_report_pre
     #- system_update
-    #- aide_setup
+    #- redhat.rhel_system_roles.aide
     #- accounts_policy
     #- accounts_local
     - certificates
     #- { role: domain_ad, when: domain_ad_admin_username is defined }
     #- { role: ipaclient, state: present, when: ipaclient_domain is defined }
     #- ima_evm_setup
-    #- fapolicyd_setup
-    #- fips_setup
+    #- redhat.rhel_system_roles.fapolicyd
     - firewall
     #- redhat.rhel_system_roles.firewall
     - watchdog
@@ -1081,5 +1017,4 @@
     #- { role: splunk_forwarder, when: splunk_user_password_hash is defined }
     #- system_coredump
     #- scap_compliance
-    #- insights_client
     - system_init
