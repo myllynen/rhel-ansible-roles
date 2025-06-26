@@ -18,7 +18,8 @@
     msg: "Audit disabled on kernel command line."
   when:
     - "'audit' in ansible_facts.cmdline"
-    - ansible_facts.cmdline['audit'] == '0'
+    - ansible_facts.cmdline['audit'] == '0' or
+      ansible_facts.cmdline['audit'] == 'off'
 
 - name: Install audit package
   ansible.builtin.dnf:
@@ -34,14 +35,18 @@
     dest: /etc/audit/auditd.conf
     mode: '0640'
   register: auditd_config
-  when: audit_setup_config_file
+  when:
+    - audit_setup_config_file is not none
+    - audit_setup_config_file | length > 0
 
 - name: Copy audit rules configuration file
   ansible.builtin.copy:
     src: "{{ audit_setup_rules_file }}"
     dest: /etc/audit/rules.d/zz-ansible.rules
     mode: '0600'
-  when: audit_setup_rules_file
+  when:
+    - audit_setup_rules_file is not none
+    - audit_setup_rules_file | length > 0
 
 - name: Remove unrecognized audit rules files
   vars:
