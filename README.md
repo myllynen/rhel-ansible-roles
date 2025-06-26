@@ -21,15 +21,15 @@ See the READMEs of [each role](roles) for descriptions of the parameters
 they support.
 
 See the example playbook [configure_rhel.yml](configure_rhel.yml) how
-these roles could be used together. For additional roles to configure
-RHEL functionality (such as network and storage), see
+for all the configuration options these roles support and they could be
+used together. For additional roles to configure RHEL functionality
+(such as network and storage), see
 [Red Hat provided RHEL system roles](https://access.redhat.com/articles/3050101)
 (available also as _rhel-system-roles_ RPM on RHEL).
 
-These roles have been tested and verified to work against RHEL 8/9
-using Ansible 2.14 - 2.18. READMEs of roles will list supported
-versions where needed, by default all roles support all supported
-RHEL versions.
+These roles have been tested and verified to work against RHEL 8/9/10
+using Ansible 2.14 - 2.19. READMEs of roles will list supported versions
+where needed, by default all roles support all supported RHEL versions.
 
 The roles will gather the minimum set of facts as needed meaning that
 they can be used in setups where fact gathering is disabled.
