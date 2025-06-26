@@ -14,6 +14,10 @@ Below are the role default values from defaults/main.yml:
 # Fails if UEFI Secure Boot is not enabled
 secure_boot_verify: false
 
+# Verify FIPS enabled
+# Fails if FIPS mode is not enabled
+fips_mode_verify: false
+
 # One of: disabled, integrity, confidentiality
 # NB. Enabling lockdown will prevent using kdump
 # NB. Supported RHEL versions: RHEL 9+
@@ -24,6 +28,7 @@ kernel_lockdown: disabled
 selinux: enforcing
 
 # System-wide crypto policy
+# NB. FIPS mode must be enabled during installation
 crypto_policy: DEFAULT
 
 # Enable or disable SCP protocol (not scp(1))

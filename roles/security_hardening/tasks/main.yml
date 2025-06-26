@@ -4,8 +4,10 @@
     gather_subset:
       - '!all'
       - '!min'
+      - cmdline
       - distribution_major_version
-  when: ansible_facts.distribution_major_version is not defined
+  when: ansible_facts.cmdline is not defined or
+        ansible_facts.distribution_major_version is not defined
 
 - name: Install required packages
   vars:
@@ -44,6 +46,27 @@
     - secure_boot_verify | bool
     - sb_state.stdout | regex_search("Secure?Boot enabled") is none
 
+- name: Verify FIPS mode (CPU)
+  check_mode: false
+  ansible.builtin.command: grep -w aes /proc/cpuinfo
+  register: cpu_flags
+  failed_when: "'aes' not in cpu_flags.stdout"
+  changed_when: false
+
+- name: Verify FIPS mode (system)
+  check_mode: false
+  ansible.builtin.command: cat /proc/sys/crypto/fips_enabled
+  register: fips_mode
+  failed_when: fips_mode.stdout != '1'
+  changed_when: false
+
+- name: Verify FIPS mode (crypto policies)
+  check_mode: false
+  ansible.builtin.command: update-crypto-policies --show
+  register: crypto_policies
+  failed_when: "'FIPS' not in crypto_policies.stdout"
+  changed_when: false
+
 - name: Check kernel lockdown configuration
   vars:
     lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
@@ -71,10 +94,12 @@
       (kernel_lockdown != 'disabled' and lockdown_check.found == 0)
 
 - name: Configure SELinux state
+  vars:
+    update_cmdline: "{{ true if 'selinux' in ansible_facts.cmdline or selinux == 'disabled' else false }}"
   ansible.posix.selinux:
     policy: targeted
     state: "{{ selinux }}"
-    update_kernel_param: true
+    update_kernel_param: "{{ update_cmdline }}"
   register: selinux_config
   when:
     - "'grubby' in ansible_facts.packages"
