@@ -8,9 +8,9 @@ files_get:
 #    url_password: admin123
 #    validate_certs: false
 #    use_proxy: false
+#    timeout: 5
 #    dest: /var/tmp/data.zip
 #    mode: '0600'
-#    timeout: 5
 
 # Value for no_log parameter when getting
 # files and using passwords, unset otherwise
