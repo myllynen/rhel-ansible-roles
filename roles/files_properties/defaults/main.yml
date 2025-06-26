@@ -1,0 +1,10 @@
+---
+# List of properties to apply to paths
+# Use ansible.builtin.file module, see
+# its documentation for parameter info
+# Registers variable: properties_files
+files_properties:
+#  - path: /etc/foo.conf
+#    owner: root
+#    group: root
+#    mode: '0600'
