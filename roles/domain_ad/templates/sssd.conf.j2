@@ -22,36 +22,44 @@ offline_credentials_expiration = 7
 
 [domain/{{ domain_ad_domain | lower }}]
 debug_level = 0
-id_provider = ad
-access_provider = simple
-
-ad_domain = {{ domain_ad_domain | lower }}
-ad_hostname = {{ ansible_facts.fqdn }}
-krb5_realm = {{ domain_ad_domain | upper }}
-krb5_store_password_if_offline = True
-krb5_auth_timeout = 6
-
-ad_enable_dns_sites = True
-dyndns_update = False
-ldap_id_mapping = True
-case_sensitive = False
-
-ad_maximum_machine_account_password_age = 30
+#lookup_family_order = ipv4_only
+dns_discovery_domain = {{ domain_ad_domain | lower }}
 
 enumerate = False
 cache_credentials = True
+default_shell = /bin/bash
+fallback_homedir = /home/%u
+use_fully_qualified_names = False
+
+id_provider = ad
+ad_domain = {{ domain_ad_domain | lower }}
+ad_hostname = {{ ansible_facts.fqdn }}
+
+dyndns_update = False
+ad_enable_dns_sites = True
+
+ad_maximum_machine_account_password_age = 30
+
+ldap_id_mapping = True
+case_sensitive = False
+
+min_id = 1000
+max_id = 0
+
 entry_cache_timeout = 3600
 subdomain_inherit = ignore_group_members
 ignore_group_members = True
 ldap_deref_threshold = 10
 
-min_id = 1000
-max_id = 0
+krb5_realm = {{ domain_ad_domain | upper }}
+krb5_store_password_if_offline = True
+krb5_auth_timeout = 6
 
-default_shell = /bin/bash
-fallback_homedir = /home/%u
-use_fully_qualified_names = False
+krb5_lifetime = 24h
+krb5_renewable_lifetime = 7d
+krb5_renew_interval = 2h
 
+access_provider = simple
 {% if domain_ad_allow_groups %}
 simple_allow_groups = {{ domain_ad_allow_groups | join(',') }}
 {% endif %}
