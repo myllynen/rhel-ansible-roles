@@ -1,9 +1,0 @@
----
-# aide config file to copy, if defined
-aide_setup_config_file:
-
-# Initialize aide database if not present
-aide_setup_initialize_database: true
-
-# Enable daily aide check using cron
-aide_setup_cron_setup: true
