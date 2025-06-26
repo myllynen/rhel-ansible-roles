@@ -1,8 +1,0 @@
----
-- name: Enable Red Hat Insights
-  ansible.builtin.include_tasks: enable.yml
-  when: insights_client_register | bool
-
-- name: Disable Red Hat Insights
-  ansible.builtin.include_tasks: disable.yml
-  when: not insights_client_register | bool
