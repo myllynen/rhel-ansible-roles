@@ -12,6 +12,13 @@
       ansible_facts.hostname is not defined or
       ansible_facts.domain is not defined
 
+- name: Fail if domainname not set for self entry
+  ansible.builtin.fail:
+    msg: "No domainname set."
+  when:
+    - etc_hosts_self_add | bool
+    - not etc_hosts_self_domain | default(ansible_facts.domain, true)
+
 - name: Create /etc/hosts file
   vars:
     self_host: "{{ ansible_facts.hostname.split('.')[0] }}"
