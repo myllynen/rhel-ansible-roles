@@ -2,10 +2,16 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
+- name: Check IMA status
+  ansible.builtin.stat:
+    path: /etc/ima/ima-policy
+  register: ima_status
+
 - name: Fail if fapolicyd enabled
   ansible.builtin.fail:
     msg: "IMA/EVM should be setup before fapolicyd."
   when:
+    - not ima_status.stat.exists
     - "'fapolicyd.service' in ansible_facts.services"
     - ansible_facts.services['fapolicyd.service'].state == 'enabled' or
       ansible_facts.services['fapolicyd.service'].status == 'running'
@@ -51,7 +57,7 @@
     - "'security.ima' not in fattr_info.stdout"
 
 - name: Verify pending IMA policy configuration file
-  ansible.builtin.shell: echo /etc/ima/ima-policy.ansible > /sys/kernel/security/integrity/ima/policy
+  ansible.builtin.shell: cat /etc/ima/ima-policy.ansible >> /sys/kernel/security/integrity/ima/policy
   changed_when: true
   when:
     - ima_evm_setup_verify_policy | bool

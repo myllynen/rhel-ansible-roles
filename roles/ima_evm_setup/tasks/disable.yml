@@ -31,7 +31,7 @@
   check_mode: true
   ansible.builtin.lineinfile:
     path: /sys/kernel/security/ima/policy
-    regexp: '^appraise.*'
+    regexp: '.*BPRM_CHECK.*'
     state: absent
   register: ima_policy_check
   changed_when: false
@@ -39,7 +39,7 @@
 - name: Fail if IMA policy loaded
   ansible.builtin.fail:
     msg: "IMA policy still loaded, cannot proceed."
-  when: ima_policy_check.found
+  when: ima_policy_check.found != 0
 
 - name: Gather package facts
   ansible.builtin.package_facts:
