@@ -1,0 +1,22 @@
+---
+- name: Install required packages
+  ansible.builtin.dnf:
+    name: acl
+    state: present
+
+- name: Configure ACLs
+  ansible.posix.acl:
+    path: "{{ item.path }}"
+    entity: "{{ item.entity | default(omit) }}"
+    etype: "{{ item.etype | default(omit) }}"
+    permissions: "{{ item.permissions | default(omit) }}"
+    default: "{{ item.default | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    recursive: "{{ item.recursive | default(omit) }}"
+    recalculate_mask: "{{ item.recalculate_mask | default(omit) }}"
+    use_nfsv4_acls: "{{ item.use_nfsv4_acls | default(omit) }}"
+  register: acl_files
+  loop: "{{ files_acl | default([], true) }}"
+  loop_control:
+    label: "{{ item.path }}"

@@ -1,0 +1,10 @@
+---
+# List of ACLs etc to apply to paths
+# Uses ansible.posix.acl module
+# Registers variable: acl_files
+files_acl:
+#  - path: /etc/foo.conf
+#    entity: joe
+#    etype: user
+#    permissions: r
+#    state: present
