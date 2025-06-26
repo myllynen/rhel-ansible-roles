@@ -4,44 +4,65 @@
     src: "{{ useradd_defaults_file }}"
     dest: /etc/default/useradd
     mode: '0644'
-  when: useradd_defaults_file
+  when:
+    - useradd_defaults_file is not none
+    - useradd_defaults_file | length > 0
 
 - name: Create system-local login defaults file
   ansible.builtin.template:
     src: "{{ login_defs_config_file }}"
     dest: /etc/login.defs
     mode: '0644'
-  when: login_defs_config_file
+  when:
+    - login_defs_config_file is not none
+    - login_defs_config_file length > 0
 
 - name: Create system-local login access file
   ansible.builtin.template:
     src: "{{ login_access_config_file }}"
     dest: /etc/security/access.conf
     mode: '0644'
-  when: login_access_config_file
+  when:
+    - login_access_config_file is not none
+    - login_access_config_file | length > 0
 
 - name: Create system-local faillock configuration file
   ansible.builtin.template:
     src: "{{ faillock_config_file }}"
     dest: /etc/security/faillock.conf
     mode: '0644'
-  when: faillock_config_file
+  when:
+    - faillock_config_file is not none
+    - faillock_config_file | length > 0
 
 - name: Create system-local password history requirements file
   ansible.builtin.template:
     src: "{{ pwhistory_config_file }}"
     dest: /etc/security/pwhistory.conf
     mode: '0644'
-  when: pwhistory_config_file
+  when:
+    - pwhistory_config_file is not none
+    - pwhistory_config_file | length > 0
 
 - name: Create system-local password quality requirements file
   ansible.builtin.template:
     src: "{{ pwquality_config_file }}"
     dest: /etc/security/pwquality.conf
     mode: '0644'
-  when: pwquality_config_file
+  when:
+    - pwquality_config_file is not none
+    - pwquality_config_file | length > 0
 
-- name: Create system-local user resource limits configuration file
+- name: Create system-local user resource limits main configuration file
+  ansible.builtin.template:
+    src: "{{ limits_config_file }}"
+    dest: /etc/security/limits.conf
+    mode: '0644'
+  when:
+    - limits_config_file is not none
+    - limits_config_file | length > 0
+
+- name: Create system-local user resource limits custom configuration file
   ansible.builtin.template:
     src: limits.conf.j2
     dest: /etc/security/limits.d/95-ansible.conf
@@ -56,7 +77,9 @@
   ansible.builtin.dnf:
     name: "{{ auth_packages | select }}"
     state: present
-  when: system_auth_profile
+  when:
+    - system_auth_profile is not none
+    - system_auth_profile | length > 0
 
 - name: Gather package facts
   ansible.builtin.package_facts:
@@ -84,7 +107,8 @@
     mode: '0644'
   register: custom_profile_copy
   when:
-    - system_auth_profile
+    - system_auth_profile is not none
+    - system_auth_profile | length > 0
     - "'custom/' in system_auth_profile"
 
 - name: Check current system-local authentication profile in use
@@ -95,7 +119,8 @@
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
-    - system_auth_profile
+    - system_auth_profile is not none
+    - system_auth_profile | length > 0
 
 - name: Check current system-local authentication profile status
   check_mode: false
@@ -105,7 +130,8 @@
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
-    - system_auth_profile
+    - system_auth_profile is not none
+    - system_auth_profile | length > 0
     - "'No existing configuration' not in profile_current.stdout"
 
 - name: Prevent Centrify updating NSS configuration
@@ -130,7 +156,8 @@
   ansible.builtin.command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
   changed_when: true
   when:
-    - system_auth_profile
+    - system_auth_profile is not none
+    - system_auth_profile | length > 0
     - current_config | trim != wanted_config | trim or
       'not valid' in profile_valid.stdout or
       custom_profile_copy is changed
@@ -142,4 +169,6 @@
     src: "{{ system_auth_pam_d_su_file }}"
     dest: /etc/pam.d/su
     mode: '0644'
-  when: system_auth_pam_d_su_file
+  when:
+    - system_auth_pam_d_su_file is not none
+    - system_auth_pam_d_su_file | length > 0

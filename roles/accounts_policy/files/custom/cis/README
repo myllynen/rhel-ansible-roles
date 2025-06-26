@@ -19,3 +19,6 @@ with-pamaccess::
 
 with-systemd::
     Enable using systemd for user/group lookups.
+
+with-yescrypt::
+    Enable using yescrypt for password hashing algorithm.

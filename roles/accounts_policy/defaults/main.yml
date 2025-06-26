@@ -5,46 +5,56 @@
 
 # New user defaults file useradd template
 # Role provided alternatives:
-# * useradd_cis.j2         - CIS Level 2 - Server compliant config
-# * useradd_rhel.j2        - RHEL default config
+# * useradd_cis.j2             - CIS Level 2 - Server compliant config
+# * useradd_rhel.j2            - RHEL default config
 useradd_defaults_file:
 
 # Shadow configuration file login.defs template
 # Role provided alternatives:
-# * login.defs_cis.j2      - CIS Level 2 - Server compliant config
-# * login.defs_rhel.j2     - RHEL default config
+# * login.defs_cis_rhel89.j2   - CIS Level 2 - Server compliant config - RHEL 8/9
+# * login.defs_cis_rhel10.j2   - CIS Level 2 - Server compliant config - RHEL 10
+# * login.defs_rhel_rhel8.j2   - RHEL 8 default config
+# * login.defs_rhel_rhel9.j2   - RHEL 9 default config
+# * login.defs_rhel_rhel10.j2  - RHEL 10 default config
 login_defs_config_file:
 
 # PAM login access control file access.conf template
 # Role provided alternatives:
-# * access.conf_rhel.j2    - RHEL default config (empty table)
+# * access.conf_rhel.j2        - RHEL default config
 login_access_config_file:
 
 # PAM faillock configuration file faillock.conf template
 # Role provided alternatives:
-# * faillock_cis.conf      - CIS Level 2 - Server compliant config
-# * faillock_rhel.conf     - RHEL default config
+# * faillock_cis.conf          - CIS Level 2 - Server compliant config
+# * faillock_rhel.conf         - RHEL default config
 faillock_config_file:
 
 # PAM password history config file pwhistory.conf template
 # NB. This is currently not compatible with oscap(8)
 # Role provided alternatives:
-# * pwhistory.conf_cis.j2  - CIS Level 2 - Server compliant config
-# * pwhistory.conf_rhel.j2 - RHEL default config
+# * pwhistory.conf_cis.j2      - CIS Level 2 - Server compliant config
+# * pwhistory.conf_rhel.j2     - RHEL default config
 pwhistory_config_file:
 
 # PAM password quality config file pwquality.conf template
 # Role provided alternatives:
-# * pwquality.conf_cis.j2  - CIS Level 2 - Server compliant config
-# * pwquality.conf_rhel.j2 - RHEL default config
+# * pwquality.conf_cis.j2      - CIS Level 2 - Server compliant config
+# * pwquality.conf_rhel.j2     - RHEL default config
 pwquality_config_file:
 
 
 # Resource limits configuration for users
+
+# User resource limits config file limits.conf template
+# See the limits.conf(5) manual page for details and file priorities!
+# Role provided alternatives:
+# * limits.conf_rhel.j2        - RHEL default config (no limits set)
+limits_config_file:
+
 # These will be configured in /etc/security/limits.d/95-ansible.conf
 # All of the following are required for each entry:
 #   domain type item value
-# If user_resource_limits is undefined will do nothing.
+# If user_resource_limits is not defined will do nothing.
 # See the limits.conf(5) manual page for details.
 #user_resource_limits:
 #  - domain: "@student"
