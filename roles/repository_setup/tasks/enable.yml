@@ -29,9 +29,10 @@
       - subscription-manager
     disablerepo: '*'
   when:
-    - not repository_setup_rhsm_curl_args
-    - repository_setup_rhsm_parameters.rhsm_baseurl | default(false)
+    - repository_setup_rhsm_curl_args is none or
+      repository_setup_rhsm_curl_args | length == 0
     - repository_setup_install_katello_rpm | bool
+    - repository_setup_rhsm_parameters.rhsm_baseurl is defined
 
 - name: Configure Red Hat subscription using subscription-manager
   community.general.redhat_subscription:
@@ -58,12 +59,15 @@
     server_proxy_port: "{{ repository_setup_rhsm_parameters.server_proxy_port | default(omit) }}"
     server_proxy_user: "{{ repository_setup_rhsm_parameters.server_proxy_user | default(omit) }}"
     server_proxy_password: "{{ repository_setup_rhsm_parameters.server_proxy_password | default(omit) }}"
+    server_proxy_scheme: "{{ repository_setup_rhsm_parameters.server_proxy_scheme | default(omit) }}"
     syspurpose: "{{ repository_setup_rhsm_parameters.syspurpose | default(omit) }}"
+    token: "{{ repository_setup_rhsm_parameters.token | default(omit) }}"
   register: subscription_state
   when:
-    - not repository_setup_rhsm_curl_args
-    - repository_setup_rhsm_parameters.activationkey | default(false) or
-      repository_setup_rhsm_parameters.username | default(false)
+    - repository_setup_rhsm_curl_args is none or
+      repository_setup_rhsm_curl_args | length == 0
+    - repository_setup_rhsm_parameters.activationkey is defined or
+      repository_setup_rhsm_parameters.username is defined
 
 - name: Disable Red Hat repositories
   community.general.rhsm_repository:
