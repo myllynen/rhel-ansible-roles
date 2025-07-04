@@ -11,7 +11,11 @@
     rdns = false
     udp_preference_limit = 1
     spake_preauth_groups = edwards25519
+{% if ansible_facts.distribution_major_version | int >= 10 %}
+    pkinit_anchors = FILE:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+{% else %}
     pkinit_anchors = FILE:/etc/pki/tls/certs/ca-bundle.crt
+{% endif %}
 
 [realms]
     {{ domain_ad_domain | upper }} = {

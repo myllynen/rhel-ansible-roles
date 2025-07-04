@@ -1,7 +1,6 @@
 [sssd]
 debug_level = 0
 services = nss, pam
-reconnection_retries = 3
 domains = {{ domain_ad_domain | lower }}
 
 [nss]
@@ -9,7 +8,6 @@ debug_level = 0
 filter_users = root, ansible
 filter_groups = root, ansible
 memcache_timeout = 3600
-enum_cache_timeout = 3600
 entry_negative_timeout = 3600
 entry_cache_nowait_percentage = 90
 
@@ -25,7 +23,6 @@ debug_level = 0
 #lookup_family_order = ipv4_only
 dns_discovery_domain = {{ domain_ad_domain | lower }}
 
-enumerate = False
 cache_credentials = True
 default_shell = /bin/bash
 fallback_homedir = /home/%u

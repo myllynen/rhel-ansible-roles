@@ -4,9 +4,11 @@
     gather_subset:
       - '!all'
       - '!min'
+      - distribution_major_version
       - system
-  when: ansible_facts.domain is not defined or
-        ansible_facts.fqdn is not defined
+  when: ansible_facts.distribution_major_version is not defined or
+        ansible_facts.domain is not defined or
+        ansible_facts.fqdn is not defined or
 
 - name: Install required packages
   ansible.builtin.dnf:

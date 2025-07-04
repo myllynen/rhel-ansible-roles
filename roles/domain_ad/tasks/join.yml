@@ -19,7 +19,9 @@
   ansible.builtin.template:
     src: "{{ domain_ad_sssd_config_file | default('sssd.conf.j2', true) }}"
     dest: /etc/sssd/conf.d/zz-ansible.conf
-    mode: '0600'
+    owner: root
+    group: "{{ 'sssd' if ansible_facts.distribution_major_version | int >= 10 else 'root' }}"
+    mode: "{{ '0640' if ansible_facts.distribution_major_version | int >= 10 else '0600' }}"
   register: sssd_config
 
 - name: Run SSSD configuration check
