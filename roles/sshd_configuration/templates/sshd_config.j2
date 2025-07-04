@@ -1,4 +1,4 @@
-{% for item in sshd | dict2items | select if item.key not in sshd_disable %}
+{% for item in sshd_enable | dict2items | select if item.key not in sshd_disable %}
 {% if item.value is not string and item.value is not number %}
 {% if item.key.startswith('Match') %}
 {{ item.key }}

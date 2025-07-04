@@ -11,15 +11,15 @@
 
 - name: Set sshd options to enable
   ansible.builtin.set_fact:
-    sshd: "{{ sshd_options | default({}, true) }}"
+    sshd_enable: "{{ sshd_options | default({}, true) }}"
 
 - name: Fail if root trying to block root access completely
   ansible.builtin.fail:
     msg: "Refusing to configure 'PermitRootLogin no' when connected as root."
   when:
     - "'SUDO_USER' not in ansible_facts.env"
-    - "'PermitRootLogin' in sshd"
-    - "sshd.PermitRootLogin == 'no'"
+    - "'PermitRootLogin' in sshd_enable"
+    - "sshd_enable.PermitRootLogin == 'no'"
 
 - name: Set sshd options to disable
   ansible.builtin.set_fact:
@@ -95,7 +95,7 @@
     mode: '0600'
     validate: /usr/sbin/sshd -tf %s
   register: enable_options
-  loop: "{{ sshd | dict2items | select }}"
+  loop: "{{ sshd_enable | dict2items | select }}"
   when:
     - item.key not in sshd_disable
     - item.key.split(' ')[0] not in ['HostKey', 'ListenAddress', 'Match']
