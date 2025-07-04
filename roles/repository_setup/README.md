@@ -75,12 +75,14 @@ repository_setup_rhsm_parameters:
   #server_proxy_port:
   #server_proxy_user:
   #server_proxy_password:
+  #server_proxy_scheme:
   #syspurpose:
   #  usage: Production
   #  role: Red Hat Enterprise Server
   #  service_level_agreement: Premium
   #  #addons: []
   #  sync: true
+  #token:
 
 # List of Red Hat / Satellite repository IDs to disable
 repository_setup_rhsm_repositories_disable:
