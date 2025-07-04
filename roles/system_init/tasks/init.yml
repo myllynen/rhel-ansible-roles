@@ -3,7 +3,7 @@
   ansible.builtin.package_facts:
 
 - name: Remove old kernel packages
-  ansible.builtin.command: dnf -C remove --oldinstallonly -y
+  ansible.builtin.command: dnf -C -y remove --oldinstallonly
   changed_when: true
   when: ansible_facts.packages['kernel'] | length > 1
 
