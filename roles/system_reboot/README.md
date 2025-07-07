@@ -12,7 +12,7 @@ Below are the role default values from defaults/main.yml:
 ---
 # Reboot policy
 # never - never reboot
-# when_needed - reboot if needs-restarting says so
+# when_needed - reboot if dnf needs-restarting says so
 # always - always reboot
 system_reboot_policy: when_needed
 </pre>

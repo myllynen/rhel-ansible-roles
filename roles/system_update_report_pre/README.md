@@ -17,7 +17,7 @@ system_update_report_pre_display_updates: false
 system_update_report_pre_email_report: false
 
 # Parameters for the community.general.mail module
-# Subject, reply, and to are mandatory, rest optional
+# Subject, sender, and to are mandatory, rest optional
 system_update_report_pre_email_parameters:
   #host: localhost
   #port: 25

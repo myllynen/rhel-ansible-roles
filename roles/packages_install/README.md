@@ -15,6 +15,7 @@ packages_install:
   - bash-completion
   - bind-utils
   - curl
+  - dnf-plugins-core
   #-git-core
   - man-pages
   #- mlocate
@@ -34,7 +35,6 @@ packages_install:
   #- vim-enhanced
   #- wget
   - xz
-  - yum-utils
   - zstd
 
 # Enable or disable dnf module 'install_weak_deps' parameter

@@ -11,10 +11,10 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # Reboot policy after applying updates
-# never - never reboot even if updates would require reboot
-# when_needed - reboot only when needed (using needs-restarting)
+# never - never reboot, even if updates would require restart
+# when_needed - reboot when needed (using dnf needs-restarting)
 # when_updated - reboot if updates were installed
-# always - always reboot even if no updates were installed
+# always - always reboot, even if no updates were installed
 system_update_reboot_policy: when_needed
 
 # Display list of updated packages on output
@@ -24,7 +24,7 @@ system_update_display_updates: false
 system_update_email_report: false
 
 # Parameters for the community.general.mail module
-# Subject, reply, and to are mandatory, rest optional
+# Subject, sender, and to are mandatory, rest optional
 system_update_email_parameters:
   #host: localhost
   #port: 25

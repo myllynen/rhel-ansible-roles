@@ -1,7 +1,7 @@
 ---
-- name: Install yum-utils package
+- name: Install dnf-plugins-core package
   ansible.builtin.dnf:
-    name: yum-utils
+    name: dnf-plugins-core
     state: present
   when: system_reboot_policy == 'when_needed'
 
@@ -15,12 +15,11 @@
   failed_when: false
   changed_when: false
   when:
-    - "'yum-utils' in ansible_facts.packages"
+    - "'dnf-plugins-core' in ansible_facts.packages"
     - system_reboot_policy == 'when_needed'
 
 - name: Reboot system
   ansible.builtin.reboot:
   when: (system_reboot_policy == 'always') or
-        (system_reboot_policy == 'when_needed' and
-         needs_restarting.rc is defined and
-         needs_restarting.rc != 0)
+        (system_reboot_policy == 'when_needed' and needs_restarting.stdout_lines is defined and
+                                                   needs_restarting.stdout_lines | length > 0)
