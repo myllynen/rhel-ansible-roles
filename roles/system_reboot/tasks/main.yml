@@ -10,7 +10,9 @@
 
 - name: Check need for rebooting
   check_mode: false
-  ansible.builtin.command: dnf -C --disableplugin=product-id,subscription-manager needs-restarting -r
+  ansible.builtin.shell: |
+    dnf -C --disableplugin=product-id,subscription-manager needs-restarting || :
+    dnf -C --disableplugin=product-id,subscription-manager needs-restarting -r > /dev/null 2>&1
   register: needs_restarting
   failed_when: false
   changed_when: false
@@ -21,5 +23,7 @@
 - name: Reboot system
   ansible.builtin.reboot:
   when: (system_reboot_policy == 'always') or
-        (system_reboot_policy == 'when_needed' and needs_restarting.stdout_lines is defined and
-                                                   needs_restarting.stdout_lines | length > 0)
+        (system_reboot_policy == 'when_needed' and ((needs_restarting.stdout_lines is defined and
+                                                     needs_restarting.stdout_lines | length > 0) or
+                                                    (needs_restarting.rc is defined and
+                                                     needs_restarting.rc != 0)))
