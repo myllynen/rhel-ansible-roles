@@ -980,7 +980,7 @@
     #- system_keyboard
     - system_locale
     - audit_setup
-    #- { role: multipath_setup, when: ansible_facts.virtualization_role != 'guest' }
+    #- {role: multipath_setup, when: ansible_facts.virtualization_role != 'guest'}
     #- redhat.rhel_system_roles.kernel_settings
     #- redhat.rhel_system_roles.storage
     #- redhat.rhel_system_roles.kdump
@@ -990,8 +990,8 @@
     #- accounts_policy
     #- accounts_local
     - certificates
-    #- { role: domain_ad, when: domain_ad_admin_username is defined }
-    #- { role: ipaclient, state: present, when: ipaclient_domain is defined }
+    #- {role: domain_ad, when: domain_ad_admin_username is defined}
+    #- {role: ipaclient, state: present, when: ipaclient_domain is defined}
     #- ima_evm_setup
     #- redhat.rhel_system_roles.fapolicyd
     - firewall
@@ -1014,7 +1014,7 @@
     #- redhat.rhel_system_roles.cockpit
     #- redhat.rhel_system_roles.logging
     #- redhat.rhel_system_roles.metrics
-    #- { role: splunk_forwarder, when: splunk_user_password_hash is defined }
+    #- {role: splunk_forwarder, when: splunk_user_password_hash is defined}
     #- system_coredump
     #- scap_compliance
     - system_init
