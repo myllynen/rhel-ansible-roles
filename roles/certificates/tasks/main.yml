@@ -46,10 +46,10 @@
       - /etc/pki/ca-trust/source/{{ block_dir }}/*
       - /etc/pki/ca-trust/source/*
     files_remove_exclude: "{{ system_files | list +
-                              certificates_files_known | select +
-                              anchor_files.results | map(attribute='invocation.module_args.dest') | list +
-                              blocklist_files.results | map(attribute='invocation.module_args.dest') | list +
-                              ext_files.results | map(attribute='invocation.module_args.dest') | list }}"
+                              certificates_files_known | default([], true) | select | list +
+                              anchor_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list +
+                              blocklist_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list +
+                              ext_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list }}"
   ansible.builtin.include_role:
     name: files_remove
   when: certificates_exclusive | bool
