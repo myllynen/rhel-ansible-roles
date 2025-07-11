@@ -74,7 +74,7 @@ limits_config_file:
 #    value: 4
 
 
-# Either use a system provided profile (e.g., "minimal")
+# Either use a system provided profile (e.g., "sssd")
 # or copy and use a custom one. A custom profile must be
 # named as "custom/name". E.g., use "/srv/custom/strict"
 # to copy the profile custom/strict from local path /srv
@@ -85,7 +85,7 @@ system_auth_profile:
 
 # Profile parameters string for "authselect select" command
 # See the "authselect show 'profile'" output for details
-# E.g., with "minimal" use without-nullok with-pamaccess
+# E.g., with "minimal"/"local" use without-nullok with-pamaccess
 # With "custom/cis" the following parameters can be used:
 #   with-centrify with-mkhomedir with-pamaccess with-systemd
 system_auth_profile_parameters:
