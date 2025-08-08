@@ -13,6 +13,9 @@ Below are the role default values from defaults/main.yml:
 # Multipath config file to copy
 multipath_setup_config_file:
 
+# Multipath bindings file to copy
+multipath_setup_bindings_file:
+
 # Reboot system after changes
 # Config file will be reloaded if no reboot
 multipath_setup_reboot: true
