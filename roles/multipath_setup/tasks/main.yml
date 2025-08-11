@@ -55,10 +55,12 @@
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: multipath_config is changed
+  when: multipath_config is changed or
+        multipath_bindings is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
   when:
     - multipath_setup_reboot | bool
     - multipath_config is changed
+    - multipath_bindings is changed
