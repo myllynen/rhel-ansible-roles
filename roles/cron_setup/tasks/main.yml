@@ -1,0 +1,46 @@
+---
+- name: Install cronie package
+  ansible.builtin.dnf:
+    name: cronie
+    state: present
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+
+- name: Enable crond service
+  ansible.builtin.service:
+    name: crond
+    enabled: true
+  when: "'cronie' in ansible_facts.packages"
+
+- name: Start crond service
+  ansible.builtin.service:
+    name: crond
+    state: started
+  register: service_start
+  when: "'cronie' in ansible_facts.packages"
+
+- name: Configure crontab entries
+  vars:
+    label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
+  ansible.builtin.cron:
+    cron_file: "{{ item.cron_file | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    user: "{{ item.user | default(omit) }}"
+    name: "{{ item.name }}"
+    minute: "{{ item.minute | default(omit) }}"
+    hour: "{{ item.hour | default(omit) }}"
+    day: "{{ item.day | default(omit) }}"
+    month: "{{ item.month | default(omit) }}"
+    weekday: "{{ item.weekday | default(omit) }}"
+    special_time: "{{ item.special_time | default(omit) }}"
+    env: "{{ item.env | default(omit) }}"
+    job: "{{ item.job | default(omit) }}"
+    insertbefore: "{{ item.insertbefore | default(omit) }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
+    disabled: "{{ item.disabled | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+  loop: "{{ cron_setup_entries | select }}"
+  loop_control:
+    label: "{{ label_user + item.name }}"
+  when: "'cronie' in ansible_facts.packages"

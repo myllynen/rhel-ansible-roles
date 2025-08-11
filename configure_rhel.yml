@@ -249,6 +249,19 @@
       - /etc/pki/ca-trust/source/anchors/katello-server-ca.pem
 
     #
+    # cron_setup
+    #
+    # List of crontab entries to update
+    # Uses ansible.builtin.cron module
+    cron_setup_entries:
+    #  - name: LC_ALL
+    #    env: true
+    #    job: C.UTF-8
+    #  - name: refresh tokens
+    #    job: /usr/local/bin/refresh-tokens
+    #    special_time: daily
+
+    #
     # dns_cache
     #
     # Enable or disable DNS cache
@@ -1020,4 +1033,5 @@
     #- {role: splunk_forwarder, when: splunk_user_password_hash is defined}
     #- system_coredump
     #- scap_compliance
+    #- cron_setup
     - system_init

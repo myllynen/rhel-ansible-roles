@@ -1,0 +1,10 @@
+---
+# List of crontab entries to update
+# Uses ansible.builtin.cron module
+cron_setup_entries:
+#  - name: LC_ALL
+#    env: true
+#    job: C.UTF-8
+#  - name: refresh tokens
+#    job: /usr/local/bin/refresh-tokens
+#    special_time: daily
