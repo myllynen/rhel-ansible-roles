@@ -11,12 +11,14 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # Enable or disable DNS cache
-dns_cache_enable: true
+dns_cache_enable: false
 
-# DNS caching component (dnsmasq recommended)
+# DNS caching component
+# dnsmasq recommended on RHEL 9 and earlier
+# systemd-resolved recommended on RHEL 10 and later
 # Allowed values: dnsmasq, systemd-resolved, nscd (RHEL < 10)
 # See https://access.redhat.com/solutions/2189381
-dns_cache_component: dnsmasq
+dns_cache_component: systemd-resolved
 
 # Minimum cache/local/negative TTL value for dnsmasq
 # to use in case none is provided in upstream reply

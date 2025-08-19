@@ -16,6 +16,14 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
+- name: Update systemd-resolved DNSSEC configuration (RHEL 8)
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^(#|)DNSSEC=.*'
+    line: 'DNSSEC=no'
+  register: daemon_config
+  when: ansible_facts.distribution_major_version | int == 8
+
 - name: Enable systemd-resolved service
   ansible.builtin.service:
     name: systemd-resolved
@@ -26,7 +34,17 @@
   ansible.builtin.service:
     name: systemd-resolved
     state: started
+  register: service_start
   when: "'systemd-resolved.service' in ansible_facts.services"
+
+- name: Restart systemd-resolved to apply configuration changes
+  ansible.builtin.service:
+    name: systemd-resolved
+    state: restarted
+  when:
+    - "'systemd-resolved.service' in ansible_facts.services"
+    - service_start is not changed
+    - daemon_config is changed
 
 - name: Update NetworkManager DNS cache configuration
   ansible.builtin.copy:
