@@ -1,0 +1,44 @@
+---
+- name: Install required packages
+  vars:
+    base_pkgs: "{{ ['gzip', 'tar', 'xz'] }}"
+    attrs_used: "{{ true if files_unarchive | selectattr('attributes', 'defined') | length > 0 else false }}"
+    attr_pkgs: "{{ ['e2fsprogs'] if attrs_used else [] }}"
+    bzip2_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.bz2$') | length > 0 else false }}"
+    bzip2_pkgs: "{{ ['bzip2'] if bzip2_used else [] }}"
+    zip_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.zip$') | length > 0 else false }}"
+    zip_pkgs: "{{ ['zip', 'unzip'] if zip_used else [] }}"
+    zstd_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.zst$') | length > 0 else false }}"
+    zstd_pkgs: "{{ ['zstd'] if zstd_used else [] }}"
+    required_pkgs: "{{ base_pkgs + attr_pkgs + bzip2_pkgs + zip_pkgs + zstd_pkgs }}"
+  ansible.builtin.dnf:
+    name: "{{ required_pkgs }}"
+    state: present
+
+- name: Unarchive files
+  ansible.builtin.unarchive:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    creates: "{{ item.creates | default(omit) }}"
+    remote_src: "{{ item.remote_src | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    decrypt: "{{ item.decrypt | default(omit) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
+    include: "{{ item.include | default(omit) }}"
+    keep_newer: "{{ item.keep_newer | default(omit) }}"
+    list_files: "{{ item.list_files | default(omit) }}"
+    extra_opts: "{{ item.extra_opts | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    io_buffer_size: "{{ item.io_buffer_size | default(omit) }}"
+  register: unarchive_files
+  loop: "{{ files_unarchive | default([], true) }}"
+  loop_control:
+    label: "{{ item.src + ' -> ' + item.dest }}"

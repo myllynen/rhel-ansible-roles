@@ -1,0 +1,8 @@
+---
+# List of files to unarchive
+# Uses ansible.builtin.unarchive module
+# Registers variable: unarchive_files
+files_unarchive:
+#  - src: /tmp/installer.zip
+#    dest: /opt/acme
+#    remote_src: true

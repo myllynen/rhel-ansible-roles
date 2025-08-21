@@ -352,7 +352,7 @@
     etc_hosts_omit_entries: none
 
     #
-    # files_{acl,copy,create,fetch,get,remove,properties} - omitted here for brevity
+    # files_{acl,copy,create,fetch,get,remove,properties,unarchive} - omitted here for brevity
     #
 
     #
