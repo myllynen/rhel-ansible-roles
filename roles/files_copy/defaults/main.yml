@@ -1,6 +1,6 @@
 ---
 # List of files and directories to copy
-# Uses Ansible built-in copy module
+# Uses ansible.builtin.copy module
 # Registers variable: copy_files
 files_copy:
 #  - src: /local/path/test.file
@@ -8,7 +8,7 @@ files_copy:
 #    mode: '0600'
 
 # List of templates to render
-# Uses Ansible built-in template module
+# Uses ansible.builtin.template module
 # Registers variable: copy_templates
 files_copy_templates:
 #  - src: settings.conf.j2

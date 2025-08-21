@@ -11,7 +11,7 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # List of files to get over network
-# Uses Ansible built-in get_url module
+# Uses ansible.builtin.get_url module
 # Registers variable: get_files
 files_get:
 #  - url: https://server.example.com/data.zip

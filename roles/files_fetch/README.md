@@ -11,7 +11,7 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # List of files and directories to fetch
-# Uses Ansible built-in fetch module
+# Uses ansible.builtin.fetch module
 # NB. With 'become' this is going to
 #     be very slow with large files!
 # Registers variable: fetch_files
