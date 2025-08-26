@@ -18,6 +18,7 @@ dns_cache_enable: false
 # systemd-resolved recommended on RHEL 10 and later
 # Allowed values: dnsmasq, systemd-resolved, nscd (RHEL < 10)
 # See https://access.redhat.com/solutions/2189381
+# NB. Ensure correct /etc/resolv.conf before/after configuration
 dns_cache_component: systemd-resolved
 
 # Minimum cache/local/negative TTL value for dnsmasq
