@@ -29,7 +29,7 @@ files_create:
 #    mode: '0644'
 #  - state: link
 #    src: /opt/dir/file
-#    dest: /opt/dir/link
+#    path: /opt/dir/link
 #    force: true
 </pre>
 
