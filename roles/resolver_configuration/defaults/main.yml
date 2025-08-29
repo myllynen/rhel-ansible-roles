@@ -1,13 +1,16 @@
 ---
 # Method for configuring resolver, /etc/resolv.conf
-# nm - configure resolver with NetworkManager
-#      global options overriding connection
-#      profile file configuration options
-# direct - prevent NM updating resolver and update
-#          the /etc/resolv.conf file directly
-# remove - remove NM configurations by this role,
-#          leave /etc/resolv.conf untouched
-# nothing - do nothing
+# nm       - configure resolver with NetworkManager
+#            global options overriding connection
+#            profile files' configuration options
+# direct   - prevent NM updating /etc/resolv.conf and
+#            write given configuration to it directly
+# symlink  - create a symlink from /etc/resolv.conf
+#            to /run/NetworkManager/resolv.conf,
+#            used e.g. with dns_cache/systemd-resolved
+# remove   - remove NM configurations by this role,
+#            leave /etc/resolv.conf untouched
+# nothing  - do nothing
 resolver_configuration_method: nothing
 
 # At least one nameserver must be specified

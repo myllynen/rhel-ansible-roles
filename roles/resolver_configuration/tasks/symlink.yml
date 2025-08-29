@@ -1,0 +1,25 @@
+---
+- name: Create /etc/resolv.conf -> /run/NetworkManager/resolv.conf symlink
+  ansible.builtin.file:
+    src: /run/NetworkManager/resolv.conf
+    path: /etc/resolv.conf
+    state: link
+    force: true
+    follow: false
+  register: nm_resolver_config
+
+- name: Update NetworkManager resolver management configuration
+  ansible.builtin.copy:
+    content: |
+      [main]
+      rc-manager=symlink
+    dest: /etc/NetworkManager/conf.d/90-rc-manager.conf
+    mode: '0644'
+  register: nm_rc_manager_config
+
+- name: Reload NetworkManager to apply configuration changes
+  ansible.builtin.service:
+    name: NetworkManager
+    state: reloaded
+  when: nm_resolver_config is changed or
+        nm_rc_manager_config is changed
