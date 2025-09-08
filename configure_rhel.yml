@@ -261,6 +261,14 @@
     #    job: /usr/local/bin/refresh-tokens
     #    special_time: daily
 
+    # List of allowed crontab users in cron.allow
+    # When set to null cron.allow will be removed
+    cron_setup_allow_file: []
+
+    # List of denied crontab users in cron.deny
+    # When set to null cron.deny will be removed
+    cron_setup_deny_file: null
+
     #
     # dns_cache
     #

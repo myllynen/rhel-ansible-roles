@@ -20,6 +20,32 @@
   register: service_start
   when: "'cronie' in ansible_facts.packages"
 
+- name: Remove cron.allow file
+  ansible.builtin.file:
+    path: /etc/cron.allow
+    state: absent
+  when: cron_setup_allow_file is none
+
+- name: Create cron.allow file
+  ansible.builtin.copy:
+    content: "{{ (cron_setup_allow_file | select | join('\n') + '\n') if cron_setup_allow_file else '' }}"
+    dest: /etc/cron.allow
+    mode: '0600'
+  when: cron_setup_allow_file is not none
+
+- name: Remove cron.deny file
+  ansible.builtin.file:
+    path: /etc/cron.deny
+    state: absent
+  when: cron_setup_deny_file is none
+
+- name: Create cron.deny file
+  ansible.builtin.copy:
+    content: "{{ (cron_setup_deny_file | select | join('\n') + '\n') if cron_setup_deny_file else '' }}"
+    dest: /etc/cron.deny
+    mode: '0600'
+  when: cron_setup_deny_file is not none
+
 - name: Configure crontab entries
   vars:
     label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
