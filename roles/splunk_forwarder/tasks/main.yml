@@ -35,6 +35,7 @@
 - name: Create Splunk user
   ansible.builtin.user:
     name: splunk
+    system: "{{ splunk_user_uid in [none, ''] }}"
     uid: "{{ splunk_user_uid | default(omit, true) }}"
     comment: splunk user
   when: "'could not be found' not in user_status"

@@ -16,6 +16,7 @@ splunk_deployment_server_check: true
 
 # Local 'splunk' user UID to use. A local user
 # will be created if no local/remote user exists
+# Set to undefined/none to create system account
 splunk_user_uid: 4445
 # This should come from vault
 #splunk_user_password_hash:
