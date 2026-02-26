@@ -1,29 +1,81 @@
 ---
+# https://github.com/ansible/ansible/issues/86199
+# https://github.com/ansible/ansible/issues/86218
 - name: Delete local user
   ansible.builtin.user:
     name: "{{ item }}"
     state: absent
     remove: true
+    force: true
   loop: "{{ accounts_local_users_delete | select }}"
+  when:
+    - item not in ['root', 'sshd']
+    - item not in accounts_local_users_create | map(attribute='name')
 
 - name: Delete local group
   ansible.builtin.group:
     name: "{{ item }}"
     state: absent
+    #force: true
   loop: "{{ accounts_local_groups_delete | select }}"
+  when:
+    - item not in ['root', 'sshd']
+    - item not in accounts_local_groups_create | map(attribute='name')
+
+- name: Verify local group names
+  ansible.builtin.assert:
+    that:
+      - item.name | length >= 1
+      - item.name | length <= 32
+      - item.name not in ['.', '..']
+      - not item.name.startswith('-')
+      - item.name is not regex('^\d+$')
+      - item.name not in ['root', 'sshd']
+      - item.name is regex('^[A-Za-z0-9_.]+(?:\$)?$')
+    quiet: true
+    fail_msg: "{{ item.name }} is not acceptable group name."
+  loop: "{{ accounts_local_groups_create | select }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Create local group
   ansible.builtin.group:
     name: "{{ item.name }}"
     state: present
     gid: "{{ item.gid }}"
+    #gid_min: "{{ item.gid_min | default(omit) }}"
+    #gid_max: "{{ item.gid_max | default(omit) }}"
+    local: "{{ item.local | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+    non_unique: "{{ item.non_unique | default(omit) }}"
   loop: "{{ accounts_local_groups_create | select }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Create passwordless list of local users to create
   no_log: "{{ accounts_local_no_log }}"
   ansible.builtin.set_fact:
-    create_users: "{{ create_users | default([]) + [item | dict2items | rejectattr('key', 'equalto', 'password') | items2dict] }}"
+    create_users: "{{ create_users | default([])
+                      + [item | dict2items
+                        | rejectattr('key', 'equalto', 'password')
+                        | rejectattr('key', 'equalto', 'ssh_key_passphrase') | items2dict] }}"
   loop: "{{ accounts_local_users_create | select }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Verify local user names
+  ansible.builtin.assert:
+    that:
+      - item.name | length >= 1
+      - item.name | length <= 32
+      - item.name not in ['.', '..']
+      - not item.name.startswith('-')
+      - item.name is not regex('^\d+$')
+      - item.name not in ['root', 'sshd']
+      - item.name is regex('^[A-Za-z0-9_.]+(?:\$)?$')
+    quiet: true
+    fail_msg: "{{ item.name }} is not acceptable user name."
+  loop: "{{ create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -32,16 +84,45 @@
     name: "{{ item.name }}"
     state: present
     uid: "{{ item.uid }}"
+    #uid_min: "{{ item.uid_min }}"
+    #uid_max: "{{ item.uid_max }}"
     group: "{{ item.group | default(omit) }}"
+    umask: "{{ item.umask | default(omit) }}"
     comment: "{{ item.comment | default(omit) }}"
     create_home: "{{ item.create_home | default(omit) }}"
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
     expires: "{{ item.expires | default(omit) }}"
+    password_lock: "{{ item.password_lock | default(omit) }}"
     password_expire_min: "{{ item.password_expire_min | default(omit) }}"
     password_expire_max: "{{ item.password_expire_max | default(omit) }}"
     #password_expire_warn: "{{ item.password_expire_warn | default(omit) }}"
+    #password_expire_account_disable: "{{ item.password_expire_account_disable | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    local: "{{ item.local | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+    skeleton: "{{ item.skeleton | default(omit) }}"
+    non_unique: "{{ item.non_unique | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
   loop: "{{ create_users | default([]) | select }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create local user SSH key
+  no_log: "{{ accounts_local_no_log }}"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: present
+    generate_ssh_key: true
+    force: "{{ item.force | default(omit) }}"
+    ssh_key_bits: "{{ item.ssh_key_bits | default(omit) }}"
+    ssh_key_comment: "{{ item.ssh_key_comment | default(omit) }}"
+    ssh_key_file: "{{ item.ssh_key_file | default(omit) }}"
+    ssh_key_passphrase: "{{ item.ssh_key_passphrase | default(omit) }}"
+    ssh_key_type: "{{ item.ssh_key_type | default(omit) }}"
+  loop: "{{ accounts_local_users_create
+            | selectattr('generate_ssh_key', 'defined')
+            | selectattr('generate_ssh_key', 'equalto', true) }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -58,13 +139,15 @@
   ansible.builtin.user:
     name: "{{ item.name }}"
     password: "{{ pw_encrypted }}"
-  loop: "{{ accounts_local_users_create | select | selectattr('password', 'defined') }}"
+  loop: "{{ accounts_local_users_create | selectattr('password', 'defined') }}"
   loop_control:
     label: "{{ item.name }}"
 
 - name: Get local user information
   ansible.builtin.getent:
     database: passwd
+  when: accounts_local_users_create | map(attribute='authorized_keys') | length > 0 or
+        accounts_local_users_groups | select | length > 0
 
 - name: Add local user to supplementary groups
   ansible.builtin.user:
@@ -85,10 +168,10 @@
 
 - name: Create local user sudo configuration
   vars:
-    pw_require: "{{ 'NOPASSWD' if item.sudo_passwordless | default(false) else 'PASSWD' }}"
+    require_password: "{{ 'NOPASSWD' if item.sudo_passwordless | default(false) else 'PASSWD' }}"
   ansible.builtin.copy:
     content: |
-      {{ item.name }} ALL=(ALL) {{ pw_require }}: ALL
+      {{ item.name }} ALL=(ALL) {{ require_password }}: ALL
     dest: /etc/sudoers.d/{{ item.name }}
     owner: root
     group: root

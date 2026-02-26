@@ -20,18 +20,20 @@ accounts_local_groups_delete:
 #  - testgroup
 
 # List of local groups to create
+# Uses ansible.builtin.group module
 # Mandatory parameters: name, gid
 accounts_local_groups_create:
 #  - name: testgroup
 #    gid: 12345
 
 # List of local users to create
+# Uses ansible.builtin.user module
 # Mandatory parameters: name, uid
 accounts_local_users_create:
 #  - name: testuser
 #    # This should come from vault
 #    # Should be encrypted, see below
-#    password: ...
+#    password: Foobar_12
 #    uid: 12345
 #    group: testgroup
 #    comment: Test User
