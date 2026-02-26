@@ -1,0 +1,48 @@
+---
+- name: Install required packages
+  vars:
+    required_packages: >
+      {{
+        []
+        + (['nfs-utils'] if mount_setup_enable | selectattr('fstype', 'match', '^nfs') | length > 0 else [])
+        + (['cifs-utils'] if mount_setup_enable | selectattr('fstype', 'equalto', 'cifs') | length > 0 else [])
+      }}
+  ansible.builtin.dnf:
+    name: "{{ required_packages | select }}"
+    state: present
+  when: required_packages | select | length > 0
+
+- name: Disable mounts
+  ansible.posix.mount:
+    src: "{{ item.src | default(omit) }}"
+    path : "{{ item.path | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    fstype: "{{ item.fstype | default(omit) }}"
+    boot: "{{ item.boot | default(omit) }}"
+    opts: "{{ item.opts | default(omit) }}"
+    opts_no_log: "{{ item.opts_no_log | default(omit) }}"
+    dump: "{{ item.dump | default(omit) }}"
+    passno: "{{ item.passno | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    fstab: "{{ item.fstab | default(omit) }}"
+  loop: "{{ mount_setup_disable | select }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: item not in mount_setup_enable | select
+
+- name: Enable mounts
+  ansible.posix.mount:
+    src: "{{ item.src | default(omit) }}"
+    path : "{{ item.path }}"
+    state: "{{ item.state }}"
+    fstype: "{{ item.fstype | default(omit) }}"
+    boot: "{{ item.boot | default(omit) }}"
+    opts: "{{ item.opts | default(omit) }}"
+    opts_no_log: "{{ item.opts_no_log | default(omit) }}"
+    dump: "{{ item.dump | default(omit) }}"
+    passno: "{{ item.passno | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    fstab: "{{ item.fstab | default(omit) }}"
+  loop: "{{ mount_setup_enable | select }}"
+  loop_control:
+    label: "{{ item.path }}"
