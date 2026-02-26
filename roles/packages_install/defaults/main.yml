@@ -26,6 +26,10 @@ packages_install:
   - xz
   - zstd
 
+# List of dnf excludes
+packages_install_exclude:
+#  - emacs
+
 # Enable or disable dnf module 'install_weak_deps' parameter
 packages_install_weak_deps: true
 

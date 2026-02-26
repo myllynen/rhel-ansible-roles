@@ -3,11 +3,13 @@
   ansible.builtin.dnf:
     name: "{{ packages_install | select }}"
     state: present
+    exclude: "{{ packages_install_exclude | select }}"
     install_weak_deps: "{{ packages_install_weak_deps | bool }}"
-  register: package_install
+  register: installed_packages
+  when: packages_install | select | length > 0
 
 - name: Display package changes
   ansible.builtin.include_tasks: display.yml
   when:
     - packages_install_display_results | bool
-    - package_install is changed
+    - installed_packages is changed
