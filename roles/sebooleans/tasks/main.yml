@@ -1,0 +1,43 @@
+---
+- name: Install required packages
+  vars:
+    required_packages:
+      - "{{ 'libselinux-utils' if sebooleans_skip_missing | bool else '' }}"
+      - python3-libselinux
+      - python3-libsemanage
+  ansible.builtin.dnf:
+    name: "{{ required_packages | select }}"
+    state: present
+  when: sebooleans_disable | select | length > 0 or
+        sebooleans_enable | select | length > 0
+
+- name: Get list of known SELinux booleans
+  check_mode: false
+  ansible.builtin.command: getsebool -a
+  register: sebooleans_known
+  changed_when: false
+  when: sebooleans_disable | select | length > 0 or
+        sebooleans_enable | select | length > 0
+
+- name: Disable SELinux booleans
+  ansible.posix.seboolean:
+    name: "{{ item }}"
+    state: false
+    persistent: true
+    ignore_selinux_state: true
+  loop: "{{ sebooleans_disable | select }}"
+  when:
+    - item + ' ' in sebooleans_known.stdout or
+      not sebooleans_skip_missing | bool
+    - item not in sebooleans_enable | select
+
+- name: Enable SELinux booleans
+  ansible.posix.seboolean:
+    name: "{{ item }}"
+    state: true
+    persistent: true
+    ignore_selinux_state: true
+  loop: "{{ sebooleans_enable | select }}"
+  when:
+    - item + ' ' in sebooleans_known.stdout or
+      not sebooleans_skip_missing | bool

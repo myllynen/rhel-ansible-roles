@@ -1,0 +1,14 @@
+---
+# List of SELinux booleans to disable
+# Uses ansible.posix.seboolean module
+sebooleans_disable:
+#  - nis_enabled
+
+# List of SELinux booleans to enable
+# Uses ansible.posix.seboolean module
+sebooleans_enable:
+#  - kerberos_enabled
+
+# Skip missing SELinux boolean instead of
+# failing when trying to configure them
+sebooleans_skip_missing: true

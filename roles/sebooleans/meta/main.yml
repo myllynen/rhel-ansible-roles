@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: sebooleans
+  author: Marko Myllynen <myllynen@redhat.com>
+  company: Red Hat, Inc.
+  description: sebooleans role
+  license: GPLv3+
+  min_ansible_version: "2.14"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+        - "10"
+  galaxy_tags:
+    - rhel
+    - centos
+    - configuration
+dependencies: []
+
+allow_duplicates: true
