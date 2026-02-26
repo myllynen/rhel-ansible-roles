@@ -1,5 +1,6 @@
 ---
-# https://github.com/ansible/ansible/issues/78107
+# https://github.com/ansible-collections/community.general/issues/4896
+# ansible-core >= 2.16 can use community.general >= 10 with updated systemd_info
 - name: Get list of known systemd units
   check_mode: false
   # noqa: command-instead-of-module
@@ -7,7 +8,8 @@
   register: unit_files_known
   changed_when: false
   when: service_state_disable | select | length > 0 or
-        service_state_enable | select | length > 0
+        service_state_enable | select | length > 0 or
+        service_state_restart | select | length > 0
 
 - name: Mask service
   ansible.builtin.systemd:
@@ -65,3 +67,57 @@
   loop: "{{ service_state_enable | select }}"
   when: item in unit_files_known.stdout or
         not service_state_skip_missing | bool
+
+- name: Reload service
+  vars:
+    changed_started: >
+      {{
+        start_services.results
+        | selectattr('changed', 'equalto', true)
+        | map(attribute='name')
+      }}
+    services_to_reload: >
+      {{
+        service_state_restart
+        | selectattr('state', 'defined')
+        | selectattr('state', 'equalto', 'reloaded')
+      }}
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    state: reloaded
+  register: reload_services
+  loop: "{{ services_to_reload }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.name not in changed_started
+    - item.name in unit_files_known.stdout or
+      not service_state_skip_missing | bool
+
+- name: Restart service
+  vars:
+    changed_started: >
+      {{
+        start_services.results
+        | selectattr('changed', 'equalto', true)
+        | map(attribute='name')
+      }}
+    services_to_restart: >
+      {{
+        (service_state_restart
+        | selectattr('state', 'defined')
+        | selectattr('state', 'equalto', 'restarted'))
+        + (service_state_restart
+          | selectattr('state', 'undefined'))
+      }}
+  ansible.builtin.systemd:
+    name: "{{ item.name | default(item) }}"
+    state: restarted
+  register: restarted_services
+  loop: "{{ services_to_restart }}"
+  loop_control:
+    label: "{{ item.name | default(item) }}"
+  when:
+    - item.name | default(item) not in changed_started
+    - item.name | default(item) in unit_files_known.stdout or
+      not service_state_skip_missing | bool
