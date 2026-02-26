@@ -4,47 +4,64 @@
   check_mode: false
   # noqa: command-instead-of-module
   ansible.builtin.command: systemctl list-unit-files
-  register: unit_files
+  register: unit_files_known
   changed_when: false
+  when: service_state_disable | select | length > 0 or
+        service_state_enable | select | length > 0
 
 - name: Mask service
   ansible.builtin.systemd:
     name: "{{ item }}"
     masked: true
+  register: mask_services
   loop: "{{ service_state_mask | select }}"
+  when:
+    - item not in service_state_unmask | select
+    - item not in ['sshd', 'sshd.service']
 
 - name: Unmask service
   ansible.builtin.systemd:
     name: "{{ item }}"
     masked: false
+  register: unmask_services
   loop: "{{ service_state_unmask | select }}"
 
 - name: Disable service
   ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: false
+  register: disable_services
   loop: "{{ service_state_disable | select }}"
-  when: item in unit_files.stdout
+  when:
+    - item in unit_files_known.stdout
+    - item not in service_state_enable | select
+    - item not in ['sshd', 'sshd.service']
 
 - name: Stop service
   ansible.builtin.systemd:
     name: "{{ item }}"
     state: stopped
+  register: stop_services
   loop: "{{ service_state_disable | select }}"
-  when: item in unit_files.stdout
+  when:
+    - item in unit_files_known.stdout
+    - item not in service_state_enable | select
+    - item not in ['sshd', 'sshd.service']
 
 - name: Enable service
   ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
+  register: enable_services
   loop: "{{ service_state_enable | select }}"
-  when: not service_state_skip_missing | bool or
-        item in unit_files.stdout
+  when: item in unit_files_known.stdout or
+        not service_state_skip_missing | bool
 
 - name: Start service
   ansible.builtin.systemd:
     name: "{{ item }}"
     state: started
+  register: start_services
   loop: "{{ service_state_enable | select }}"
-  when: not service_state_skip_missing | bool or
-        item in unit_files.stdout
+  when: item in unit_files_known.stdout or
+        not service_state_skip_missing | bool

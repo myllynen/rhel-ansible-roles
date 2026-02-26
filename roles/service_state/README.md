@@ -11,14 +11,17 @@ Below are the role default values from defaults/main.yml:
 <pre>
 ---
 # List of services/units to mask
+# Registers variable: mask_services
 service_state_mask:
 #  - dnf-makecache.timer
 
 # List of services/units to unmask
+# Registers variable: unmask_services
 service_state_unmask:
 #  - httpd.service
 
 # List of services/units to disable and stop
+# Registers variable: {disable,stop}_services
 service_state_disable:
 #  - mlocate-updatedb.timer
 #  - nfs-client.target
@@ -26,6 +29,7 @@ service_state_disable:
 #  - rpcbind.socket
 
 # List of services/units to enable and start
+# Registers variable: {enable,start}_services
 service_state_enable:
 #  - irqbalance.service
 
