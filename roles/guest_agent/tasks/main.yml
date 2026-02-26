@@ -17,10 +17,15 @@
   vars:
     firmware_packages:
       - 'a*firmware*'
+      - 'b*firmware*'
+      - "{{ 'c*firmware*' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
       - 'i*firmware*'
       - 'lib*firmware*'
+      - "{{ 'linux-firmware*' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+      - 'm*firmware*'
       - 'n*firmware*'
-      - "{{ 'linux-firmware-whence' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+      - 'r*firmware*'
+      - 't*firmware*'
   ansible.builtin.dnf:
     name: "{{ firmware_packages | select }}"
     state: absent
