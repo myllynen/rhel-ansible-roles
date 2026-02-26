@@ -4,7 +4,7 @@
     that:
       - resolver_configuration_method in ['nm', 'direct', 'symlink', 'remove', 'nothing']
       - resolver_configuration_method in ['symlink', 'remove', 'nothing'] or
-        resolver_nameservers | default([], true) | length > 0
+        resolver_nameservers | select | length > 0
     quiet: true
 
 - name: Remove NetworkManager resolver configuration

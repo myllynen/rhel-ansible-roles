@@ -45,7 +45,7 @@ scap_compliance_remediate_reboot: true
 # Failed check items will always be displayed
 scap_compliance_check_result_show_all: false
 
-# Allow role complete even if compliance check fails
+# Allow role to complete even if compliance check fails
 scap_compliance_check_fail_role_pass: false
 </pre>
 

@@ -69,7 +69,7 @@
       - /etc/usbguard/IPCAccessControl.d/*
     files_remove_exclude: "{{ ['/etc/usbguard/rules.d/zz-ansible.conf'] +
                               ['/etc/usbguard/IPCAccessControl.d/zz-ansible.conf'] +
-                              usbguard_setup_files_known | default([], true) }}"
+                              usbguard_setup_files_known | select }}"
   ansible.builtin.include_role:
     name: files_remove
   when: usbguard_setup_exclusive | bool

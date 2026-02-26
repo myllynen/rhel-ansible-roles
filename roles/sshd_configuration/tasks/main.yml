@@ -117,7 +117,7 @@
     self_config: /etc/ssh/sshd_config.d/0-ansible.conf
     files_remove:
       - /etc/ssh/sshd_config.d/*
-    files_remove_exclude: "{{ [self_config] + sshd_configuration_files_known | default([], true) }}"
+    files_remove_exclude: "{{ [self_config] + sshd_configuration_files_known | select }}"
   ansible.builtin.include_role:
     name: files_remove
   when:

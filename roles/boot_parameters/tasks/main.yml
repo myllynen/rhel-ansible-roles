@@ -47,8 +47,8 @@
   ansible.builtin.command: >
     grubby
     --update-kernel=ALL
-    --args="{{ boot_parameters_enable | default([], true) | join(' ') }}"
-    --remove-args="{{ boot_parameters_disable | default([], true) | join(' ') }}"
+    --args="{{ boot_parameters_enable | select | join(' ') }}"
+    --remove-args="{{ boot_parameters_disable | select | join(' ') }}"
   register: boot_config
   changed_when: true
   when: 0 in enable_check.results | map(attribute='found') or

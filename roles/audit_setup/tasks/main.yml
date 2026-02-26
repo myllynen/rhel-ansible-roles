@@ -53,7 +53,7 @@
     self_config: /etc/audit/rules.d/zz-ansible.rules
     files_remove:
       - /etc/audit/rules.d/*
-    files_remove_exclude: "{{ [self_config] + audit_setup_files_known | default([], true) }}"
+    files_remove_exclude: "{{ [self_config] + audit_setup_files_known | select }}"
   ansible.builtin.include_role:
     name: files_remove
   when: audit_setup_exclusive | bool

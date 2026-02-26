@@ -47,7 +47,7 @@
 
 - name: Set list of ports to open
   ansible.builtin.set_fact:
-    ports_to_open: "{{ firewall_open_ports | default([], true) | select | unique }}"
+    ports_to_open: "{{ firewall_open_ports | select | unique }}"
 
 - name: Open configured ports in firewall
   ansible.posix.firewalld:
@@ -94,7 +94,7 @@
 
 - name: Set list of services to open
   ansible.builtin.set_fact:
-    services_to_open: "{{ firewall_open_services | default([], true) | select | unique }}"
+    services_to_open: "{{ firewall_open_services | select | unique }}"
 
 - name: Open configured services in firewall
   ansible.posix.firewalld:
