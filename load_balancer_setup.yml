@@ -1,0 +1,50 @@
+---
+- name: Configure load balancer
+  hosts: all
+  become: true
+  gather_facts: true
+  collections:
+    - myllynen.rhel_ansible_roles
+  vars:
+    packages_install:
+      - haproxy
+      - keepalived
+    files_copy:
+      - content: haproxy-global.cfg
+        path: /etc/haproxy/haproxy.cfg
+        owner: root
+        group: root
+        mode: '0644'
+    files_copy_templates:
+      - src: app-proxy.cfg.j2
+        path: /etc/haproxy/conf.d/app-proxy.cfg
+        owner: root
+        group: root
+        mode: '0644'
+      - src: keepalived.conf.j2
+        path: /etc/keepalived/keepalived.conf
+        owner: root
+        group: root
+        mode: '0644'
+    #sebooleans_enable:
+    #  - haproxy_connect_any
+    service_state_enable:
+      - haproxy
+      - keepalived
+
+  roles:
+    - packages_install
+    - files_copy
+    - sebooleans
+    - service_state
+    # Reload services only if necessary
+    - role: service_state
+      vars:
+        service_state_restart:
+          - name: keepalived
+            state: restarted
+          - name: haproxy
+            state: reloaded
+      when:
+        - copy_files is changed
+        - start_services is not changed
