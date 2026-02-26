@@ -1,10 +1,11 @@
 ---
 - name: Set changed packages
   ansible.builtin.set_fact:
-    package_changes: "{{ (package_remove.results | default([]) + package_remove_leaf.results | default([]))
-                         | reject('search', 'No match') | sort }}"
+    removed_packages_all: "{{ (removed_packages.results | default([])
+                              + removed_packages_leaf.results | default([]))
+                              | reject('search', 'No match') | sort }}"
 
 - name: Display package changes
   ansible.builtin.debug:
-    msg: "{{ package_changes | join('\n') }}"
-  when: package_changes | length > 0
+    msg: "{{ removed_packages_all | join('\n') }}"
+  when: removed_packages_all | length > 0

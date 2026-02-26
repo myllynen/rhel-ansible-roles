@@ -40,6 +40,12 @@ packages_remove:
   #- teamd
   #- webkit*
 
+# List of dnf excludes
+packages_remove_exclude:
+  - kernel
+  - kernel-core
+  - microcode_ctl
+
 # Remove all "leaf" packages no longer required,
 # see dnf module autoremove parameter description
 packages_remove_autoremove: false

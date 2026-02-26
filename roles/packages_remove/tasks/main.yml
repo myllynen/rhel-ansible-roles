@@ -1,25 +1,32 @@
 ---
 - name: Remove unwanted packages
+  vars:
+    remove_packages: "{{ packages_remove | select
+                         | difference(packages_install | select)
+                         | difference(packages_remove_exclude | select) }}"
   ansible.builtin.dnf:
-    name: "{{ packages_remove | select }}"
+    name: "{{ remove_packages }}"
     state: absent
+    exclude: "{{ packages_remove_exclude | select }}"
     autoremove: false
     cacheonly: true
     disablerepo: '*'
-  register: package_remove
+  register: removed_packages
+  when: remove_packages | length > 0
 
 - name: Remove unneeded leaf packages
   ansible.builtin.dnf:
     state: absent
+    exclude: "{{ packages_remove_exclude | select }}"
     autoremove: true
     cacheonly: true
     disablerepo: '*'
-  register: package_remove_leaf
+  register: removed_packages_leaf
   when: packages_remove_autoremove | bool
 
 - name: Display package changes
   ansible.builtin.include_tasks: display.yml
   when:
     - packages_remove_display_results | bool
-    - package_remove is changed or
-      package_remove_leaf is changed
+    - removed_packages is changed or
+      removed_packages_leaf is changed
