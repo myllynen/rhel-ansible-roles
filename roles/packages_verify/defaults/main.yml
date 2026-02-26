@@ -1,0 +1,24 @@
+---
+# Enable or disable package verification
+packages_verify_enable: false
+
+# List of packages to verify
+# Set to empty to verify all packages
+packages_verify:
+  - glibc
+  - kernel
+  - selinux-policy
+
+# Check for missing packages
+# Registers variable missing_packages
+packages_verify_check_missing: true
+
+# Fail role on missing packages
+packages_verify_fail_missing: false
+
+# Check for changed package
+# Registers variable verified_packages
+packages_verify_check_content: true
+
+# Fail role on changed packages
+packages_verify_fail_content: false
