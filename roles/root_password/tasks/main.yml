@@ -7,6 +7,7 @@
     encrypted: "{{ root_password_encrypted }}"
     pw_string: "{{ root_password | string }}"
     pw_encrypted: "{{ pw_string if encrypted else pw_string | password_hash('sha512', rand_salt) }}"
+  no_log: true
   ansible.builtin.user:
     name: root
     password: "{{ pw_encrypted }}"
