@@ -19,18 +19,20 @@
     #  - testgroup
 
     # List of local groups to create
+    # Uses ansible.builtin.group module
     # Mandatory parameters: name, gid
     accounts_local_groups_create:
     #  - name: testgroup
     #    gid: 12345
 
     # List of local users to create
+    # Uses ansible.builtin.user module
     # Mandatory parameters: name, uid
     accounts_local_users_create:
     #  - name: testuser
     #    # This should come from vault
     #    # Should be encrypted, see below
-    #    password: ...
+    #    password: Foobar_12
     #    uid: 12345
     #    group: testgroup
     #    comment: Test User
@@ -465,6 +467,24 @@
     issue_template:
 
     #
+    # mount_setup
+    #
+    # List of mounts to enable
+    # Uses ansible.posix.mount module
+    mount_setup_enable:
+    #  - src: 192.168.122.1:/export
+    #    path: /mnt/remote
+    #    fstype: nfs
+    #    opts: _netdev,hard
+    #    state: mounted
+
+    # List of mounts to disable
+    # Uses ansible.posix.mount module
+    mount_setup_disable:
+    #  - path: /mnt/temp
+    #    state: unmounted
+
+    #
     # multipath_setup
     #
     # Multipath config file to copy
@@ -483,6 +503,10 @@
     #packages_install:
     #  -
 
+    # List of dnf excludes
+    #packages_install_exclude:
+    #  - emacs
+
     # Enable or disable dnf module 'install_weak_deps' parameter
     packages_install_weak_deps: true
 
@@ -495,12 +519,43 @@
     #packages_remove:
     #  -
 
+    # List of dnf excludes
+    packages_remove_exclude:
+      - kernel
+      - kernel-core
+      - microcode_ctl
+
     # Remove all "leaf" packages no longer required,
     # see dnf module autoremove parameter description
     packages_remove_autoremove: false
 
     # Display results on output
     packages_remove_display_results: true
+
+    #
+    # packages_verify
+    #
+    # Enable or disable package verification
+    packages_verify_enable: false
+
+    # List of packages to verify
+    # Set to empty to verify all packages
+    packages_verify:
+      - glibc
+      - kernel
+      - selinux-policy
+
+    # Check for missing packages
+    packages_verify_check_missing: true
+
+    # Fail role on missing packages
+    packages_verify_fail_missing: false
+
+    # Check for changed package
+    packages_verify_check_content: true
+
+    # Fail role on changed packages
+    packages_verify_fail_content: false
 
     #
     # performance_tuning
@@ -604,8 +659,25 @@
     # Failed check items will always be displayed
     scap_compliance_check_result_show_all: false
 
-    # Allow role complete even if compliance check fails
+    # Allow role to complete even if compliance check fails
     scap_compliance_check_fail_role_pass: false
+
+    #
+    # sebooleans
+    #
+    # List of SELinux booleans to disable
+    # Uses ansible.posix.seboolean module
+    sebooleans_disable:
+    #  - nis_enabled
+
+    # List of SELinux booleans to enable
+    # Uses ansible.posix.seboolean module
+    sebooleans_enable:
+    #  - kerberos_enabled
+
+    # Skip missing SELinux boolean instead of
+    # failing when trying to configure them
+    sebooleans_skip_missing: true
 
     #
     # security_hardening
@@ -638,14 +710,17 @@
     # service_state
     #
     # List of services/units to mask
+    # Registers variable: mask_services
     service_state_mask:
     #  - dnf-makecache.timer
 
     # List of services/units to unmask
+    # Registers variable: unmask_services
     service_state_unmask:
     #  - httpd.service
 
     # List of services/units to disable and stop
+    # Registers variable: {disable,stop}_services
     service_state_disable:
     #  - mlocate-updatedb.timer
     #  - nfs-client.target
@@ -653,6 +728,7 @@
     #  - rpcbind.socket
 
     # List of services/units to enable and start
+    # Registers variable: {enable,start}_services
     service_state_enable:
     #  - irqbalance.service
 
@@ -675,6 +751,7 @@
 
     # Local 'splunk' user UID to use. A local user
     # will be created if no local/remote user exists
+    # Set to undefined/none to create system account
     splunk_user_uid: 4445
     # This should come from vault
     #splunk_user_password_hash:
@@ -1030,11 +1107,14 @@
     #- redhat.rhel_system_roles.firewall
     - watchdog
     #- motd_issue
+    #- mount_setup
     - packages_install
     - performance_tuning
     #- rescue_image
     - root_password
     - security_hardening
+    - sebooleans
+    #- packages_verify
     - service_state
     #- shell_profile
     - sshd_configuration
