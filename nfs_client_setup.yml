@@ -1,0 +1,35 @@
+---
+- name: Configure NFS client
+  hosts: all
+  become: true
+  gather_facts: false
+  collections:
+    - myllynen.rhel_ansible_roles
+  vars:
+    # NFS client configuration
+    nfs_mount_src: 192.168.122.130:/export
+    nfs_mount_dir: /mnt/remote
+
+    # NFS client implementation
+    packages_install:
+      - nfs-utils
+    files_create:
+      - state: directory
+        path: "{{ nfs_mount_dir }}"
+        owner: nobody
+        group: nobody
+        mode: '0755'
+    service_state_enable:
+      - nfs-client.target
+    mount_setup_enable:
+      - src: "{{ nfs_mount_src }}"
+        path: "{{ nfs_mount_dir }}"
+        fstype: nfs
+        opts: _netdev,hard
+        state: mounted
+
+  roles:
+    - packages_install
+    - files_create
+    - service_state
+    - mount_setup

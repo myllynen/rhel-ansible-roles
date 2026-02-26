@@ -1,0 +1,57 @@
+---
+- name: Configure NFS server
+  hosts: all
+  become: true
+  gather_facts: false
+  collections:
+    - myllynen.rhel_ansible_roles
+  vars:
+    # NFS server configuration
+    nfs_export_dir: /export
+    nfs_network: 192.168.122.0/24
+    nfs_options: rw,sync,root_squash
+
+    # NFS server implementation
+    packages_install:
+      - nfs-utils
+    files_create:
+      - state: directory
+        path: "{{ nfs_export_dir }}"
+        owner: nobody
+        group: nobody
+        mode: '0755'
+        setype: public_content_rw_t
+    files_copy:
+      - content: |
+          {{ nfs_export_dir }} {{ nfs_network }}({{ nfs_options }})
+        dest: /etc/exports.d/ansible.exports
+        owner: root
+        group: root
+        mode: '0644'
+    sebooleans_enable:
+      - nfs_export_all_rw
+    # Or use redhat.rhel_system_roles.firewall
+    # for more nuanced firewall configuration
+    firewall_enable: true
+    firewall_default_zone: public
+    firewall_open_services:
+      - nfs
+    service_state_enable:
+      - nfs-server
+
+  roles:
+    - packages_install
+    - files_create
+    - files_copy
+    - sebooleans
+    - firewall
+    - service_state
+    # Reload service only if necessary
+    - role: service_state
+      vars:
+        service_state_restart:
+          - name: nfs-server
+            state: reloaded
+      when:
+        - copy_files is changed
+        - start_services is not changed
