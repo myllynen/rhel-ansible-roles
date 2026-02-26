@@ -14,6 +14,7 @@
   ansible.builtin.dnf:
     name: "{{ required_pkgs }}"
     state: present
+  when: files_unarchive | select | length > 0
 
 - name: Unarchive files
   ansible.builtin.unarchive:
@@ -39,6 +40,6 @@
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
     io_buffer_size: "{{ item.io_buffer_size | default(omit) }}"
   register: unarchive_files
-  loop: "{{ files_unarchive | default([], true) }}"
+  loop: "{{ files_unarchive | select }}"
   loop_control:
     label: "{{ item.src + ' -> ' + item.dest }}"

@@ -6,6 +6,13 @@
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    recurse: "{{ item.recurse | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
   register: create_directories
   loop: "{{ files_create | selectattr('state', 'equalto', 'directory') }}"
   loop_control:
@@ -20,21 +27,37 @@
     mode: "{{ item.mode | default(omit) }}"
     modification_time: preserve
     access_time: preserve
+    attributes: "{{ item.attributes | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
   register: create_files
   loop: "{{ files_create | selectattr('state', 'equalto', 'file') }}"
   loop_control:
     label: "{{ item.path }}"
 
 - name: Create symlinks
+  vars:
+    # For role backwards compatibility
+    link: "{{ item.path | default(item.dest) }}"
   ansible.builtin.file:
     state: link
     src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    path: "{{ link }}"
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
     force: "{{ item.force | default(omit) }}"
-    follow: false
+    follow: "{{ item.follow | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
   register: create_links
   loop: "{{ files_create | selectattr('state', 'equalto', 'link') }}"
   loop_control:
-    label: "{{ item.dest + ' -> ' + item.src }}"
+    label: "{{ link + ' -> ' + item.src }}"

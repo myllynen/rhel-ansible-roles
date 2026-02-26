@@ -7,6 +7,6 @@
     fail_on_missing: "{{ item.fail_on_missing | default(omit) }}"
     validate_checksum: "{{ item.validate_checksum | default(omit) }}"
   register: fetch_files
-  loop: "{{ files_fetch | default([], true) }}"
+  loop: "{{ files_fetch | select }}"
   loop_control:
     label: "{{ item.src + ' -> ' + item.dest }}"

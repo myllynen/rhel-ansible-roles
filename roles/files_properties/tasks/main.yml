@@ -3,6 +3,7 @@
   ansible.builtin.dnf:
     name: e2fsprogs
     state: present
+  when: files_properties | select | length > 0
 
 - name: Configure properties
   ansible.builtin.file:
@@ -25,7 +26,7 @@
     recursive: "{{ item.recursive | default(omit) }}"
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
   register: properties_files
-  loop: "{{ files_properties | default([], true) }}"
+  loop: "{{ files_properties | select }}"
   loop_control:
     label: "{{ item.path }}"
   when: item.state is not defined or

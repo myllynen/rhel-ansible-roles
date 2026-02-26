@@ -1,7 +1,7 @@
 ---
 - name: Get files
   vars:
-    passwords_used: "{{ files_get | default([], true) | selectattr('url_password', 'defined') | length > 0 }}"
+    passwords_used: "{{ files_get | selectattr('url_password', 'defined') | length > 0 }}"
   no_log: "{{ passwords_used and files_get_no_log }}"
   ansible.builtin.get_url:
     url: "{{ item.url }}"
@@ -15,10 +15,12 @@
     use_proxy: "{{ item.use_proxy | default(omit) }}"
     timeout: "{{ item.timeout | default(omit) }}"
     headers: "{{ item.headers | default(omit) }}"
+    decompress: "{{ item.decompress | default(omit) }}"
     unredirected_headers: "{{ item.unredirected_headers | default(omit) }}"
     client_cert: "{{ item.client_cert | default(omit) }}"
     client_key: "{{ item.client_key | default(omit) }}"
     ciphers: "{{ item.ciphers | default(omit) }}"
+    tmp_dest: "{{ item.tmp_dest | default(omit) }}"
     dest: "{{ item.dest }}"
     force: "{{ item.force | default(omit) }}"
     backup: "{{ item.backup | default(omit) }}"
@@ -27,7 +29,12 @@
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     attributes: "{{ item.attributes | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    unsafe_writes: "{{ unsafe_writes.dest }}"
   register: get_files
-  loop: "{{ files_get | default([], true) }}"
+  loop: "{{ files_get | select }}"
   loop_control:
     label: "{{ item.dest }}"

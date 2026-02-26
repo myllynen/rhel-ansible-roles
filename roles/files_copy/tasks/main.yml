@@ -1,18 +1,31 @@
 ---
 - name: Copy files
   ansible.builtin.copy:
-    src: "{{ item.src }}"
+    src: "{{ item.src | default(omit) }}"
+    content: "{{ item.content | default(omit) }}"
     dest: "{{ item.dest }}"
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    checksum: "{{ item.checksum | default(omit) }}"
+    decrypt: "{{ item.decrypt | default(omit) }}"
+    directory_mode: "{{ item.directory_mode | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    local_follow: "{{ item.local_follow | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
     follow: "{{ item.follow | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
     remote_src: "{{ item.remote_src | default(omit) }}"
   register: copy_files
-  loop: "{{ files_copy | default([], true) }}"
+  loop: "{{ files_copy | select }}"
   loop_control:
-    label: "{{ item.src + ' -> ' + item.dest }}"
+    label: "{{ item.src | default('(inline content)') + ' -> ' + item.dest }}"
 
 - name: Create files from templates
   ansible.builtin.template:
@@ -23,7 +36,25 @@
     mode: "{{ item.mode | default(omit) }}"
     follow: "{{ item.follow | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    block_end_string: "{{ item.block_end_string | default(omit) }}"
+    block_start_string: "{{ item.block_start_string | default(omit) }}"
+    comment_end_string: "{{ item.comment_end_string | default(omit) }}"
+    comment_start_string: "{{ item.comment_start_string | default(omit) }}"
+    variable_end_string: "{{ item.variable_end_string | default(omit) }}"
+    variable_start_string: "{{ item.variable_start_string | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    trim_blocks: "{{ item.trim_blocks | default(omit) }}"
+    output_encoding: "{{ item.output_encoding | default(omit) }}"
+    newline_sequence: "{{ item.newline_sequence | default(omit) }}"
+    lstrip_blocks: "{{ item.lstrip_blocks | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
   register: copy_templates
-  loop: "{{ files_copy_templates | default([], true) }}"
+  loop: "{{ files_copy_templates | select }}"
   loop_control:
     label: "{{ item.src + ' -> ' + item.dest }}"

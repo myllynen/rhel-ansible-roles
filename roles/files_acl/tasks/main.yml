@@ -3,6 +3,7 @@
   ansible.builtin.dnf:
     name: acl
     state: present
+  when: files_acl | select | length > 0
 
 - name: Configure ACLs
   ansible.posix.acl:
@@ -17,6 +18,6 @@
     recalculate_mask: "{{ item.recalculate_mask | default(omit) }}"
     use_nfsv4_acls: "{{ item.use_nfsv4_acls | default(omit) }}"
   register: acl_files
-  loop: "{{ files_acl | default([], true) }}"
+  loop: "{{ files_acl | select }}"
   loop_control:
     label: "{{ item.path }}"
