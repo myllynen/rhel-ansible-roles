@@ -32,7 +32,6 @@ packages_remove:
   #- NetworkManager-tui
   #- nfs*
   #- libnfs*
-  #- parted
   #- rpc*
   #- sssd*
   #- libsss*

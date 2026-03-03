@@ -734,6 +734,8 @@
 
     # List of services to reload/restart
     # Default is to restart, use state to reload
+    # Optionally can require given service state
+    # or status to carry out or not the operation
     # Registers variables: {reload,restart}_services
     service_state_restart:
     #  - name: pmcd.service

@@ -2,8 +2,8 @@
 - name: Fail if unsafe globbing in use
   ansible.builtin.fail:
     msg: "Refusing to expand unsafe globbing '*'."
-  when: "'*' in files_remove | default([], true) or
-         '/*' in files_remove | default([], true)"
+  when: "'*' in files_remove | select or
+         '/*' in files_remove | select"
 
 - name: Fail if incorrect path format in use
   ansible.builtin.fail:
@@ -52,5 +52,5 @@
     path: "{{ item }}"
     state: absent
   register: remove_files
-  loop: "{{ (plain_paths + glob_paths) | select }}"
-  when: item not in files_remove_exclude | default([], true)
+  loop: "{{ plain_paths + glob_paths }}"
+  when: item not in files_remove_exclude | select
