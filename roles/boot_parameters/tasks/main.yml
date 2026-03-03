@@ -11,7 +11,6 @@
   ansible.builtin.dnf:
     name: grubby
     state: present
-  when: false
 
 - name: Create default boot parameter configuration file
   ansible.builtin.file:
