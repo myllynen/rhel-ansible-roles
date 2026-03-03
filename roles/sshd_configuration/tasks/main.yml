@@ -23,7 +23,7 @@
 
 - name: Set sshd options to disable
   ansible.builtin.set_fact:
-    sshd_disable: "{{ sshd_options_disable | default([], true) }}"
+    sshd_disable: "{{ sshd_options_disable | select }}"
 
 - name: Check sshd_config.d directory
   ansible.builtin.stat:
