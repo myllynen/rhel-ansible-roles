@@ -24,11 +24,14 @@ service_state_enable:
 
 # List of services to reload/restart
 # Default is to restart, use state to reload
+# Optionally can require given service state
+# or status to carry out or not the operation
 # Registers variables: {reload,restart}_services
 service_state_restart:
 #  - pmcd.service
 #  - name: haproxy.service
 #    state: reloaded
+#    require: running
 
 # Skip missing services/units instead of
 # failing when trying to enable/start them

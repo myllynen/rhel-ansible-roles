@@ -68,8 +68,13 @@
   when: item in unit_files_known.stdout or
         not service_state_skip_missing | bool
 
+- name: Gather service facts
+  ansible.builtin.service_facts:
+  when: service_state_restart | selectattr('require', 'defined') | length > 0
+
 - name: Reload service
   vars:
+    item_full_name: "{{ item.name if '.' in item.name else item.name + '.service' }}"
     changed_started: >
       {{
         start_services.results
@@ -93,9 +98,13 @@
     - item.name not in changed_started
     - item.name in unit_files_known.stdout or
       not service_state_skip_missing | bool
+    - item.require is not defined or
+      item.require == ansible_facts['services'][item_full_name]['state'] or
+      item.require == ansible_facts['services'][item_full_name]['status']
 
 - name: Restart service
   vars:
+    item_full_name: "{{ item.name if '.' in item.name else item.name + '.service' }}"
     changed_started: >
       {{
         start_services.results
@@ -121,3 +130,6 @@
     - item.name | default(item) not in changed_started
     - item.name | default(item) in unit_files_known.stdout or
       not service_state_skip_missing | bool
+    - item.require is not defined or
+      item.require == ansible_facts['services'][item_full_name]['state'] or
+      item.require == ansible_facts['services'][item_full_name]['status']
