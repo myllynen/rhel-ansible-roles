@@ -6,18 +6,30 @@
   collections:
     - myllynen.rhel_ansible_roles
   vars:
+    # haproxy template configuration
+    # ...
+
+    # keepalived template configuration
+    # ...
+
+    # Load balancer implementation
     packages_install:
       - haproxy
       - keepalived
     files_copy:
-      - content: haproxy-global.cfg
+      - src: keepalived-notify-haproxy
+        path: /usr/local/sbin/keepalived-notify-haproxy
+        owner: root
+        group: root
+        mode: '0755'
+    files_copy_templates:
+      - src: haproxy-global.cfg.j2
         path: /etc/haproxy/haproxy.cfg
         owner: root
         group: root
         mode: '0644'
-    files_copy_templates:
-      - src: app-proxy.cfg.j2
-        path: /etc/haproxy/conf.d/app-proxy.cfg
+      - src: haproxy-app.cfg.j2
+        path: /etc/haproxy/conf.d/app.cfg
         owner: root
         group: root
         mode: '0644'
@@ -29,7 +41,7 @@
     #sebooleans_enable:
     #  - haproxy_connect_any
     service_state_enable:
-      - haproxy
+      # keepalived will manage haproxy
       - keepalived
 
   roles:
@@ -37,14 +49,15 @@
     - files_copy
     - sebooleans
     - service_state
-    # Reload services only if necessary
+    # Reload/restart services only if necessary
     - role: service_state
       vars:
         service_state_restart:
-          - name: keepalived
-            state: restarted
           - name: haproxy
             state: reloaded
+            require: running
+          - name: keepalived
+            state: restarted
       when:
-        - copy_files is changed
+        - copy_templates is changed
         - start_services is not changed
