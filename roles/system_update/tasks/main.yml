@@ -35,6 +35,7 @@
 
 - name: Gather package facts
   ansible.builtin.package_facts:
+  when: system_update_reboot_policy == 'when_needed'
 
 - name: Check need for rebooting
   check_mode: false
@@ -45,8 +46,8 @@
   failed_when: false
   changed_when: false
   when:
-    - "'dnf-plugins-core' in ansible_facts.packages"
     - system_update_reboot_policy == 'when_needed'
+    - "'dnf-plugins-core' in ansible_facts.packages"
 
 - name: Reboot system
   ansible.builtin.reboot:
