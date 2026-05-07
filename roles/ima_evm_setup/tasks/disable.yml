@@ -45,19 +45,14 @@
   ansible.builtin.package_facts:
 
 - name: Check IMA security attributes on files
-  ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
   check_mode: false
+  ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
   register: fattr_info
   changed_when: false
   when: "'attr' in ansible_facts.packages"
 
-- name: Remove IMA security attributes from files
-  ansible.builtin.shell: |
-    set -o pipefail
-    find / \( -path /proc -prune -o -path /sys -prune \) -o \( -fstype xfs -o -fstype ext4 \) -type f -print0 | \
-      xargs -0 setfattr -x security.ima > /dev/null 2>&1 || :
-  register: ima_attrs
-  failed_when: false
+- name: Mark IMA disabled on system
+  ansible.builtin.command: setfattr -x security.ima /usr/bin/ima-setup
   changed_when: true
   when:
     - fattr_info.stdout is defined

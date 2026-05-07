@@ -10,27 +10,26 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-# NB. Applicable RHEL versions: RHEL 9.5+
-# NB. Any legacy RPMs which do not contain IMA signatures
-#     *must* be installed after enabling IMA, not before.
+# NB. Applicable RHEL versions: RHEL 9.7+
 #
 # Enable or disable IMA/EVM
 # Set to null to leave the current setup untouched
 ima_evm_setup_enable: null
 
-# IMA policy configuration file to use
-# Role provided alternatives:
-# * ima-policy  - appraise executable files and libraries
-ima_evm_setup_policy_config_file: ima-policy
+# Path to the IMA policy configuration file to use
+# NB. This must be a signed policy file on the target,
+#     the default is part of the ima-evm-utils package
+ima_evm_setup_policy_config_file: >-
+  /usr/share/ima/policies/01-appraise-executable-and-lib-signatures
 
 # Verify new IMA policy configuration file on the target
-# This is recommended but this works by appending the
+# This is recommended however this works by appending the
 # new policy (if valid) to the current policy so prior
 # rebooting the combined policy will be in use.
 ima_evm_setup_verify_policy: true
 
-# Reboot system after enabling IMA
-# NB. A reboot is mandatory when disabling IMA
+# Reboot system after configuring IMA, recommended
+# NB. Reboot is required to complete disabling IMA
 ima_evm_setup_reboot: false
 </pre>
 

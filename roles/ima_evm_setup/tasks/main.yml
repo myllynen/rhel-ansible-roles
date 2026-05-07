@@ -10,13 +10,13 @@
 - name: Enable IMA/EVM
   ansible.builtin.include_tasks: enable.yml
   when:
-    - ansible_facts.distribution_version | float >= 9.5
+    - ansible_facts.distribution_version | float >= 9.7
     - ima_evm_setup_enable is not none
     - ima_evm_setup_enable | bool
 
 - name: Disable IMA/EVM
   ansible.builtin.include_tasks: disable.yml
   when:
-    - ansible_facts.distribution_version | float >= 9.5
+    - ansible_facts.distribution_version | float >= 9.7
     - ima_evm_setup_enable is not none
     - not ima_evm_setup_enable | bool
