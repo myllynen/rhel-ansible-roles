@@ -105,17 +105,24 @@
     label: "{{ item.path }}"
   when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']
 
-- name: Check yggdrasil status
-  ansible.builtin.stat:
-    path: /etc/yggdrasil
-  register: yggdrasil_config
+- name: Disable yggdrasild service
+  ansible.builtin.service:
+    name: yggdrasild
+    enabled: false
+  when: "'yggdrasil' in ansible_facts.packages"
+
+- name: Stop yggdrasild service
+  ansible.builtin.service:
+    name: yggdrasild
+    state: stopped
+  when: "'yggdrasil' in ansible_facts.packages"
 
 - name: Check yggdrasil configuration backup files
   ansible.builtin.find:
     paths: /etc/yggdrasil/
     patterns: 'config.toml.*'
   register: yggdrasil_backups
-  when: yggdrasil_config.stat.exists
+  when: "'yggdrasil' in ansible_facts.packages"
 
 - name: Restore yggdrasil configuration backup files
   ansible.builtin.copy:
@@ -127,7 +134,7 @@
   loop_control:
     label: "{{ item.path }}"
   when:
-    - yggdrasil_config.stat.exists
+    - "'yggdrasil' in ansible_facts.packages"
     - item.path | basename in ['config.toml.bak']
 
 - name: Remove RHSM configuration backup files
@@ -138,5 +145,5 @@
   loop_control:
     label: "{{ item.path }}"
   when:
-    - yggdrasil_config.stat.exists
+    - "'yggdrasil' in ansible_facts.packages"
     - item.path | basename in ['config.toml.bak']
