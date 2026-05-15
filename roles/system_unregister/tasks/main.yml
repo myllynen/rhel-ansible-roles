@@ -40,14 +40,23 @@
       - product-id
       - subscription-manager
     disablerepo: '*'
+  register: katello_packages
 
 - name: Remove Katello CA certificates
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
+  register: katello_files
   loop:
+    - /etc/pki/ca-trust/source/anchors/katello-server-ca.pem
     - /etc/rhsm/ca/katello-default-ca.pem
     - /etc/rhsm/ca/katello-server-ca.pem
+
+- name: Update system CA trust store
+  ansible.builtin.command: update-ca-trust
+  changed_when: true
+  when: katello_packages is changed or
+        katello_files is changed
 
 - name: Locate RHSM cache files
   ansible.builtin.find:
@@ -95,3 +104,39 @@
   loop_control:
     label: "{{ item.path }}"
   when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']
+
+- name: Check yggdrasil status
+  ansible.builtin.stat:
+    path: /etc/yggdrasil
+  register: yggdrasil_config
+
+- name: Check yggdrasil configuration backup files
+  ansible.builtin.find:
+    paths: /etc/yggdrasil/
+    patterns: 'config.toml.*'
+  register: yggdrasil_backups
+  when: yggdrasil_config.stat.exists
+
+- name: Restore yggdrasil configuration backup files
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: /etc/yggdrasil/config.toml
+    mode: '0640'
+    remote_src: true
+  loop: "{{ yggdrasil_backups.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - yggdrasil_config.stat.exists
+    - item.path | basename in ['config.toml.bak']
+
+- name: Remove RHSM configuration backup files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ yggdrasil_backups.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - yggdrasil_config.stat.exists
+    - item.path | basename in ['config.toml.bak']
