@@ -9,7 +9,7 @@
 
 - name: Configure Red Hat subscription using curl URL
   # noqa: command-instead-of-module
-  ansible.builtin.shell: set -o pipefail ; curl {{ repository_setup_rhsm_curl_args }} | bash
+  ansible.builtin.shell: set -o pipefail && curl {{ repository_setup_rhsm_curl_args }} | bash
   register: curl_command
   failed_when: curl_command.rc != 0 and 'already registered' not in curl_command.stderr
   changed_when: "'already registered' not in curl_command.stderr"

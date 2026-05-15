@@ -109,7 +109,7 @@
 
 - name: Find failed compliance check items
   ansible.builtin.shell: >
-    set -o pipefail ;
+    set -o pipefail &&
     grep -B 3 'fail$' {{ scap_compliance_report_dir }}/oscap-eval-output.txt
     | tr -d '\r'
     | expand
