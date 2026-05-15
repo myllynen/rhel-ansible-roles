@@ -695,7 +695,6 @@
     # Allowed states: present, latest
     scap_satellite_package_state: present
 
-
     #
     # sebooleans
     #
