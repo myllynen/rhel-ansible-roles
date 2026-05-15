@@ -1,0 +1,31 @@
+---
+# This role runs foreman_scap_client with given configuration
+# and requires the managed host being registered to Satellite
+# and Satellite/Capsule being configured before this will work
+
+# Satellite/Capsule FQDN
+scap_satellite_server: satellite.example.com
+
+# Satellite/Capsule port
+scap_satellite_port: 9090
+
+# Satellite/Capsule timeout
+scap_satellite_timeout: 60
+
+# Satellite Compliance Policies to scan
+scap_satellite_policies:
+  - id: 1
+    profile: xccdf_org.ssgproject.content_profile_cis
+#    tailoring_id: 1
+#    tailoring_profile: xccdf_org.ssgproject.content_profile_cis_cloud
+
+# Force refreshing policy files from the server,
+# otherwise existing files will be used if present
+scap_satellite_refresh_policy_files: false
+
+# Allow oscap to fetch remote SCAP resources
+scap_satellite_fetch_remote_resources: false
+
+# State of SCAP packages on the client
+# Allowed states: present, latest
+scap_satellite_package_state: present

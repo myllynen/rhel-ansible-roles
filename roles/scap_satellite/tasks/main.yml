@@ -1,0 +1,40 @@
+---
+- name: Install Satellite SCAP client package
+  ansible.builtin.dnf:
+    name: foreman_scap_client_bash
+    state: "{{ scap_satellite_package_state }}"
+
+- name: Create Satellite SCAP client configuration file
+  ansible.builtin.template:
+    src: foreman_scap_client_config.yaml.j2
+    dest: /etc/foreman_scap_client/config.yaml
+    mode: '0640'
+
+- name: Remove local SCAP policy content files
+  ansible.builtin.file:
+    path: /var/lib/openscap/content/{{ item.profile }}.xml
+    state: absent
+  loop: "{{ scap_satellite_policies if scap_satellite_refresh_policy_files | bool else [] }}"
+  loop_control:
+    label: "{{ '/var/lib/openscap/content/' + item.profile + '.xml' }}"
+
+- name: Remove local SCAP policy tailoring files
+  ansible.builtin.file:
+    path: /var/lib/openscap/tailoring/{{ item.tailoring_profile }}.xml
+    state: absent
+  loop: "{{ scap_satellite_policies | selectattr('tailoring_profile', 'defined') if scap_satellite_refresh_policy_files | bool else [] }}"
+  loop_control:
+    label: "{{ '/var/lib/openscap/tailoring/' + item.tailoring_profile + '.xml' }}"
+
+- name: Run Satellite SCAP compliance scan
+  vars:
+    tailoring: "{{ ' with Tailoring ' + item.tailoring_id | string + ' - ' + item.tailoring_profile
+                   if item.tailoring_id is defined else '' }}"
+  ansible.builtin.command:
+    cmd: foreman_scap_client {{ item.id }}
+  register: scan_command
+  failed_when: scan_command.rc not in [0, 2]
+  changed_when: "'Download' in scan_command.stdout"
+  loop: "{{ scap_satellite_policies }}"
+  loop_control:
+    label: "{{ 'Profile ' + item.id | string + ' - ' + item.profile + tailoring }}"
