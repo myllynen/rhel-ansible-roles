@@ -58,7 +58,7 @@
 # https://github.com/ansible/ansible/issues/86945
 - name: Verify IMA policy configuration file
   ansible.builtin.shell: >
-    cmp -s {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy > /dev/null 2>&1 || \
+    cmp -s {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy > /dev/null 2>&1 ||
       (echo {{ ima_evm_setup_policy_config_file }} >> /sys/kernel/security/integrity/ima/policy &&
        echo changed)
   register: ima_policy_verify
@@ -67,8 +67,8 @@
 
 # https://github.com/ansible/ansible/issues/86945
 - name: Copy IMA policy configuration file
-  ansible.builtin.shell: |
-    cmp -s {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy > /dev/null 2>&1 || \
+  ansible.builtin.shell: >
+    cmp -s {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy > /dev/null 2>&1 ||
       (cp -av {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy &&
        restorecon -v /etc/ima/ima-policy &&
        echo changed)
@@ -77,8 +77,8 @@
 
 # https://github.com/ansible/ansible/issues/86945
 - name: Enable dracut integrity module
-  ansible.builtin.shell: |
-    cmp -s /usr/share/ima/dracut-98-integrity.conf /etc/dracut.conf.d/98-integrity.conf > /dev/null 2>&1 || \
+  ansible.builtin.shell: >
+    cmp -s /usr/share/ima/dracut-98-integrity.conf /etc/dracut.conf.d/98-integrity.conf > /dev/null 2>&1 ||
       (cp -av /usr/share/ima/dracut-98-integrity.conf /etc/dracut.conf.d/98-integrity.conf &&
        restorecon -v /etc/dracut.conf.d/98-integrity.conf &&
        echo changed)
