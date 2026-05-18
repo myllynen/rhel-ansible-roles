@@ -1,4 +1,11 @@
 ---
+- name: Get RHSM server name
+  check_mode: false
+  ansible.builtin.shell: awk -F '=' '/^hostname/ {print $2}' /etc/rhsm/rhsm.conf 2> /dev/null | xargs
+  register: rhsm_server
+  failed_when: false
+  changed_when: false
+
 - name: Gather package facts
   ansible.builtin.package_facts:
 
@@ -30,6 +37,15 @@
 - name: Remove all Subscription Management local data
   ansible.builtin.command: subscription-manager clean
   changed_when: unregister is failed
+
+# https://redhat.atlassian.net/browse/RHEL-176572
+- name: Remove container registry RHSM server certificates
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/containers/certs.d/{{ rhsm_server.stdout }}
+  when: rhsm_server.stdout != ''
 
 - name: Remove Katello CA package
   ansible.builtin.dnf:
