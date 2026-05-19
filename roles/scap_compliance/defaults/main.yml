@@ -6,6 +6,11 @@
 # another may not work and is unsupported
 scap_compliance_profile: cis
 
+# Optional remote content ds file to use
+# This is full SCAP file path on remote
+# Default is the RHEL RPM provided file
+scap_compliance_content_file_path:
+
 # Optional custom tailoring template to use
 # Needs scap_compliance_tailoring_file_path
 # This is copied from controller to remote
