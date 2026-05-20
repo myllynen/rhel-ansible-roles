@@ -18,6 +18,7 @@ packages_remove:
   - telnet-server
 
   #- biosdevname
+  #- bluez
   #- cloud-init
   #- flashrom
   #- fonts*
