@@ -35,6 +35,7 @@
   loop:
     - /etc/insights-client/.last-upload.results
     - /etc/insights-client/.lastupload
+    - /etc/insights-client/.run_insights_client_next_boot
     - /etc/rhsm/facts/insights-client.facts
 
 - name: Unregister from Red Hat Subscription Management
