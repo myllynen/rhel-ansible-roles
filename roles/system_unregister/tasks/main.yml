@@ -1,7 +1,8 @@
 ---
 - name: Get RHSM server name
   check_mode: false
-  ansible.builtin.shell: awk -F '=' '/^hostname/ {print $2}' /etc/rhsm/rhsm.conf 2> /dev/null | xargs
+  ansible.builtin.shell: >
+    awk -F '=' '/^hostname/ {print $2}' /etc/rhsm/rhsm.conf 2> /dev/null | xargs
   register: rhsm_server
   failed_when: false
   changed_when: false
@@ -26,6 +27,15 @@
     cmd: insights-client --unregister
     removes: /etc/insights-client/.registered
   when: "'insights-client' in ansible_facts.packages"
+
+- name: Remove Insights state files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/insights-client/.last-upload.results
+    - /etc/insights-client/.lastupload
+    - /etc/rhsm/facts/insights-client.facts
 
 - name: Unregister from Red Hat Subscription Management
   ansible.builtin.command: subscription-manager unregister
@@ -95,6 +105,17 @@
   register: pkg_cache
   changed_when: not pkg_cache.stdout.startswith('0 files removed')
 
+- name: Reset RHSM state files
+  ansible.builtin.copy:
+    content: "{{ {} | to_yaml if item.startswith('/etc') else '{}' }}"
+    dest: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0640'
+  loop:
+    - /etc/rhsm/syspurpose/syspurpose.json
+    - /var/lib/rhsm/cache/syspurpose.json
+
 - name: Check RHSM configuration backup files
   ansible.builtin.find:
     paths: /etc/rhsm
@@ -133,33 +154,23 @@
     state: stopped
   when: "'yggdrasil' in ansible_facts.packages"
 
-- name: Check yggdrasil configuration backup files
-  ansible.builtin.find:
-    paths: /etc/yggdrasil/
-    patterns: 'config.toml.*'
-  register: yggdrasil_backups
+# Backup may contain Satellite URL, reset to RPM default
+- name: Reset yggdrasil configuration file
+  ansible.builtin.copy:
+    content: |
+      # yggdrasil global configuration settings
+
+      broker = ["tcp://test.mosquitto.org:1883"]
+      log-level = "error"
+    dest: /etc/yggdrasil/config.toml
+    owner: root
+    group: root
+    mode: '0644'
   when: "'yggdrasil' in ansible_facts.packages"
 
-- name: Restore yggdrasil configuration backup files
-  ansible.builtin.copy:
-    src: "{{ item.path }}"
-    dest: /etc/yggdrasil/config.toml
-    mode: '0640'
-    remote_src: true
-  loop: "{{ yggdrasil_backups.files | sort(attribute='path') }}"
-  loop_control:
-    label: "{{ item.path }}"
-  when:
-    - "'yggdrasil' in ansible_facts.packages"
-    - item.path | basename in ['config.toml.bak']
-
-- name: Remove RHSM configuration backup files
+- name: Remove yggdrasil configuration backup file
   ansible.builtin.file:
-    path: "{{ item.path }}"
+    path: "{{ item }}"
     state: absent
-  loop: "{{ yggdrasil_backups.files | sort(attribute='path') }}"
-  loop_control:
-    label: "{{ item.path }}"
-  when:
-    - "'yggdrasil' in ansible_facts.packages"
-    - item.path | basename in ['config.toml.bak']
+  loop:
+    - /etc/yggdrasil/config.toml.bak
