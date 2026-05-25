@@ -18,6 +18,7 @@ packages_install:
   - dnf-plugins-core
   #-git-core
   - man-pages
+  #- mokutil
   #- mlocate
   - nano
   - openssh-clients
@@ -27,7 +28,6 @@ packages_install:
   - python3-libselinux
   - policycoreutils-python-utils
   #- rsync
-  - setools-console
   #- sos
   - tar
   #- tmux
