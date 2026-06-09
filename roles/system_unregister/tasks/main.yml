@@ -1,6 +1,7 @@
 ---
 - name: Get RHSM server name
   check_mode: false
+  # noqa: risky-shell-pipe
   ansible.builtin.shell: >
     awk -F '=' '/^hostname/ {print $2}' /etc/rhsm/rhsm.conf 2> /dev/null | xargs
   register: rhsm_server
@@ -56,7 +57,7 @@
     state: absent
   loop:
     - /etc/containers/certs.d/{{ rhsm_server.stdout }}
-  when: rhsm_server.stdout != ''
+  when: rhsm_server.stdout | length > 0
 
 - name: Remove Katello CA package
   ansible.builtin.dnf:

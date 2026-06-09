@@ -15,7 +15,7 @@
 - name: Disable mounts
   ansible.posix.mount:
     src: "{{ item.src | default(omit) }}"
-    path : "{{ item.path | default(omit) }}"
+    path: "{{ item.path | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     fstype: "{{ item.fstype | default(omit) }}"
     boot: "{{ item.boot | default(omit) }}"
@@ -33,7 +33,7 @@
 - name: Enable mounts
   ansible.posix.mount:
     src: "{{ item.src | default(omit) }}"
-    path : "{{ item.path }}"
+    path: "{{ item.path }}"
     state: "{{ item.state }}"
     fstype: "{{ item.fstype | default(omit) }}"
     boot: "{{ item.boot | default(omit) }}"
