@@ -2,6 +2,7 @@
 - name: Leave AD domain
   vars:
     leave_action: "{{ 'delete-computer' if domain_ad_leave_computer_delete | bool else 'reset-computer' }}"
+    recursive_option: "{{ '--recursive' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
   no_log: true
   ansible.builtin.shell: >
     set -o pipefail &&
@@ -9,6 +10,7 @@
     adcli -v {{ leave_action }}
     --domain={{ domain_ad_domain }}
     --login-user={{ domain_ad_admin_username }}
+    {{ recursive_option }}
     --stdin-password
     {{ ansible_facts.fqdn }}
   changed_when: true
