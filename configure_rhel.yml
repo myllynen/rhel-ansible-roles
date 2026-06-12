@@ -262,6 +262,8 @@
     #  - name: refresh tokens
     #    job: /usr/local/bin/refresh-tokens
     #    special_time: daily
+    #  - name: obsoleted task
+    #    state: absent
 
     # List of allowed crontab users in cron.allow
     # When set to null cron.allow will be removed
