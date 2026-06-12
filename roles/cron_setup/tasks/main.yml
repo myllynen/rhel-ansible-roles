@@ -46,12 +46,30 @@
     mode: '0600'
   when: cron_setup_deny_file is not none
 
-- name: Configure crontab entries
+- name: Configure crontab entries - disabled
   vars:
     label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
   ansible.builtin.cron:
     cron_file: "{{ item.cron_file | default(omit) }}"
-    state: "{{ item.state | default(omit) }}"
+    state: absent
+    user: "{{ item.user | default(omit) }}"
+    name: "{{ item.name }}"
+    env: "{{ item.env | default(omit) }}"
+    job: "{{ item.job | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+  loop: "{{ cron_setup_entries
+            | selectattr('state', 'defined')
+            | selectattr('state', 'equalto', 'absent') }}"
+  loop_control:
+    label: "{{ label_user + item.name }}"
+  when: "'cronie' in ansible_facts.packages"
+
+- name: Configure crontab entries - enabled
+  vars:
+    label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
+  ansible.builtin.cron:
+    cron_file: "{{ item.cron_file | default(omit) }}"
+    state: present
     user: "{{ item.user | default(omit) }}"
     name: "{{ item.name }}"
     minute: "{{ item.minute | default(omit) }}"
@@ -66,7 +84,11 @@
     insertafter: "{{ item.insertafter | default(omit) }}"
     disabled: "{{ item.disabled | default(omit) }}"
     backup: "{{ item.backup | default(omit) }}"
-  loop: "{{ cron_setup_entries | select }}"
+  loop: "{{ cron_setup_entries
+            | selectattr('state', 'undefined')
+            + (cron_setup_entries
+              | selectattr('state', 'defined')
+              | selectattr('state', 'equalto', 'present')) }}"
   loop_control:
     label: "{{ label_user + item.name }}"
   when: "'cronie' in ansible_facts.packages"
