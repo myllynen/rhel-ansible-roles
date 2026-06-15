@@ -48,6 +48,12 @@
 
 - name: Configure crontab entries - disabled
   vars:
+    enabled_names: "{{ (cron_setup_entries
+                        | selectattr('state', 'undefined')
+                        + (cron_setup_entries
+                           | selectattr('state', 'defined')
+                           | selectattr('state', 'equalto', 'present')))
+                       | map(attribute='name') }}"
     label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
   ansible.builtin.cron:
     cron_file: "{{ item.cron_file | default(omit) }}"
@@ -62,7 +68,9 @@
             | selectattr('state', 'equalto', 'absent') }}"
   loop_control:
     label: "{{ label_user + item.name }}"
-  when: "'cronie' in ansible_facts.packages"
+  when:
+    - "'cronie' in ansible_facts.packages"
+    - item.name not in enabled_names
 
 - name: Configure crontab entries - enabled
   vars:
@@ -87,8 +95,8 @@
   loop: "{{ cron_setup_entries
             | selectattr('state', 'undefined')
             + (cron_setup_entries
-              | selectattr('state', 'defined')
-              | selectattr('state', 'equalto', 'present')) }}"
+               | selectattr('state', 'defined')
+               | selectattr('state', 'equalto', 'present')) }}"
   loop_control:
     label: "{{ label_user + item.name }}"
   when: "'cronie' in ansible_facts.packages"
