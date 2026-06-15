@@ -57,8 +57,8 @@
   ansible.builtin.set_fact:
     create_users: "{{ create_users | default([])
                       + [item | dict2items
-                        | rejectattr('key', 'equalto', 'password')
-                        | rejectattr('key', 'equalto', 'ssh_key_passphrase') | items2dict] }}"
+                         | rejectattr('key', 'equalto', 'password')
+                         | rejectattr('key', 'equalto', 'ssh_key_passphrase') | items2dict] }}"
   loop: "{{ accounts_local_users_create | select }}"
   loop_control:
     label: "{{ item.name }}"

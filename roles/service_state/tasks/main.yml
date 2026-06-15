@@ -114,10 +114,10 @@
     services_to_restart: >
       {{
         (service_state_restart
-        | selectattr('state', 'defined')
-        | selectattr('state', 'equalto', 'restarted'))
+         | selectattr('state', 'defined')
+         | selectattr('state', 'equalto', 'restarted'))
         + (service_state_restart
-          | selectattr('state', 'undefined'))
+           | selectattr('state', 'undefined'))
       }}
   ansible.builtin.systemd:
     name: "{{ item.name | default(item) }}"

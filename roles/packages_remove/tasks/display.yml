@@ -2,7 +2,7 @@
 - name: Set changed packages
   ansible.builtin.set_fact:
     removed_packages_all: "{{ (removed_packages.results | default([])
-                              + removed_packages_leaf.results | default([]))
+                               + removed_packages_leaf.results | default([]))
                               | reject('search', 'No match') | sort }}"
 
 - name: Display package changes
