@@ -2,7 +2,7 @@
 - name: Remove unwanted packages
   vars:
     remove_packages: "{{ packages_remove | select
-                         | difference(packages_install | select)
+                         | difference((packages_install | default([])) | select)
                          | difference(packages_remove_exclude | select) }}"
   ansible.builtin.dnf:
     name: "{{ remove_packages }}"

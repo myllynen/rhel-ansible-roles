@@ -15,7 +15,7 @@
     mode: '0644'
   when:
     - login_defs_config_file is not none
-    - login_defs_config_file length > 0
+    - login_defs_config_file | length > 0
 
 - name: Create system-local login access file
   ansible.builtin.template:

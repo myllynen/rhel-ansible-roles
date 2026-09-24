@@ -50,7 +50,7 @@
     path: "{{ watchdog_conf }}"
     regexp: '^(#|)WatchdogDevice=.*'
     line: 'WatchdogDevice={{ watchdog_device }}'
-  register: watchdog_device
+  register: watchdog_devconf
   when:
     - ansible_facts.distribution_major_version | int >= 9
     - watchdog_device is not none
@@ -62,7 +62,7 @@
   when: watchdog_runtime is changed or
         watchdog_reboot is changed or
         watchdog_kexec is changed or
-        watchdog_device is changed
+        watchdog_devconf is changed
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
@@ -70,4 +70,4 @@
   when: watchdog_runtime is changed or
         watchdog_reboot is changed or
         watchdog_kexec is changed or
-        watchdog_device is changed
+        watchdog_devconf is changed

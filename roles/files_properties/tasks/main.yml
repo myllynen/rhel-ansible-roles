@@ -23,7 +23,7 @@
     serole: "{{ item.serole | default(omit) }}"
     setype: "{{ item.setype | default(omit) }}"
     seuser: "{{ item.seuser | default(omit) }}"
-    recursive: "{{ item.recursive | default(omit) }}"
+    recurse: "{{ item.recurse | default(omit) }}"
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
   register: properties_files
   loop: "{{ files_properties | select }}"

@@ -8,7 +8,7 @@
       - system
   when: ansible_facts.distribution_major_version is not defined or
         ansible_facts.domain is not defined or
-        ansible_facts.fqdn is not defined or
+        ansible_facts.fqdn is not defined
 
 - name: Install required packages
   ansible.builtin.dnf:
@@ -50,13 +50,12 @@
   check_mode: false
   no_log: true
   ansible.builtin.shell: >
-    set -o pipefail &&
-    echo '{{ domain_ad_admin_password }}' |
     adcli -v show-computer
     --domain={{ domain_ad_domain }}
     --login-user={{ domain_ad_admin_username }}
     --stdin-password
     {{ ansible_facts.fqdn }}
+    <<< '{{ domain_ad_admin_password }}'
   register: computer_info
   failed_when: computer_info.rc != 0 and computer_info.rc != 5
   changed_when: false

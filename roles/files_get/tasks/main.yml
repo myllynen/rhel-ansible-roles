@@ -33,7 +33,7 @@
     serole: "{{ item.serole | default(omit) }}"
     setype: "{{ item.setype | default(omit) }}"
     seuser: "{{ item.seuser | default(omit) }}"
-    unsafe_writes: "{{ unsafe_writes.dest }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
   register: get_files
   loop: "{{ files_get | select }}"
   loop_control:

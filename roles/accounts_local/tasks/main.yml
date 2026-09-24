@@ -52,10 +52,15 @@
   loop_control:
     label: "{{ item.name }}"
 
+# Reset create_users from possible previous role execution
+- name: Initialize list of local users to create
+  ansible.builtin.set_fact:
+    create_users: []
+
 - name: Create passwordless list of local users to create
   no_log: "{{ accounts_local_no_log }}"
   ansible.builtin.set_fact:
-    create_users: "{{ create_users | default([])
+    create_users: "{{ create_users
                       + [item | dict2items
                          | rejectattr('key', 'equalto', 'password')
                          | rejectattr('key', 'equalto', 'ssh_key_passphrase') | items2dict] }}"
