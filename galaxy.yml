@@ -18,5 +18,5 @@ tags:
 dependencies:
   ansible.posix: ">=1.5.4"
   community.general: ">=9.5.13"
-repository: https://www.github.com/myllynen/rhel-ansible-roles
-issues: https://www.github.com/myllynen/rhel-ansible-roles/issues
+repository: https://github.com/myllynen/rhel-ansible-roles
+issues: https://github.com/myllynen/rhel-ansible-roles/issues
