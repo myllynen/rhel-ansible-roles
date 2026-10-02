@@ -5,7 +5,7 @@
       - kbd
       - kbd-misc
     state: present
-  register: package_install
+  register: __rar_kb_package_install
 
 - name: Check system keyboard configuration
   check_mode: true
@@ -13,14 +13,14 @@
     path: /etc/vconsole.conf
     regexp: '^KEYMAP=("|){{ system_keyboard }}(|")'
     state: absent
-  register: keyboard_check
+  register: __rar_kb_keyboard_check
   changed_when: false
 
 - name: Configure system keyboard
   ansible.builtin.command: localectl set-keymap {{ system_keyboard }}
-  register: keyboard_config
+  register: __rar_kb_keyboard_config
   changed_when: true
-  when: not keyboard_check.found
+  when: not __rar_kb_keyboard_check.found
 
 - name: Check system console font configuration
   check_mode: true
@@ -28,7 +28,7 @@
     path: /etc/vconsole.conf
     regexp: '^FONT=("|){{ system_font }}(|")'
     state: absent
-  register: font_check
+  register: __rar_kb_font_check
   changed_when: false
 
 - name: Update system console font configuration
@@ -36,17 +36,17 @@
     path: /etc/vconsole.conf
     regexp: '^FONT=("|).*(|")'
     replace: 'FONT={{ system_font }}'
-  register: font_config
-  when: not font_check.found
+  register: __rar_kb_font_config
+  when: not __rar_kb_font_check.found
 
 - name: Configure system console font
   ansible.builtin.command: setfont {{ system_font }}
   changed_when: true
-  when: font_config is changed
+  when: __rar_kb_font_config is changed
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: package_install is changed or
-        keyboard_config is changed or
-        font_config is changed
+  when: __rar_kb_package_install is changed or
+        __rar_kb_keyboard_config is changed or
+        __rar_kb_font_config is changed

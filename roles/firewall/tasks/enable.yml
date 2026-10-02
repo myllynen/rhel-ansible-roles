@@ -12,7 +12,7 @@
     path: /etc/firewalld/firewalld.conf
     regexp: '^AllowZoneDrifting=yes'
     replace: 'AllowZoneDrifting=no'
-  register: firewalld_config
+  register: __rar_fw_firewalld_config
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Enable firewalld service
@@ -25,7 +25,7 @@
   ansible.builtin.service:
     name: firewalld
     state: started
-  register: service_start
+  register: __rar_fw_service_start
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Reload firewalld to apply configuration changes
@@ -34,20 +34,20 @@
     state: reloaded
   when:
     - "'firewalld' in ansible_facts.packages"
-    - service_start is not changed
-    - firewalld_config is changed
+    - __rar_fw_service_start is not changed
+    - __rar_fw_firewalld_config is changed
 
 - name: Gather service facts
   ansible.builtin.service_facts:
 
 - name: Configure default firewall zone
   ansible.builtin.command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
-  register: firewall_cmd_result
-  changed_when: "'ZONE_ALREADY_SET' not in firewall_cmd_result.stderr"
+  register: __rar_fw_firewall_cmd_result
+  changed_when: "'ZONE_ALREADY_SET' not in __rar_fw_firewall_cmd_result.stderr"
 
 - name: Set list of ports to open
   ansible.builtin.set_fact:
-    ports_to_open: "{{ firewall_open_ports | select | unique }}"
+    __rar_fw_ports_to_open: "{{ firewall_open_ports | select | unique }}"
 
 - name: Open configured ports in firewall
   ansible.posix.firewalld:
@@ -56,13 +56,13 @@
     state: enabled
     immediate: true
     permanent: true
-  loop: "{{ ports_to_open }}"
+  loop: "{{ __rar_fw_ports_to_open }}"
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Check open ports in firewall
   check_mode: false
   ansible.builtin.command: firewall-cmd --zone={{ firewall_default_zone }} --list-ports
-  register: open_ports
+  register: __rar_fw_open_ports
   changed_when: false
   when:
     - "'firewalld' in ansible_facts.packages"
@@ -75,26 +75,26 @@
     state: disabled
     immediate: true
     permanent: true
-  loop: "{{ open_ports.stdout.split(' ') | select }}"
+  loop: "{{ __rar_fw_open_ports.stdout.split(' ') | select }}"
   when:
     - "'firewalld' in ansible_facts.packages"
     - firewall_close_unconfigured | bool
-    - open_ports.stdout is defined
-    - item not in ports_to_open
+    - __rar_fw_open_ports.stdout is defined
+    - item not in __rar_fw_ports_to_open
 
 - name: Display unconfigured ports left open
   vars:
-    unclosed_ports: "{{ open_ports.stdout.split(' ') | select | difference(ports_to_open) }}"
+    __rar_fw_unclosed_ports: "{{ __rar_fw_open_ports.stdout.split(' ') | select | difference(__rar_fw_ports_to_open) }}"
   ansible.builtin.debug:
-    msg: "{{ unclosed_ports | join(' ') }}"
+    msg: "{{ __rar_fw_unclosed_ports | join(' ') }}"
   when:
     - not firewall_close_unconfigured | bool
-    - open_ports.stdout is defined
-    - unclosed_ports | length > 0
+    - __rar_fw_open_ports.stdout is defined
+    - __rar_fw_unclosed_ports | length > 0
 
 - name: Set list of services to open
   ansible.builtin.set_fact:
-    services_to_open: "{{ firewall_open_services | select | unique }}"
+    __rar_fw_services_to_open: "{{ firewall_open_services | select | unique }}"
 
 - name: Open configured services in firewall
   ansible.posix.firewalld:
@@ -103,13 +103,13 @@
     state: enabled
     immediate: true
     permanent: true
-  loop: "{{ services_to_open }}"
+  loop: "{{ __rar_fw_services_to_open }}"
   when: "'firewalld' in ansible_facts.packages"
 
 - name: Check open services in firewall
   check_mode: false
   ansible.builtin.command: firewall-cmd --zone={{ firewall_default_zone }} --list-services
-  register: open_services
+  register: __rar_fw_open_services
   changed_when: false
   when:
     - "'firewalld' in ansible_facts.packages"
@@ -122,20 +122,20 @@
     state: disabled
     immediate: true
     permanent: true
-  loop: "{{ open_services.stdout.split(' ') | select }}"
+  loop: "{{ __rar_fw_open_services.stdout.split(' ') | select }}"
   when:
     - "'firewalld' in ansible_facts.packages"
     - firewall_close_unconfigured | bool
-    - open_services.stdout is defined
-    - item not in services_to_open
+    - __rar_fw_open_services.stdout is defined
+    - item not in __rar_fw_services_to_open
     - item != 'ssh'
 
 - name: Display unconfigured services left open
   vars:
-    unclosed_services: "{{ open_services.stdout.split(' ') | select | difference(services_to_open) | difference(['ssh']) }}"
+    __rar_fw_unclosed_services: "{{ __rar_fw_open_services.stdout.split(' ') | select | difference(__rar_fw_services_to_open) | difference(['ssh']) }}"
   ansible.builtin.debug:
-    msg: "{{ unclosed_services | join(' ') }}"
+    msg: "{{ __rar_fw_unclosed_services | join(' ') }}"
   when:
     - not firewall_close_unconfigured | bool
-    - open_services.stdout is defined
-    - unclosed_services | length > 0
+    - __rar_fw_open_services.stdout is defined
+    - __rar_fw_unclosed_services | length > 0

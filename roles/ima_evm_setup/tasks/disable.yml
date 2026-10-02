@@ -3,13 +3,13 @@
   ansible.builtin.file:
     path: /etc/ima/ima-policy
     state: absent
-  register: ima_policy
+  register: __rar_ie_ima_policy
 
 - name: Disable dracut integrity module
   ansible.builtin.file:
     path: /etc/dracut.conf.d/98-integrity.conf
     state: absent
-  register: dracut_config
+  register: __rar_ie_dracut_config
 
 - name: Remove RPM IMA plugin package
   ansible.builtin.dnf:
@@ -20,12 +20,12 @@
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: dracut_config is changed
+  when: __rar_ie_dracut_config is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
-  when: ima_policy is changed or
-        dracut_config is changed
+  when: __rar_ie_ima_policy is changed or
+        __rar_ie_dracut_config is changed
 
 - name: Check current IMA policy configuration
   check_mode: true
@@ -33,13 +33,13 @@
     path: /sys/kernel/security/ima/policy
     regexp: '.*BPRM_CHECK.*'
     state: absent
-  register: ima_policy_check
+  register: __rar_ie_ima_policy_check
   changed_when: false
 
 - name: Fail if IMA policy loaded
   ansible.builtin.fail:
     msg: "IMA policy still loaded, cannot proceed."
-  when: ima_policy_check.found != 0
+  when: __rar_ie_ima_policy_check.found != 0
 
 - name: Gather package facts
   ansible.builtin.package_facts:
@@ -47,7 +47,7 @@
 - name: Check IMA security attributes on files
   check_mode: false
   ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
-  register: fattr_info
+  register: __rar_ie_fattr_info
   changed_when: false
   when: "'attr' in ansible_facts.packages"
 
@@ -55,5 +55,5 @@
   ansible.builtin.command: setfattr -x security.ima /usr/bin/ima-setup
   changed_when: true
   when:
-    - fattr_info.stdout is defined
-    - "'security.ima' in fattr_info.stdout"
+    - __rar_ie_fattr_info.stdout is defined
+    - "'security.ima' in __rar_ie_fattr_info.stdout"

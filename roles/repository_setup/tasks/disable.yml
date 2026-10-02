@@ -1,14 +1,14 @@
 ---
 - name: Unregister from Red Hat Subscription Management
   ansible.builtin.command: subscription-manager unregister
-  register: unregister
-  failed_when: unregister.rc != 0 and 'currently not registered' not in unregister.stderr
-  changed_when: unregister.rc == 0 and 'has been unregistered' in unregister.stdout
+  register: __rar_rs_unregister
+  failed_when: __rar_rs_unregister.rc != 0 and 'currently not registered' not in __rar_rs_unregister.stderr
+  changed_when: __rar_rs_unregister.rc == 0 and 'has been unregistered' in __rar_rs_unregister.stdout
   ignore_errors: true
 
 - name: Remove all Subscription Management local data
   ansible.builtin.command: subscription-manager clean
-  changed_when: unregister is failed
+  changed_when: __rar_rs_unregister is failed
 
 - name: Remove Katello CA package
   ansible.builtin.dnf:
@@ -36,24 +36,24 @@
     excludes:
       - redhat.repo
       - syspurpose.json
-  register: rhsm_cache
+  register: __rar_rs_rhsm_cache
 
 - name: Remove RHSM cache files
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  loop: "{{ rhsm_cache.files | map(attribute='path') }}"
+  loop: "{{ __rar_rs_rhsm_cache.files | map(attribute='path') }}"
 
 - name: Clean package manager caches
   ansible.builtin.command: dnf -C --disableplugin=product-id,subscription-manager clean all
-  register: pkg_cache
-  changed_when: not pkg_cache.stdout.startswith('0 files removed')
+  register: __rar_rs_pkg_cache
+  changed_when: not __rar_rs_pkg_cache.stdout.startswith('0 files removed')
 
 - name: Check RHSM configuration backup files
   ansible.builtin.find:
     paths: /etc/rhsm
     patterns: 'rhsm.conf.*'
-  register: rhsm_backups
+  register: __rar_rs_rhsm_backups
 
 - name: Restore RHSM configuration backup files
   ansible.builtin.copy:
@@ -61,7 +61,7 @@
     dest: /etc/rhsm/rhsm.conf
     mode: '0644'
     remote_src: true
-  loop: "{{ rhsm_backups.files | sort(attribute='path') }}"
+  loop: "{{ __rar_rs_rhsm_backups.files | sort(attribute='path') }}"
   loop_control:
     label: "{{ item.path }}"
   when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']
@@ -70,7 +70,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  loop: "{{ rhsm_backups.files | sort(attribute='path') }}"
+  loop: "{{ __rar_rs_rhsm_backups.files | sort(attribute='path') }}"
   loop_control:
     label: "{{ item.path }}"
   when: item.path | basename in ['rhsm.conf.bak', 'rhsm.conf.kat-backup', 'rhsm.conf.rpmnew']

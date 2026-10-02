@@ -11,18 +11,18 @@
 
 - name: Install required packages
   vars:
-    security_packages:
+    __rar_sh_security_packages:
       - crypto-policies-scripts
       - grubby
       - "{{ 'mokutil' if secure_boot_verify | bool else '' }}"
-    selinux_packages:
+    __rar_sh_selinux_packages:
       - python3-libselinux
       - python3-libsemanage
       - policycoreutils-python-utils
       - selinux-policy-targeted
       - setools-console
   ansible.builtin.dnf:
-    name: "{{ security_packages | select | list + selinux_packages }}"
+    name: "{{ __rar_sh_security_packages | select | list + __rar_sh_selinux_packages }}"
     state: present
 
 - name: Gather package facts
@@ -31,7 +31,7 @@
 - name: Check Secure Boot state
   check_mode: false
   ansible.builtin.command: mokutil --sb-state
-  register: sb_state
+  register: __rar_sh_sb_state
   failed_when: false
   changed_when: false
   when:
@@ -44,41 +44,41 @@
   when:
     - "'mokutil' in ansible_facts.packages"
     - secure_boot_verify | bool
-    - sb_state.stdout | regex_search("Secure?Boot enabled") is none
+    - __rar_sh_sb_state.stdout | regex_search("Secure?Boot enabled") is none
 
 - name: Verify FIPS mode (CPU)
   check_mode: false
   ansible.builtin.command: grep -w aes /proc/cpuinfo
-  register: cpu_flags
-  failed_when: "'aes' not in cpu_flags.stdout"
+  register: __rar_sh_cpu_flags
+  failed_when: "'aes' not in __rar_sh_cpu_flags.stdout"
   changed_when: false
   when: fips_mode_verify | bool
 
 - name: Verify FIPS mode (system)
   check_mode: false
   ansible.builtin.command: cat /proc/sys/crypto/fips_enabled
-  register: fips_mode
-  failed_when: fips_mode.stdout != '1'
+  register: __rar_sh_fips_mode
+  failed_when: __rar_sh_fips_mode.stdout != '1'
   changed_when: false
   when: fips_mode_verify | bool
 
 - name: Verify FIPS mode (crypto policies)
   check_mode: false
   ansible.builtin.command: update-crypto-policies --show
-  register: crypto_policies
-  failed_when: "'FIPS' not in crypto_policies.stdout"
+  register: __rar_sh_crypto_policies
+  failed_when: "'FIPS' not in __rar_sh_crypto_policies.stdout"
   changed_when: false
   when: fips_mode_verify | bool
 
 - name: Check kernel lockdown configuration
   vars:
-    lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
+    __rar_sh_lockdown_param: "{{ 'lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else 'lockdown' }}"
   check_mode: true
   ansible.builtin.lineinfile:
     path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ lockdown_param }}(=| |")'
+    regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ __rar_sh_lockdown_param }}(=| |")'
     state: absent
-  register: lockdown_check
+  register: __rar_sh_lockdown_check
   changed_when: false
   when: ansible_facts.distribution_major_version | int >= 9
 
@@ -88,22 +88,22 @@
     --update-kernel=ALL
     --remove-args=lockdown
     "{{ '--args=lockdown=' + kernel_lockdown if kernel_lockdown != 'disabled' else '' }}"
-  register: lockdown_config
+  register: __rar_sh_lockdown_config
   changed_when: true
   when:
     - "'grubby' in ansible_facts.packages"
     - ansible_facts.distribution_major_version | int >= 9
-    - (kernel_lockdown == 'disabled' and lockdown_check.found != 0) or
-      (kernel_lockdown != 'disabled' and lockdown_check.found == 0)
+    - (kernel_lockdown == 'disabled' and __rar_sh_lockdown_check.found != 0) or
+      (kernel_lockdown != 'disabled' and __rar_sh_lockdown_check.found == 0)
 
 - name: Configure SELinux state
   vars:
-    update_cmdline: "{{ true if 'selinux' in ansible_facts.cmdline or selinux == 'disabled' else false }}"
+    __rar_sh_update_cmdline: "{{ true if 'selinux' in ansible_facts.cmdline or selinux == 'disabled' else false }}"
   ansible.posix.selinux:
     policy: targeted
     state: "{{ selinux }}"
-    update_kernel_param: "{{ update_cmdline }}"
-  register: selinux_config
+    update_kernel_param: "{{ __rar_sh_update_cmdline }}"
+  register: __rar_sh_selinux_config
   when:
     - "'grubby' in ansible_facts.packages"
     - "'python3-libselinux' in ansible_facts.packages"
@@ -111,32 +111,32 @@
 - name: Check current crypto policy
   check_mode: false
   ansible.builtin.command: update-crypto-policies --show
-  register: current_crypto_policy
+  register: __rar_sh_current_crypto_policy
   changed_when: false
   when: "'crypto-policies-scripts' in ansible_facts.packages"
 
 - name: Configure crypto policy
   ansible.builtin.command: update-crypto-policies --no-reload --set {{ crypto_policy }}
-  register: crypto_policy_config
+  register: __rar_sh_crypto_policy_config
   changed_when: true
   when:
     - "'crypto-policies-scripts' in ansible_facts.packages"
-    - current_crypto_policy.stdout != crypto_policy
+    - __rar_sh_current_crypto_policy.stdout != crypto_policy
 
 - name: Check SCP protocol configuration
   ansible.builtin.stat:
     path: /etc/ssh/disable_scp
-  register: scp_state
+  register: __rar_sh_scp_state
 
 - name: Configure SCP protocol state
   ansible.builtin.file:
     state: "{{ 'absent' if scp_protocol_enable | bool else 'touch' }}"
     path: /etc/ssh/disable_scp
     mode: '0644'
-  when: scp_state.stat.exists == scp_protocol_enable | bool
+  when: __rar_sh_scp_state.stat.exists == scp_protocol_enable | bool
 
 - name: Reboot system
   ansible.builtin.reboot:
-  when: lockdown_config is changed or
-        (selinux_config.reboot_required is defined and selinux_config.reboot_required) or
-        crypto_policy_config is changed
+  when: __rar_sh_lockdown_config is changed or
+        (__rar_sh_selinux_config.reboot_required is defined and __rar_sh_selinux_config.reboot_required) or
+        __rar_sh_crypto_policy_config is changed

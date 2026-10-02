@@ -30,7 +30,7 @@
 - name: Read current tuned profile
   ansible.builtin.slurp:
     src: /etc/tuned/active_profile
-  register: active_profile
+  register: __rar_pt_active_profile
   when: "'tuned' in ansible_facts.packages"
 
 - name: Configure tuned profile
@@ -38,4 +38,4 @@
   changed_when: true
   when:
     - "'tuned' in ansible_facts.packages"
-    - active_profile.content | b64decode | trim != tuned_profile
+    - __rar_pt_active_profile.content | b64decode | trim != tuned_profile

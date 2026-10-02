@@ -29,28 +29,28 @@
     file_type: any
     hidden: true
     recurse: "{{ files_remove_recursive | bool }}"
-  register: remove_globs
+  register: __rar_fr_remove_globs
   loop: "{{ files_remove | select('search', '\\?|\\*|\\[') }}"
 
 # Remove set paths from possible previous role execution
 - name: Initialize list of globbed files and directories
   ansible.builtin.set_fact:
-    glob_paths: []
+    __rar_fr_glob_paths: []
 
 - name: Set globbed files and directories to remove
   ansible.builtin.set_fact:
-    glob_paths: "{{ glob_paths + item.files | map(attribute='path') }}"
-  loop: "{{ remove_globs.results }}"
+    __rar_fr_glob_paths: "{{ __rar_fr_glob_paths + item.files | map(attribute='path') }}"
+  loop: "{{ __rar_fr_remove_globs.results }}"
   loop_control:
     label: "{{ item.files | map(attribute='path') }}"
   when: item.files | length > 0
 
 - name: Remove files and directories
   vars:
-    plain_paths: "{{ files_remove | select | reject('search', '\\?|\\*|\\[') }}"
+    __rar_fr_plain_paths: "{{ files_remove | select | reject('search', '\\?|\\*|\\[') }}"
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   register: remove_files
-  loop: "{{ plain_paths + glob_paths }}"
+  loop: "{{ __rar_fr_plain_paths + __rar_fr_glob_paths }}"
   when: item not in files_remove_exclude | select

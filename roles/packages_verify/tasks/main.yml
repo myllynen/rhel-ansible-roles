@@ -8,14 +8,14 @@
 
 - name: Verify packages present
   vars:
-    packages_missing: "{{ packages_verify | select | difference(ansible_facts.packages.keys()) | sort | unique }}"
+    __rar_pv_packages_missing: "{{ packages_verify | select | difference(ansible_facts.packages.keys()) | sort | unique }}"
   ansible.builtin.assert:
     that:
-      - not packages_missing
+      - not __rar_pv_packages_missing
     quiet: true
     fail_msg: |
       The following packages are not installed:
-      {{ packages_missing | to_nice_yaml }}
+      {{ __rar_pv_packages_missing | to_nice_yaml }}
   register: missing_packages
   ignore_errors: "{{ not packages_verify_fail_missing | bool }}"
   when:
@@ -25,7 +25,7 @@
 
 - name: Verify packages content
   vars:
-    verify_packages: "{{ packages_verify | default(ansible_facts.packages.keys(), true) | sort | unique }}"
+    __rar_pv_verify_packages: "{{ packages_verify | default(ansible_facts.packages.keys(), true) | sort | unique }}"
   check_mode: false
   # noqa: command-instead-of-module
   ansible.builtin.command: rpm -V {{ item }}
@@ -33,7 +33,7 @@
   ignore_errors: "{{ not packages_verify_fail_content | bool }}"
   failed_when: verified_packages.rc != 0
   changed_when: false
-  loop: "{{ (verify_packages | select) if packages_verify_enable else [] }}"
+  loop: "{{ (__rar_pv_verify_packages | select) if packages_verify_enable else [] }}"
   when:
     - packages_verify_check_content | bool
     - item in ansible_facts.packages

@@ -1,34 +1,34 @@
 ---
 - name: Update coredump process size configuration
   ansible.builtin.lineinfile:
-    path: "{{ coredump_conf }}"
+    path: "{{ __rar_cd_coredump_conf }}"
     regexp: '^(#|)ProcessSizeMax=.*'
     line: 'ProcessSizeMax=0'
-  register: process_config
-  when: coredump_check.stat.exists
+  register: __rar_cd_process_config
+  when: __rar_cd_coredump_check.stat.exists
 
 - name: Update coredump storage configuration
   ansible.builtin.lineinfile:
-    path: "{{ coredump_conf }}"
+    path: "{{ __rar_cd_coredump_conf }}"
     regexp: '^(#|)Storage=.*'
     line: 'Storage=none'
-  register: storage_config
-  when: coredump_check.stat.exists
+  register: __rar_cd_storage_config
+  when: __rar_cd_coredump_check.stat.exists
 
 - name: Update default coredump limit configuration
   ansible.builtin.lineinfile:
-    path: "{{ system_conf }}"
+    path: "{{ __rar_cd_system_conf }}"
     regexp: '^(#|)DefaultLimitCORE=.*'
     line: 'DefaultLimitCORE=0:infinity'
-  register: core_config
-  when: system_check.stat.exists
+  register: __rar_cd_core_config
+  when: __rar_cd_system_check.stat.exists
 
 - name: Reload systemd to apply configuration changes
   ansible.builtin.systemd:
     daemon_reload: true
-  when: process_config is changed or
-        storage_config is changed or
-        core_config is changed
+  when: __rar_cd_process_config is changed or
+        __rar_cd_storage_config is changed or
+        __rar_cd_core_config is changed
 
 - name: Disallow suid binary coredumps
   ansible.posix.sysctl:
@@ -36,7 +36,7 @@
     value: '0'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
-  register: suid_config
+  register: __rar_cd_suid_config
 
 - name: Configure system coredump pattern
   ansible.posix.sysctl:
@@ -44,13 +44,13 @@
     value: '|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
-  register: pattern_config
+  register: __rar_cd_pattern_config
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: process_config is changed or
-        storage_config is changed or
-        core_config is changed or
-        suid_config is changed or
-        pattern_config is changed
+  when: __rar_cd_process_config is changed or
+        __rar_cd_storage_config is changed or
+        __rar_cd_core_config is changed or
+        __rar_cd_suid_config is changed or
+        __rar_cd_pattern_config is changed

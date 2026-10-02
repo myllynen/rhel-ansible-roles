@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: /etc/NetworkManager/conf.d/50-resolver.conf
     state: absent
-  register: nm_resolver_config
+  register: __rar_rc_nm_resolver_config
 
 - name: Update NetworkManager resolver management configuration
   ansible.builtin.copy:
@@ -12,18 +12,18 @@
       rc-manager=unmanaged
     dest: /etc/NetworkManager/conf.d/90-rc-manager.conf
     mode: '0644'
-  register: nm_rc_manager_config
+  register: __rar_rc_nm_rc_manager_config
 
 - name: Reload NetworkManager to apply configuration changes
   ansible.builtin.service:
     name: NetworkManager
     state: reloaded
-  when: nm_resolver_config is changed or
-        nm_rc_manager_config is changed
+  when: __rar_rc_nm_resolver_config is changed or
+        __rar_rc_nm_rc_manager_config is changed
 
 - name: Create /etc/resolv.conf file
   vars:
-    etc_resolv_conf_content: |
+    __rar_rc_etc_resolv_conf_content: |
       {% for server in resolver_nameservers %}
       nameserver {{ server }}
       {% endfor %}
@@ -34,6 +34,6 @@
       options {{ resolver_options | join(' ') }}
       {% endif %}
   ansible.builtin.copy:
-    content: "{{ etc_resolv_conf_content }}"
+    content: "{{ __rar_rc_etc_resolv_conf_content }}"
     dest: /etc/resolv.conf
     mode: '0644'

@@ -19,36 +19,36 @@
 - name: Read OS release info
   ansible.builtin.slurp:
     src: /etc/redhat-release
-  register: os_release
+  register: __rar_rp_os_release
 
 - name: Set timestamp and file names
   ansible.builtin.set_fact:
-    pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
-    server_pdf: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
-    server_ps: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.ps' }}"
-    server_txt: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.txt' }}"
+    __rar_rp_pdf_timestamp: "{{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}"
+    __rar_rp_server_pdf: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.pdf' }}"
+    __rar_rp_server_ps: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.ps' }}"
+    __rar_rp_server_txt: "{{ system_update_report_pre_pdf_dir + '/' + inventory_hostname | replace('.', '_') + '.txt' }}"
 
 - name: Write report to text file
   ansible.builtin.shell: |
     set -o pipefail
-    printf "{{ system_update_report_pre_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ server_txt }}
-    sed -i -e 's,<HOST>,{{ inventory_hostname }},g' {{ server_txt }}
-    sed -i -e 's,<OSREL>,{{ os_release.content | b64decode | trim }},g' {{ server_txt }}
-    printf "\n{{ package_updates | join('\n') }}" >> {{ server_txt }}
-    printf "\n\n\nThis report was automatically generated on {{ pdf_timestamp }}.\n" >> {{ server_txt }}
-  register: command_output
+    printf "{{ system_update_report_pre_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ __rar_rp_server_txt }}
+    sed -i -e 's,<HOST>,{{ inventory_hostname }},g' {{ __rar_rp_server_txt }}
+    sed -i -e 's,<OSREL>,{{ __rar_rp_os_release.content | b64decode | trim }},g' {{ __rar_rp_server_txt }}
+    printf "\n{{ __rar_rp_package_updates | join('\n') }}" >> {{ __rar_rp_server_txt }}
+    printf "\n\n\nThis report was automatically generated on {{ __rar_rp_pdf_timestamp }}.\n" >> {{ __rar_rp_server_txt }}
+  register: __rar_rp_command_output
   changed_when: true
   delegate_to: localhost
   become: false
 
 - name: Convert text file to PostScript file
-  ansible.builtin.command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ inventory_hostname }} -T 4 -o {{ server_ps }} {{ server_txt }}
+  ansible.builtin.command: enscript -BhR -f Times-Roman12 -i 4 -M A4 -N n -t {{ inventory_hostname }} -T 4 -o {{ __rar_rp_server_ps }} {{ __rar_rp_server_txt }}
   changed_when: true
   delegate_to: localhost
   become: false
 
 - name: Convert PostScript file to PDF file
-  ansible.builtin.command: ps2pdf {{ server_ps }} {{ server_pdf }}
+  ansible.builtin.command: ps2pdf {{ __rar_rp_server_ps }} {{ __rar_rp_server_pdf }}
   changed_when: true
   delegate_to: localhost
   become: false

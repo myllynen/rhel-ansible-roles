@@ -13,11 +13,11 @@
       - /boot
       - /boot/loader/entries
     patterns: '*rescue*'
-  register: rescue_images
+  register: __rar_ri_rescue_images
 
 - name: Remove rescue images
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  loop: "{{ rescue_images.files | map(attribute='path') }}"
-  register: remove_images
+  loop: "{{ __rar_ri_rescue_images.files | map(attribute='path') }}"
+  register: __rar_ri_remove_images

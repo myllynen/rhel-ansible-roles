@@ -12,7 +12,7 @@
     src: "{{ dns_cache_nscd_config_file | default('nscd.conf.j2', true) }}"
     dest: /etc/nscd.conf
     mode: '0644'
-  register: daemon_config
+  register: __rar_dc_daemon_config
 
 - name: Enable nscd service
   ansible.builtin.service:
@@ -24,7 +24,7 @@
   ansible.builtin.service:
     name: nscd
     state: started
-  register: service_start
+  register: __rar_dc_service_start
   when: "'nscd' in ansible_facts.packages"
 
 - name: Reload nscd to apply configuration changes
@@ -33,5 +33,5 @@
     state: reloaded
   when:
     - "'nscd' in ansible_facts.packages"
-    - service_start is not changed
-    - daemon_config is changed
+    - __rar_dc_service_start is not changed
+    - __rar_dc_daemon_config is changed

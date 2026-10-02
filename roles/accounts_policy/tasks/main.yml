@@ -71,11 +71,11 @@
 
 - name: Install required packages
   vars:
-    auth_packages:
+    __rar_ap_auth_packages:
       - authselect
       - "{{ 'oddjob-mkhomedir' if 'with-mkhomedir' in system_auth_profile_parameters | default('', true) else '' }}"
   ansible.builtin.dnf:
-    name: "{{ auth_packages | select }}"
+    name: "{{ __rar_ap_auth_packages | select }}"
     state: present
   when:
     - system_auth_profile is not none
@@ -105,7 +105,7 @@
     src: "{{ system_auth_profile }}"
     dest: /etc/authselect/custom
     mode: '0644'
-  register: custom_profile_copy
+  register: __rar_ap_custom_profile_copy
   when:
     - system_auth_profile is not none
     - system_auth_profile | length > 0
@@ -114,8 +114,8 @@
 - name: Check current system-local authentication profile in use
   check_mode: false
   ansible.builtin.command: authselect current -r
-  register: profile_current
-  failed_when: profile_current.rc != 0 and 'No existing configuration' not in profile_current.stdout
+  register: __rar_ap_profile_current
+  failed_when: __rar_ap_profile_current.rc != 0 and 'No existing configuration' not in __rar_ap_profile_current.stdout
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
@@ -125,14 +125,14 @@
 - name: Check current system-local authentication profile status
   check_mode: false
   ansible.builtin.command: authselect check
-  register: profile_valid
+  register: __rar_ap_profile_valid
   failed_when: false
   changed_when: false
   when:
     - "'authselect' in ansible_facts.packages"
     - system_auth_profile is not none
     - system_auth_profile | length > 0
-    - "'No existing configuration' not in profile_current.stdout"
+    - "'No existing configuration' not in __rar_ap_profile_current.stdout"
 
 - name: Prevent Centrify updating NSS configuration
   ansible.builtin.lineinfile:
@@ -150,21 +150,21 @@
 
 - name: Configure system-local authentication profile
   vars:
-    profile_name: "{{ system_auth_profile | regex_replace('.*custom/', 'custom/') }}"
-    current_config: "{{ profile_current.stdout }}"
-    wanted_config: "{{ profile_name }} {{ system_auth_profile_parameters }}"
-  ansible.builtin.command: authselect select -f {{ profile_name }} {{ system_auth_profile_parameters }}
+    __rar_ap_profile_name: "{{ system_auth_profile | regex_replace('.*custom/', 'custom/') }}"
+    __rar_ap_current_config: "{{ __rar_ap_profile_current.stdout }}"
+    __rar_ap_wanted_config: "{{ __rar_ap_profile_name }} {{ system_auth_profile_parameters }}"
+  ansible.builtin.command: authselect select -f {{ __rar_ap_profile_name }} {{ system_auth_profile_parameters }}
   changed_when: true
   when:
     - system_auth_profile is not none
     - system_auth_profile | length > 0
-    - current_config | trim != wanted_config | trim or
-      'not valid' in profile_valid.stdout or
-      custom_profile_copy is changed
+    - __rar_ap_current_config | trim != __rar_ap_wanted_config | trim or
+      'not valid' in __rar_ap_profile_valid.stdout or
+      __rar_ap_custom_profile_copy is changed
 
 - name: Create PAM su configuration file
   vars:
-    enable_centrify: "{{ true if 'with-centrify' in system_auth_profile_parameters | default('', true) else false }}"
+    __rar_ap_enable_centrify: "{{ true if 'with-centrify' in system_auth_profile_parameters | default('', true) else false }}"
   ansible.builtin.template:
     src: "{{ system_auth_pam_d_su_file }}"
     dest: /etc/pam.d/su

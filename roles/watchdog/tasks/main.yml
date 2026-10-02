@@ -9,13 +9,13 @@
 
 - name: Set watchdog configuration file
   ansible.builtin.set_fact:
-    watchdog_conf: "{{ '/etc/systemd/system.conf.d/95-ansible.conf'
-                       if ansible_facts.distribution_major_version | int >= 10 else '/etc/systemd/system.conf' }}"
+    __rar_wd_watchdog_conf: "{{ '/etc/systemd/system.conf.d/95-ansible.conf'
+                            if ansible_facts.distribution_major_version | int >= 10 else '/etc/systemd/system.conf' }}"
 
 - name: Check watchdog configuration file
   ansible.builtin.stat:
-    path: "{{ watchdog_conf }}"
-  register: watchdog_check
+    path: "{{ __rar_wd_watchdog_conf }}"
+  register: __rar_wd_watchdog_check
 
 - name: Enable system watchdog
   ansible.builtin.include_tasks: enable.yml

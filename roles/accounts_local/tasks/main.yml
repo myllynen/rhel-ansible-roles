@@ -52,15 +52,15 @@
   loop_control:
     label: "{{ item.name }}"
 
-# Reset create_users from possible previous role execution
+# Reset list from possible previous role execution
 - name: Initialize list of local users to create
   ansible.builtin.set_fact:
-    create_users: []
+    __rar_al_create_users: []
 
 - name: Create passwordless list of local users to create
   no_log: "{{ accounts_local_no_log }}"
   ansible.builtin.set_fact:
-    create_users: "{{ create_users
+    __rar_al_create_users: "{{ __rar_al_create_users
                       + [item | dict2items
                          | rejectattr('key', 'equalto', 'password')
                          | rejectattr('key', 'equalto', 'ssh_key_passphrase') | items2dict] }}"
@@ -80,7 +80,7 @@
       - item.name is regex('^[A-Za-z0-9_.]+(?:\$)?$')
     quiet: true
     fail_msg: "{{ item.name }} is not acceptable user name."
-  loop: "{{ create_users | default([]) | select }}"
+  loop: "{{ __rar_al_create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -109,7 +109,7 @@
     skeleton: "{{ item.skeleton | default(omit) }}"
     non_unique: "{{ item.non_unique | default(omit) }}"
     seuser: "{{ item.seuser | default(omit) }}"
-  loop: "{{ create_users | default([]) | select }}"
+  loop: "{{ __rar_al_create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -133,17 +133,17 @@
 
 - name: Update local user password
   vars:
-    salt_seed: "{{ accounts_local_password_salt_seed }}"
-    salt_rand: "{{ 1234567890 | random(start=1000000000, seed=salt_seed) | string }}"
-    rand_salt: "{{ ((salt_rand + inventory_hostname) | hash('sha512'))[:16] }}"
-    encrypted: "{{ accounts_local_password_encrypted }}"
-    pw_string: "{{ item.password | string if item.password is defined and item.password is not none else omit }}"
-    pw_omitted: "{{ pw_string.startswith('__omit') }}"
-    pw_encrypted: "{{ pw_string if encrypted or pw_omitted else pw_string | password_hash('sha512', rand_salt) }}"
+    __rar_al_salt_seed: "{{ accounts_local_password_salt_seed }}"
+    __rar_al_salt_rand: "{{ 1234567890 | random(start=1000000000, seed=__rar_al_salt_seed) | string }}"
+    __rar_al_rand_salt: "{{ ((__rar_al_salt_rand + inventory_hostname) | hash('sha512'))[:16] }}"
+    __rar_al_encrypted: "{{ accounts_local_password_encrypted }}"
+    __rar_al_pw_string: "{{ item.password | string if item.password is defined and item.password is not none else omit }}"
+    __rar_al_pw_omitted: "{{ __rar_al_pw_string.startswith('__omit') }}"
+    __rar_al_pw_encrypted: "{{ __rar_al_pw_string if __rar_al_encrypted or __rar_al_pw_omitted else __rar_al_pw_string | password_hash('sha512', __rar_al_rand_salt) }}"
   no_log: "{{ accounts_local_no_log }}"
   ansible.builtin.user:
     name: "{{ item.name }}"
-    password: "{{ pw_encrypted }}"
+    password: "{{ __rar_al_pw_encrypted }}"
   loop: "{{ accounts_local_users_create | selectattr('password', 'defined') }}"
   loop_control:
     label: "{{ item.name }}"
@@ -166,23 +166,23 @@
   ansible.builtin.file:
     path: /etc/sudoers.d/{{ item.name }}
     state: absent
-  loop: "{{ create_users | default([]) | select }}"
+  loop: "{{ __rar_al_create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
   when: not item.sudo_allow_all | default(false)
 
 - name: Create local user sudo configuration
   vars:
-    require_password: "{{ 'NOPASSWD' if item.sudo_passwordless | default(false) else 'PASSWD' }}"
+    __rar_al_require_password: "{{ 'NOPASSWD' if item.sudo_passwordless | default(false) else 'PASSWD' }}"
   ansible.builtin.copy:
     content: |
-      {{ item.name }} ALL=(ALL) {{ require_password }}: ALL
+      {{ item.name }} ALL=(ALL) {{ __rar_al_require_password }}: ALL
     dest: /etc/sudoers.d/{{ item.name }}
     owner: root
     group: root
     mode: '0440'
     validate: /usr/sbin/visudo -csf %s
-  loop: "{{ create_users | default([]) | select }}"
+  loop: "{{ __rar_al_create_users | default([]) | select }}"
   loop_control:
     label: "{{ item.name }}"
   when: item.sudo_allow_all | default(false)
@@ -192,7 +192,7 @@
     user: "{{ item.0.name }}"
     key: "{{ item.1 }}"
     exclusive: "{{ item.0.authorized_keys_exclusive | default(omit) }}"
-  loop: "{{ create_users | default([]) | subelements('authorized_keys', 'skip_missing=true') }}"
+  loop: "{{ __rar_al_create_users | default([]) | subelements('authorized_keys', 'skip_missing=true') }}"
   loop_control:
     label: "{{ item.0.name }}"
   when: item.0.name in ansible_facts.getent_passwd

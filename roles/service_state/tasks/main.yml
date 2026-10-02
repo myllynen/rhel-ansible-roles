@@ -5,7 +5,7 @@
   check_mode: false
   # noqa: command-instead-of-module
   ansible.builtin.command: systemctl list-unit-files
-  register: unit_files_known
+  register: __rar_sv_unit_files_known
   changed_when: false
   when: service_state_disable | select | length > 0 or
         service_state_enable | select | length > 0 or
@@ -35,7 +35,7 @@
   register: disable_services
   loop: "{{ service_state_disable | select }}"
   when:
-    - item in unit_files_known.stdout
+    - item in __rar_sv_unit_files_known.stdout
     - item not in service_state_enable | select
     - item not in ['sshd', 'sshd.service']
 
@@ -46,7 +46,7 @@
   register: stop_services
   loop: "{{ service_state_disable | select }}"
   when:
-    - item in unit_files_known.stdout
+    - item in __rar_sv_unit_files_known.stdout
     - item not in service_state_enable | select
     - item not in ['sshd', 'sshd.service']
 
@@ -56,7 +56,7 @@
     enabled: true
   register: enable_services
   loop: "{{ service_state_enable | select }}"
-  when: item in unit_files_known.stdout or
+  when: item in __rar_sv_unit_files_known.stdout or
         not service_state_skip_missing | bool
 
 - name: Start service
@@ -65,7 +65,7 @@
     state: started
   register: start_services
   loop: "{{ service_state_enable | select }}"
-  when: item in unit_files_known.stdout or
+  when: item in __rar_sv_unit_files_known.stdout or
         not service_state_skip_missing | bool
 
 - name: Gather service facts
@@ -74,14 +74,14 @@
 
 - name: Reload service
   vars:
-    item_full_name: "{{ item.name if '.' in item.name else item.name + '.service' }}"
-    changed_started: >
+    __rar_sv_item_full_name: "{{ item.name if '.' in item.name else item.name + '.service' }}"
+    __rar_sv_changed_started: >
       {{
         start_services.results
         | selectattr('changed', 'equalto', true)
         | map(attribute='name')
       }}
-    services_to_reload: >
+    __rar_sv_services_to_reload: >
       {{
         service_state_restart
         | selectattr('state', 'defined')
@@ -91,27 +91,27 @@
     name: "{{ item.name }}"
     state: reloaded
   register: reload_services
-  loop: "{{ services_to_reload }}"
+  loop: "{{ __rar_sv_services_to_reload }}"
   loop_control:
     label: "{{ item.name }}"
   when:
-    - item.name not in changed_started
-    - item.name in unit_files_known.stdout or
+    - item.name not in __rar_sv_changed_started
+    - item.name in __rar_sv_unit_files_known.stdout or
       not service_state_skip_missing | bool
     - item.require is not defined or
-      item.require == ansible_facts['services'][item_full_name]['state'] or
-      item.require == ansible_facts['services'][item_full_name]['status']
+      item.require == ansible_facts['services'][__rar_sv_item_full_name]['state'] or
+      item.require == ansible_facts['services'][__rar_sv_item_full_name]['status']
 
 - name: Restart service
   vars:
-    item_full_name: "{{ item.name if '.' in item.name else item.name + '.service' }}"
-    changed_started: >
+    __rar_sv_item_full_name: "{{ item.name if '.' in item.name else item.name + '.service' }}"
+    __rar_sv_changed_started: >
       {{
         start_services.results
         | selectattr('changed', 'equalto', true)
         | map(attribute='name')
       }}
-    services_to_restart: >
+    __rar_sv_services_to_restart: >
       {{
         (service_state_restart
          | selectattr('state', 'defined')
@@ -123,13 +123,13 @@
     name: "{{ item.name | default(item) }}"
     state: restarted
   register: restarted_services
-  loop: "{{ services_to_restart }}"
+  loop: "{{ __rar_sv_services_to_restart }}"
   loop_control:
     label: "{{ item.name | default(item) }}"
   when:
-    - item.name | default(item) not in changed_started
-    - item.name | default(item) in unit_files_known.stdout or
+    - item.name | default(item) not in __rar_sv_changed_started
+    - item.name | default(item) in __rar_sv_unit_files_known.stdout or
       not service_state_skip_missing | bool
     - item.require is not defined or
-      item.require == ansible_facts['services'][item_full_name]['state'] or
-      item.require == ansible_facts['services'][item_full_name]['status']
+      item.require == ansible_facts['services'][__rar_sv_item_full_name]['state'] or
+      item.require == ansible_facts['services'][__rar_sv_item_full_name]['status']

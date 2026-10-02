@@ -28,13 +28,13 @@
 
 - name: Run Satellite SCAP compliance scan
   vars:
-    tailoring: "{{ ' with Tailoring ' + item.tailoring_id | string + ' - ' + item.tailoring_profile
-                   if item.tailoring_id is defined else '' }}"
+    __rar_ss_tailoring: "{{ ' with Tailoring ' + item.tailoring_id | string + ' - ' + item.tailoring_profile
+                         if item.tailoring_id is defined else '' }}"
   ansible.builtin.command:
     cmd: foreman_scap_client {{ item.id }}
-  register: scan_command
-  failed_when: scan_command.rc not in [0, 2]
-  changed_when: "'Download' in scan_command.stdout"
+  register: __rar_ss_scan_command
+  failed_when: __rar_ss_scan_command.rc not in [0, 2]
+  changed_when: "'Download' in __rar_ss_scan_command.stdout"
   loop: "{{ scap_satellite_policies }}"
   loop_control:
-    label: "{{ 'Profile ' + item.id | string + ' - ' + item.profile + tailoring }}"
+    label: "{{ 'Profile ' + item.id | string + ' - ' + item.profile + __rar_ss_tailoring }}"

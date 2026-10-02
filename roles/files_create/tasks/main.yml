@@ -41,11 +41,11 @@
 - name: Create symlinks
   vars:
     # For role backwards compatibility
-    link: "{{ item.path | default(item.dest) }}"
+    __rar_fc_link: "{{ item.path | default(item.dest) }}"
   ansible.builtin.file:
     state: link
     src: "{{ item.src }}"
-    path: "{{ link }}"
+    path: "{{ __rar_fc_link }}"
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
@@ -60,4 +60,4 @@
   register: create_links
   loop: "{{ files_create | selectattr('state', 'equalto', 'link') }}"
   loop_control:
-    label: "{{ link + ' -> ' + item.src }}"
+    label: "{{ __rar_fc_link + ' -> ' + item.src }}"

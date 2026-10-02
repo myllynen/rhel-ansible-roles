@@ -13,7 +13,7 @@
     patterns:
       - 'ifcfg-e*'
       - 'ifcfg-net*'
-  register: ifcfg_files
+  register: __rar_si_ifcfg_files
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=2050704
 - name: Fix VMware NIC configuration
@@ -21,18 +21,18 @@
     path: "{{ item }}"
     regexp: '^\ncheck_link_down\(\) {\n return 1; \n}\n$'
     replace: ''
-  register: nic_config
-  loop: "{{ ifcfg_files.files | map(attribute='path') }}"
+  register: __rar_si_nic_config
+  loop: "{{ __rar_si_ifcfg_files.files | map(attribute='path') }}"
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: nic_config is changed
+  when: __rar_si_nic_config is changed
 
 - name: Check installer log directory
   ansible.builtin.stat:
     path: /var/log/anaconda
-  register: installer_logdir
+  register: __rar_si_installer_logdir
 
 - name: Locate installer leftover root files
   ansible.builtin.find:
@@ -40,20 +40,20 @@
     patterns:
       - '*-ks.cfg'
       - 'install.post*.log'
-  register: root_files
+  register: __rar_si_root_files
 
 - name: Locate installer leftover kickstart files
   ansible.builtin.find:
     paths: /tmp
     patterns:
       - 'ks-script-*'
-  register: kickstart_files
-  when: installer_logdir.stat.exists
+  register: __rar_si_kickstart_files
+  when: __rar_si_installer_logdir.stat.exists
 
 - name: Set list of installer leftover files
   ansible.builtin.set_fact:
-    installer_files: "{{ (root_files.files + kickstart_files.files) | map(attribute='path') }}"
-  when: installer_logdir.stat.exists
+    __rar_si_installer_files: "{{ (__rar_si_root_files.files + __rar_si_kickstart_files.files) | map(attribute='path') }}"
+  when: __rar_si_installer_logdir.stat.exists
 
 - name: Store installer leftover files
   ansible.builtin.copy:
@@ -61,22 +61,22 @@
     dest: /var/log/anaconda
     mode: '0700'
     remote_src: true
-  loop: "{{ installer_files }}"
+  loop: "{{ __rar_si_installer_files }}"
   loop_control:
     label: "{{ item }} -> /var/log/anaconda/{{ item | basename }}"
-  when: installer_logdir.stat.exists
+  when: __rar_si_installer_logdir.stat.exists
 
 - name: Relabel stored installer files
   community.general.sefcontext:
     target: /var/log/anaconda/{{ item | basename }}
     setype: var_log_t
     state: present
-  loop: "{{ installer_files }}"
+  loop: "{{ __rar_si_installer_files }}"
   loop_control:
     label: /var/log/anaconda/{{ item | basename }}
   when:
     - "'python3-libselinux' in ansible_facts.packages"
-    - installer_logdir.stat.exists
+    - __rar_si_installer_logdir.stat.exists
 
 - name: Locate leftover temp files
   ansible.builtin.find:
@@ -90,13 +90,13 @@
       - 'vmware-root_*'
     file_type: any
     hidden: true
-  register: leftover_files
+  register: __rar_si_leftover_files
 
 - name: Remove all leftover files
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  loop: "{{ (leftover_files.files + root_files.files) | map(attribute='path') }}"
+  loop: "{{ (__rar_si_leftover_files.files + __rar_si_root_files.files) | map(attribute='path') }}"
 
 - name: Reboot system
   ansible.builtin.reboot:
@@ -115,7 +115,7 @@
 - name: Mark system initialized
   ansible.builtin.copy:
     content: "This system was initialized by system_init on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\n"
-    dest: "{{ __system_init_file }}"
+    dest: "{{ __rar_si_system_init_file }}"
     mode: '0644'
 
 - name: Log initialization message

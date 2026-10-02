@@ -17,7 +17,7 @@
   ansible.builtin.service:
     name: crond
     state: started
-  register: service_start
+  register: __rar_cr_service_start
   when: "'cronie' in ansible_facts.packages"
 
 - name: Remove cron.allow file
@@ -48,13 +48,13 @@
 
 - name: Configure crontab entries - disabled
   vars:
-    enabled_names: "{{ (cron_setup_entries
-                        | selectattr('state', 'undefined')
-                        + (cron_setup_entries
-                           | selectattr('state', 'defined')
-                           | selectattr('state', 'equalto', 'present')))
-                       | map(attribute='name') }}"
-    label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
+    __rar_cr_enabled_names: "{{ (cron_setup_entries
+                              | selectattr('state', 'undefined')
+                              + (cron_setup_entries
+                                 | selectattr('state', 'defined')
+                                 | selectattr('state', 'equalto', 'present')))
+                             | map(attribute='name') }}"
+    __rar_cr_label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
   ansible.builtin.cron:
     cron_file: "{{ item.cron_file | default(omit) }}"
     state: absent
@@ -67,14 +67,14 @@
             | selectattr('state', 'defined')
             | selectattr('state', 'equalto', 'absent') }}"
   loop_control:
-    label: "{{ label_user + item.name }}"
+    label: "{{ __rar_cr_label_user + item.name }}"
   when:
     - "'cronie' in ansible_facts.packages"
-    - item.name not in enabled_names
+    - item.name not in __rar_cr_enabled_names
 
 - name: Configure crontab entries - enabled
   vars:
-    label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
+    __rar_cr_label_user: "{{ item.user + ': ' if item.user is defined else 'root: ' }}"
   ansible.builtin.cron:
     cron_file: "{{ item.cron_file | default(omit) }}"
     state: present
@@ -98,5 +98,5 @@
                | selectattr('state', 'defined')
                | selectattr('state', 'equalto', 'present')) }}"
   loop_control:
-    label: "{{ label_user + item.name }}"
+    label: "{{ __rar_cr_label_user + item.name }}"
   when: "'cronie' in ansible_facts.packages"

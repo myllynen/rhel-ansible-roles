@@ -29,13 +29,13 @@
 - name: Check Kerberos keytab file
   ansible.builtin.stat:
     path: /etc/krb5.keytab
-  register: krb5_keytab
+  register: __rar_da_krb5_keytab
 
 - name: Discover AD domain information
   check_mode: false
   ansible.builtin.shell: >
     adcli info -v {{ domain_ad_domain }}
-  register: domain_info
+  register: __rar_da_domain_info
   changed_when: false
   when: "'adcli' in ansible_facts.packages"
 
@@ -44,7 +44,7 @@
     msg: "AD domain reports domain controller not usable."
   when:
     - "'adcli' in ansible_facts.packages"
-    - "'domain-controller-usable = yes' not in domain_info.stdout"
+    - "'domain-controller-usable = yes' not in __rar_da_domain_info.stdout"
 
 - name: Check computer status in AD domain
   check_mode: false
@@ -56,8 +56,8 @@
     --stdin-password
     {{ ansible_facts.fqdn }}
     <<< '{{ domain_ad_admin_password }}'
-  register: computer_info
-  failed_when: computer_info.rc != 0 and computer_info.rc != 5
+  register: __rar_da_computer_info
+  failed_when: __rar_da_computer_info.rc != 0 and __rar_da_computer_info.rc != 5
   changed_when: false
   when: "'adcli' in ansible_facts.packages"
 
@@ -67,4 +67,4 @@
   when:
     - "'adcli' in ansible_facts.packages"
     - not domain_ad_join_computer_create | bool
-    - computer_info.rc != 0
+    - __rar_da_computer_info.rc != 0

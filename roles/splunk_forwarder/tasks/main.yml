@@ -20,15 +20,15 @@
     validate_certs: false
     timeout: 5
     return_content: true
-  register: server_response
-  failed_when: "'splunkd' not in server_response.content"
+  register: __rar_sf_server_response
+  failed_when: "'splunkd' not in __rar_sf_server_response.content"
   when: splunk_deployment_server_check | bool
 
 - name: Check Splunk user
   ansible.builtin.getent:
     database: passwd
     key: splunk
-  register: user_status
+  register: __rar_sf_user_status
   failed_when: false
   changed_when: false
 
@@ -38,13 +38,13 @@
     system: "{{ splunk_user_uid in [none, ''] }}"
     uid: "{{ splunk_user_uid | default(omit, true) }}"
     comment: splunk user
-  when: user_status.msg is defined
+  when: __rar_sf_user_status.msg is defined
 
 - name: Install Splunk Forwarder package
   ansible.builtin.dnf:
     name: splunkforwarder
     state: "{{ splunk_forwarder_package_state }}"
-  register: package_install
+  register: __rar_sf_package_install
 
 - name: Gather package facts
   ansible.builtin.package_facts:
@@ -56,7 +56,7 @@
     owner: splunk
     group: splunk
     mode: '0644'
-  register: client_config
+  register: __rar_sf_client_config
 
 - name: Create Splunk user configuration file
   ansible.builtin.template:
@@ -65,27 +65,27 @@
     owner: splunk
     group: splunk
     mode: '0600'
-  register: user_config
+  register: __rar_sf_user_config
 
 - name: Check Splunk legacy init script
   ansible.builtin.stat:
     path: /etc/init.d/splunk
-  register: legacy_init
+  register: __rar_sf_legacy_init
 
 - name: Stop Splunk legacy service
   ansible.builtin.command: /opt/splunkforwarder/bin/splunk stop
   changed_when: true
-  when: legacy_init.stat.exists
+  when: __rar_sf_legacy_init.stat.exists
 
 - name: Disable Splunk legacy service
   ansible.builtin.command: /opt/splunkforwarder/bin/splunk disable boot-start
   changed_when: true
-  when: legacy_init.stat.exists
+  when: __rar_sf_legacy_init.stat.exists
 
 - name: Check Splunk Forwarder systemd service file
   ansible.builtin.stat:
     path: /etc/systemd/system/SplunkForwarder.service
-  register: systemd_service
+  register: __rar_sf_systemd_service
 
 - name: Create Splunk Forwarder systemd service file
   ansible.builtin.command: >
@@ -93,7 +93,7 @@
     -systemd-managed 1 -user splunk -group splunk
     --accept-license --no-prompt --answer-yes
   changed_when: true
-  when: not systemd_service.stat.exists
+  when: not __rar_sf_systemd_service.stat.exists
 
 - name: Enable Splunk Forwarder service
   ansible.builtin.service:
@@ -105,7 +105,7 @@
   ansible.builtin.service:
     name: SplunkForwarder
     state: started
-  register: service_start
+  register: __rar_sf_service_start
   when: "'splunkforwarder' in ansible_facts.packages"
 
 - name: Restart Splunk Forwarder to apply configuration changes
@@ -114,17 +114,17 @@
     state: restarted
   when:
     - "'splunkforwarder' in ansible_facts.packages"
-    - service_start is not changed
-    - client_config is changed or
-      user_config is changed
+    - __rar_sf_service_start is not changed
+    - __rar_sf_client_config is changed or
+      __rar_sf_user_config is changed
 
 - name: Read Splunk Forwarder version
   ansible.builtin.command: /opt/splunkforwarder/bin/splunk version
-  register: splunk_version
+  register: __rar_sf_splunk_version
   changed_when: false
-  when: package_install is changed
+  when: __rar_sf_package_install is changed
 
 - name: Log message on package install
   community.general.syslogger:
-    msg: "{{ splunk_version.stdout }} installed on {{ ansible_facts.fqdn }}."
-  when: package_install is changed
+    msg: "{{ __rar_sf_splunk_version.stdout }} installed on {{ ansible_facts.fqdn }}."
+  when: __rar_sf_package_install is changed

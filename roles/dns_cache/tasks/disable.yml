@@ -23,7 +23,7 @@
 - name: Read NetworkManager DNS cache configuration
   ansible.builtin.slurp:
     src: /etc/NetworkManager/conf.d/95-dns-cache.conf
-  register: current_config
+  register: __rar_dc_current_config
   failed_when: false
 
 - name: Update NetworkManager DNS cache configuration
@@ -33,11 +33,11 @@
       #dns=
     dest: /etc/NetworkManager/conf.d/95-dns-cache.conf
     mode: '0644'
-  register: nm_config
+  register: __rar_dc_nm_config
   when:
     - not dns_cache_enable | bool or
-      (current_config.content is defined and
-       dns_cache_component not in current_config.content | b64decode)
+      (__rar_dc_current_config.content is defined and
+       dns_cache_component not in __rar_dc_current_config.content | b64decode)
 
 - name: Disable systemd-resolved service
   ansible.builtin.service:
@@ -61,4 +61,4 @@
   ansible.builtin.service:
     name: NetworkManager
     state: reloaded
-  when: nm_config is changed
+  when: __rar_dc_nm_config is changed

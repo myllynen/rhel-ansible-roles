@@ -1,13 +1,13 @@
 ---
 - name: Check timesync configuration
   ansible.builtin.set_fact:
-    timesync_old_var: "{{ true if timesync_ntp_servers is not defined and ntp_servers is defined else false }}"
+    __rar_ts_timesync_old_var: "{{ true if timesync_ntp_servers is not defined and ntp_servers is defined else false }}"
 
 - name: Migrate legacy timesync configuration
   ansible.builtin.set_fact:
     timesync_ntp_servers: "{{ timesync_ntp_servers | default([]) + [{'hostname': item, 'iburst': true}] }}"
   loop: "{{ ntp_servers }}"
-  when: timesync_old_var
+  when: __rar_ts_timesync_old_var
 
 - name: Configure timesync
   ansible.builtin.include_role:

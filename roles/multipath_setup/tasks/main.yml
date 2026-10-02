@@ -9,7 +9,7 @@
     src: "{{ multipath_setup_config_file }}"
     dest: /etc/multipath.conf
     mode: '0600'
-  register: multipath_config
+  register: __rar_mp_multipath_config
   when:
     - multipath_setup_config_file is not none
     - multipath_setup_config_file | length > 0
@@ -19,7 +19,7 @@
     src: "{{ multipath_setup_bindings_file }}"
     dest: /etc/multipath/bindings
     mode: '0600'
-  register: multipath_bindings
+  register: __rar_mp_multipath_bindings
   when:
     - multipath_setup_bindings_file is not none
     - multipath_setup_bindings_file | length > 0
@@ -36,7 +36,7 @@
   ansible.builtin.service:
     name: multipathd
     state: started
-  register: service_start
+  register: __rar_mp_service_start
   when:
     - not multipath_setup_reboot | bool
     - multipath_setup_config_file is not none
@@ -48,19 +48,19 @@
     state: reloaded
   when:
     - not multipath_setup_reboot | bool
-    - service_start is not changed
-    - multipath_config is changed or
-      multipath_bindings is changed
+    - __rar_mp_service_start is not changed
+    - __rar_mp_multipath_config is changed or
+      __rar_mp_multipath_bindings is changed
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: multipath_config is changed or
-        multipath_bindings is changed
+  when: __rar_mp_multipath_config is changed or
+        __rar_mp_multipath_bindings is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
   when:
     - multipath_setup_reboot | bool
-    - multipath_config is changed or
-      multipath_bindings is changed
+    - __rar_mp_multipath_config is changed or
+      __rar_mp_multipath_bindings is changed

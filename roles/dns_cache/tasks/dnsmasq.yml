@@ -17,7 +17,7 @@
     src: "{{ dns_cache_nm_dnsmasq_config_file | default('dnsmasq.conf.j2', true) }}"
     dest: /etc/NetworkManager/dnsmasq.d/95-ansible.conf
     mode: '0644'
-  register: dnsmasq_config
+  register: __rar_dc_dnsmasq_config
 
 - name: Update NetworkManager DNS cache configuration
   ansible.builtin.copy:
@@ -26,11 +26,11 @@
       dns=dnsmasq
     dest: /etc/NetworkManager/conf.d/95-dns-cache.conf
     mode: '0644'
-  register: nm_config
+  register: __rar_dc_nm_config
 
 - name: Reload NetworkManager to apply configuration changes
   ansible.builtin.service:
     name: NetworkManager
     state: reloaded
-  when: dnsmasq_config is changed or
-        nm_config is changed
+  when: __rar_dc_dnsmasq_config is changed or
+        __rar_dc_nm_config is changed

@@ -1,20 +1,20 @@
 ---
 - name: Leave AD domain
   vars:
-    leave_action: "{{ 'delete-computer' if domain_ad_leave_computer_delete | bool else 'reset-computer' }}"
-    recursive_option: "{{ '--recursive' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
+    __rar_da_leave_action: "{{ 'delete-computer' if domain_ad_leave_computer_delete | bool else 'reset-computer' }}"
+    __rar_da_recursive_option: "{{ '--recursive' if ansible_facts.distribution_major_version | int >= 9 else '' }}"
   no_log: true
   ansible.builtin.shell: >
     set -o pipefail &&
     echo '{{ domain_ad_admin_password }}' |
-    adcli -v {{ leave_action }}
+    adcli -v {{ __rar_da_leave_action }}
     --domain={{ domain_ad_domain }}
     --login-user={{ domain_ad_admin_username }}
-    {{ recursive_option }}
+    {{ __rar_da_recursive_option }}
     --stdin-password
     {{ ansible_facts.fqdn }}
   changed_when: true
-  when: krb5_keytab.stat.exists
+  when: __rar_da_krb5_keytab.stat.exists
 
 - name: Disable sssd-kcm socket
   ansible.builtin.service:

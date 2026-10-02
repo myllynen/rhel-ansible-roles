@@ -28,7 +28,7 @@
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
     state: absent
-  register: enable_check
+  register: __rar_bp_enable_check
   changed_when: false
   loop: "{{ boot_parameters_enable | select }}"
 
@@ -38,7 +38,7 @@
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| ){{ item }}(=| |")'
     state: absent
-  register: disable_check
+  register: __rar_bp_disable_check
   changed_when: false
   loop: "{{ boot_parameters_disable | select }}"
 
@@ -48,17 +48,17 @@
     --update-kernel=ALL
     --args="{{ boot_parameters_enable | select | join(' ') }}"
     --remove-args="{{ boot_parameters_disable | select | join(' ') }}"
-  register: boot_config
+  register: __rar_bp_boot_config
   changed_when: true
-  when: 0 in enable_check.results | map(attribute='found') or
-        1 in disable_check.results | map(attribute='found')
+  when: 0 in __rar_bp_enable_check.results | map(attribute='found') or
+        1 in __rar_bp_disable_check.results | map(attribute='found')
 
 - name: Update boot loader timeout configuration
   ansible.builtin.replace:
     path: /etc/default/grub
     regexp: '^GRUB_TIMEOUT=.*'
     replace: 'GRUB_TIMEOUT={{ boot_parameters_timeout }}'
-  register: boot_timeout
+  register: __rar_bp_boot_timeout
   when:
     - boot_parameters_timeout is integer
     - boot_parameters_timeout | int >= 1
@@ -66,47 +66,47 @@
 - name: Determine platform type
   ansible.builtin.stat:
     path: /sys/firmware/efi
-  register: efi_dir
+  register: __rar_bp_efi_dir
 
 - name: Set boot loader configuration files
   vars:
-    old_rhel: "{{ true if ansible_facts.distribution_major_version | int < 9 else false }}"
-    efi_path: "{{ true if old_rhel and efi_dir.stat.exists else false }}"
+    __rar_bp_old_rhel: "{{ true if ansible_facts.distribution_major_version | int < 9 else false }}"
+    __rar_bp_efi_path: "{{ true if __rar_bp_old_rhel and __rar_bp_efi_dir.stat.exists else false }}"
   ansible.builtin.set_fact:
-    grub_config: "{{ '/boot/grub2/grub.cfg' if not efi_path else '/boot/efi/EFI/redhat/grub.cfg' }}"
-    user_config: "{{ '/boot/grub2/user.cfg' if not efi_path else '/boot/efi/EFI/redhat/user.cfg' }}"
+    __rar_bp_grub_config: "{{ '/boot/grub2/grub.cfg' if not __rar_bp_efi_path else '/boot/efi/EFI/redhat/grub.cfg' }}"
+    __rar_bp_user_config: "{{ '/boot/grub2/user.cfg' if not __rar_bp_efi_path else '/boot/efi/EFI/redhat/user.cfg' }}"
 
 - name: Update boot loader password configuration
   ansible.builtin.copy:
     content: |
       GRUB2_PASSWORD={{ boot_parameters_password }}
-    dest: "{{ user_config }}"
+    dest: "{{ __rar_bp_user_config }}"
     mode: '0600'
-  register: password_update
+  register: __rar_bp_password_update
   when: boot_parameters_password | default(false)
 
 - name: Remove boot loader password configuration
   ansible.builtin.file:
     state: absent
-    path: "{{ user_config }}"
-  register: password_remove
+    path: "{{ __rar_bp_user_config }}"
+  register: __rar_bp_password_remove
   when: not boot_parameters_password | default(true)
 
 - name: Write boot loader configuration
-  ansible.builtin.command: grub2-mkconfig -o {{ grub_config }}
+  ansible.builtin.command: grub2-mkconfig -o {{ __rar_bp_grub_config }}
   changed_when: true
-  when: boot_timeout is changed or
-        password_remove is changed or
-        password_update is changed
+  when: __rar_bp_boot_timeout is changed or
+        __rar_bp_password_remove is changed or
+        __rar_bp_password_update is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
   when:
     - boot_parameters_reboot | bool
-    - boot_config is changed
+    - __rar_bp_boot_config is changed
 
 - name: Clear gathered facts
   ansible.builtin.meta: clear_facts
   when:
     - boot_parameters_reboot | bool
-    - boot_config is changed
+    - __rar_bp_boot_config is changed

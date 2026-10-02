@@ -1,7 +1,7 @@
 #%PAM-1.0
 auth        required      pam_env.so
 auth        sufficient    pam_rootok.so
-{% if enable_centrify | bool %}
+{% if __rar_ap_enable_centrify | bool %}
 auth        sufficient    pam_centrifydc.so enable_dzpamgate
 {% endif %}
 # Uncomment the following line to implicitly trust users in the "wheel" group.

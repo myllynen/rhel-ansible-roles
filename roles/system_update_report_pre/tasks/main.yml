@@ -6,24 +6,24 @@
     name: '*'
     state: latest
     update_cache: true
-  register: package_install
+  register: __rar_rp_package_install
 
 - name: Set available package updates
   ansible.builtin.set_fact:
-    package_updates: "{{ package_install.results | default([]) | sort }}"
+    __rar_rp_package_updates: "{{ __rar_rp_package_install.results | default([]) | sort }}"
   when:
     - system_update_report_pre_display_updates | bool or
       system_update_report_pre_email_report | bool
 
 - name: Display list of available package updates
   ansible.builtin.debug:
-    msg: "{{ package_updates | join('\n') }}"
+    msg: "{{ __rar_rp_package_updates | join('\n') }}"
   when:
     - system_update_report_pre_display_updates | bool
-    - package_updates | length > 0
+    - __rar_rp_package_updates | length > 0
 
 - name: Send email report
   ansible.builtin.include_tasks: report.yml
   when:
     - system_update_report_pre_email_report | bool
-    - package_updates | length > 0
+    - __rar_rp_package_updates | length > 0

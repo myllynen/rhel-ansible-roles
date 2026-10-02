@@ -15,7 +15,7 @@
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*("| )ipv6.disable(=| |")'
     state: absent
-  register: boot_param_check
+  register: __rar_ip_boot_param_check
   changed_when: false
 
 - name: Remove IPv6 boot parameter
@@ -23,23 +23,23 @@
     grubby
     --update-kernel=ALL
     --remove-args="ipv6.disable"
-  register: boot_config
+  register: __rar_ip_boot_config
   changed_when: true
-  when: boot_param_check.found == 1
+  when: __rar_ip_boot_param_check.found == 1
 
 - name: Update IPv6 sysctl parameters configuration
   vars:
-    disable_ipv6: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
-    loopback_disable_ipv6: >
+    __rar_ip_disable_ipv6: "{{ '0' if ipv6_setup_enable | bool else '1' }}"
+    __rar_ip_loopback_disable_ipv6: >
       {{ '1' if not ipv6_setup_enable | bool and not ipv6_setup_loopback_persist | bool else '0' }}
   ansible.builtin.copy:
     content: |
-      net.ipv6.conf.all.disable_ipv6 = {{ disable_ipv6 }}
-      net.ipv6.conf.default.disable_ipv6 = {{ disable_ipv6 }}
-      net.ipv6.conf.lo.disable_ipv6 = {{ loopback_disable_ipv6 }}
+      net.ipv6.conf.all.disable_ipv6 = {{ __rar_ip_disable_ipv6 }}
+      net.ipv6.conf.default.disable_ipv6 = {{ __rar_ip_disable_ipv6 }}
+      net.ipv6.conf.lo.disable_ipv6 = {{ __rar_ip_loopback_disable_ipv6 }}
     dest: /etc/sysctl.d/50-ipv6.conf
     mode: '0644'
-  register: sysctl_config
+  register: __rar_ip_sysctl_config
 
 - name: Locate NIC ifcfg configuration files
   ansible.builtin.find:
@@ -47,7 +47,7 @@
     patterns:
       - 'ifcfg-e*'
       - 'ifcfg-net*'
-  register: ifcfg_files
+  register: __rar_ip_ifcfg_files
   when: ipv6_setup_configure_nm | bool
 
 - name: Locate NM connection configuration files
@@ -55,41 +55,41 @@
     paths: /etc/NetworkManager/system-connections
     patterns:
       - '*.nmconnection'
-  register: nmconnection_files
+  register: __rar_ip_nmconnection_files
   when: ipv6_setup_configure_nm | bool
 
 - name: Update IPv6 configuration in NIC ifcfg files
   vars:
-    disable_ipv6: "{{ 'yes' if ipv6_setup_enable | bool else 'no' }}"
+    __rar_ip_disable_ipv6: "{{ 'yes' if ipv6_setup_enable | bool else 'no' }}"
   ansible.builtin.replace:
     path: "{{ item }}"
     regexp: '^IPV6INIT=.*'
-    replace: 'IPV6INIT={{ disable_ipv6 }}'
-  register: ifcfg_config
-  loop: "{{ ifcfg_files.files | map(attribute='path') }}"
+    replace: 'IPV6INIT={{ __rar_ip_disable_ipv6 }}'
+  register: __rar_ip_ifcfg_config
+  loop: "{{ __rar_ip_ifcfg_files.files | map(attribute='path') }}"
   when: ipv6_setup_configure_nm | bool
 
 - name: Update IPv6 configuration in NM connection files
   vars:
-    disable_ipv6: "{{ 'auto' if ipv6_setup_enable | bool else 'disabled' }}"
+    __rar_ip_disable_ipv6: "{{ 'auto' if ipv6_setup_enable | bool else 'disabled' }}"
   ansible.builtin.replace:
     path: "{{ item }}"
     after: '\[ipv6\]'
     before: '\[proxy\]'
     regexp: '^method=.*'
-    replace: 'method={{ disable_ipv6 }}'
-  register: nmconnection_config
-  loop: "{{ nmconnection_files.files | map(attribute='path') }}"
+    replace: 'method={{ __rar_ip_disable_ipv6 }}'
+  register: __rar_ip_nmconnection_config
+  loop: "{{ __rar_ip_nmconnection_files.files | map(attribute='path') }}"
   when: ipv6_setup_configure_nm | bool
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: sysctl_config is changed
+  when: __rar_ip_sysctl_config is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
-  when: boot_config is changed or
-        sysctl_config is changed or
-        ifcfg_config is changed or
-        nmconnection_config is changed
+  when: __rar_ip_boot_config is changed or
+        __rar_ip_sysctl_config is changed or
+        __rar_ip_ifcfg_config is changed or
+        __rar_ip_nmconnection_config is changed

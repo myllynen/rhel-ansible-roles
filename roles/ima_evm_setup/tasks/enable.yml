@@ -5,13 +5,13 @@
 - name: Check IMA status
   ansible.builtin.stat:
     path: /etc/ima/ima-policy
-  register: ima_status
+  register: __rar_ie_ima_status
 
 - name: Fail if fapolicyd enabled
   ansible.builtin.fail:
     msg: "IMA/EVM should be setup before fapolicyd."
   when:
-    - not ima_status.stat.exists
+    - not __rar_ie_ima_status.stat.exists
     - "'fapolicyd.service' in ansible_facts.services"
     - ansible_facts.services['fapolicyd.service'].state == 'running' or
       ansible_facts.services['fapolicyd.service'].status == 'enabled'
@@ -40,7 +40,7 @@
 - name: Check IMA security attributes on files
   check_mode: false
   ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
-  register: fattr_info
+  register: __rar_ie_fattr_info
   changed_when: false
   when: "'attr' in ansible_facts.packages"
 
@@ -49,11 +49,11 @@
     ima-setup --policy={{ ima_evm_setup_policy_config_file }} --reinstall_threshold=100000
     # https://redhat.atlassian.net/browse/RHEL-173581
     restorecon -v /etc/ima/ima-policy /etc/dracut.conf.d/98-integrity.conf
-  register: ima_setup
+  register: __rar_ie_ima_setup
   changed_when: true
   when:
-    - fattr_info.stdout is defined
-    - "'security.ima' not in fattr_info.stdout"
+    - __rar_ie_fattr_info.stdout is defined
+    - "'security.ima' not in __rar_ie_fattr_info.stdout"
 
 # https://github.com/ansible/ansible/issues/86945
 - name: Verify IMA policy configuration file
@@ -61,8 +61,8 @@
     cmp -s {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy > /dev/null 2>&1 ||
       (echo {{ ima_evm_setup_policy_config_file }} >> /sys/kernel/security/integrity/ima/policy &&
        echo changed)
-  register: ima_policy_verify
-  changed_when: "'changed' in ima_policy_verify.stdout"
+  register: __rar_ie_ima_policy_verify
+  changed_when: "'changed' in __rar_ie_ima_policy_verify.stdout"
   when: ima_evm_setup_verify_policy | bool
 
 # https://github.com/ansible/ansible/issues/86945
@@ -72,8 +72,8 @@
       (cp -av {{ ima_evm_setup_policy_config_file }} /etc/ima/ima-policy &&
        restorecon -v /etc/ima/ima-policy &&
        echo changed)
-  register: ima_policy
-  changed_when: "'changed' in ima_policy.stdout"
+  register: __rar_ie_ima_policy
+  changed_when: "'changed' in __rar_ie_ima_policy.stdout"
 
 # https://github.com/ansible/ansible/issues/86945
 - name: Enable dracut integrity module
@@ -82,26 +82,26 @@
       (cp -av /usr/share/ima/dracut-98-integrity.conf /etc/dracut.conf.d/98-integrity.conf &&
        restorecon -v /etc/dracut.conf.d/98-integrity.conf &&
        echo changed)
-  register: dracut_config
-  changed_when: "'changed' in dracut_config.stdout"
+  register: __rar_ie_dracut_config
+  changed_when: "'changed' in __rar_ie_dracut_config.stdout"
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: dracut_config is changed
+  when: __rar_ie_dracut_config is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
   when:
     - ima_evm_setup_reboot | bool
-    - ima_setup is changed or
-      ima_policy is changed or
-      dracut_config is changed
+    - __rar_ie_ima_setup is changed or
+      __rar_ie_ima_policy is changed or
+      __rar_ie_dracut_config is changed
 
 - name: Verify IMA security attributes on files
   check_mode: false
   ansible.builtin.command: getfattr -m - -d /usr/bin/ima-setup
-  register: fattr_info
-  failed_when: "'security.ima' not in fattr_info.stdout"
+  register: __rar_ie_fattr_info
+  failed_when: "'security.ima' not in __rar_ie_fattr_info.stdout"
   changed_when: false
   when: "'attr' in ansible_facts.packages"

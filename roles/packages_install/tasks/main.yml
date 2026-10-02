@@ -5,11 +5,11 @@
     state: present
     exclude: "{{ packages_install_exclude | select }}"
     install_weak_deps: "{{ packages_install_weak_deps | bool }}"
-  register: installed_packages
+  register: __rar_pi_installed_packages
   when: packages_install | select | length > 0
 
 - name: Display package changes
   ansible.builtin.include_tasks: display.yml
   when:
     - packages_install_display_results | bool
-    - installed_packages is changed
+    - __rar_pi_installed_packages is changed

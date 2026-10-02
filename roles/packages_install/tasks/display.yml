@@ -1,9 +1,9 @@
 ---
 - name: Set changed packages
   ansible.builtin.set_fact:
-    installed_packages_all: "{{ installed_packages.results | default([]) | sort }}"
+    __rar_pi_installed_packages_all: "{{ __rar_pi_installed_packages.results | default([]) | sort }}"
 
 - name: Display package changes
   ansible.builtin.debug:
-    msg: "{{ installed_packages_all | join('\n') }}"
-  when: installed_packages_all | length > 0
+    msg: "{{ __rar_pi_installed_packages_all | join('\n') }}"
+  when: __rar_pi_installed_packages_all | length > 0

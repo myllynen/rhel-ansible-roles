@@ -3,17 +3,17 @@
   ansible.builtin.file:
     path: /etc/NetworkManager/conf.d/50-resolver.conf
     state: absent
-  register: nm_resolver_config
+  register: __rar_rc_nm_resolver_config
 
 - name: Remove NetworkManager resolver management configuration file
   ansible.builtin.file:
     path: /etc/NetworkManager/conf.d/90-rc-manager.conf
     state: absent
-  register: nm_rc_manager_config
+  register: __rar_rc_nm_rc_manager_config
 
 - name: Reload NetworkManager to apply configuration changes
   ansible.builtin.service:
     name: NetworkManager
     state: reloaded
-  when: nm_resolver_config is changed or
-        nm_rc_manager_config is changed
+  when: __rar_rc_nm_resolver_config is changed or
+        __rar_rc_nm_rc_manager_config is changed

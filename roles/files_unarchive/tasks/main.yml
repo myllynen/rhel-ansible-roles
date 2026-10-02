@@ -1,18 +1,18 @@
 ---
 - name: Install required packages
   vars:
-    base_pkgs: "{{ ['gzip', 'tar', 'xz'] }}"
-    attrs_used: "{{ true if files_unarchive | selectattr('attributes', 'defined') | length > 0 else false }}"
-    attr_pkgs: "{{ ['e2fsprogs'] if attrs_used else [] }}"
-    bzip2_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.bz2$') | length > 0 else false }}"
-    bzip2_pkgs: "{{ ['bzip2'] if bzip2_used else [] }}"
-    zip_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.zip$') | length > 0 else false }}"
-    zip_pkgs: "{{ ['zip', 'unzip'] if zip_used else [] }}"
-    zstd_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.zst$') | length > 0 else false }}"
-    zstd_pkgs: "{{ ['zstd'] if zstd_used else [] }}"
-    required_pkgs: "{{ base_pkgs + attr_pkgs + bzip2_pkgs + zip_pkgs + zstd_pkgs }}"
+    __rar_fu_base_pkgs: "{{ ['gzip', 'tar', 'xz'] }}"
+    __rar_fu_attrs_used: "{{ true if files_unarchive | selectattr('attributes', 'defined') | length > 0 else false }}"
+    __rar_fu_attr_pkgs: "{{ ['e2fsprogs'] if __rar_fu_attrs_used else [] }}"
+    __rar_fu_bzip2_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.bz2$') | length > 0 else false }}"
+    __rar_fu_bzip2_pkgs: "{{ ['bzip2'] if __rar_fu_bzip2_used else [] }}"
+    __rar_fu_zip_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.zip$') | length > 0 else false }}"
+    __rar_fu_zip_pkgs: "{{ ['zip', 'unzip'] if __rar_fu_zip_used else [] }}"
+    __rar_fu_zstd_used: "{{ true if files_unarchive | selectattr('src', 'search', '\\.zst$') | length > 0 else false }}"
+    __rar_fu_zstd_pkgs: "{{ ['zstd'] if __rar_fu_zstd_used else [] }}"
+    __rar_fu_required_pkgs: "{{ __rar_fu_base_pkgs + __rar_fu_attr_pkgs + __rar_fu_bzip2_pkgs + __rar_fu_zip_pkgs + __rar_fu_zstd_pkgs }}"
   ansible.builtin.dnf:
-    name: "{{ required_pkgs }}"
+    name: "{{ __rar_fu_required_pkgs }}"
     state: present
   when: files_unarchive | select | length > 0
 

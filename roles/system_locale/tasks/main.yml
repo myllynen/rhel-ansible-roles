@@ -14,33 +14,33 @@
 
 - name: Check C.UTF-8 support
   ansible.builtin.set_fact:
-    c_utf_8: "{{ true if ansible_facts.distribution_major_version | int >= 9 else false }}"
+    __rar_lo_c_utf_8: "{{ true if ansible_facts.distribution_major_version | int >= 9 else false }}"
 
 - name: Install locale packages
   vars:
-    locale_packages:
+    __rar_lo_locale_packages:
       - glibc-minimal-langpack
-      - "{{ 'glibc-langpack-en' if not c_utf_8 or system_locale == 'en_US.UTF-8' else '' }}"
+      - "{{ 'glibc-langpack-en' if not __rar_lo_c_utf_8 or system_locale == 'en_US.UTF-8' else '' }}"
   ansible.builtin.dnf:
-    name: "{{ locale_packages | select }}"
+    name: "{{ __rar_lo_locale_packages | select }}"
     state: present
 
 - name: Update system locale configuration
   vars:
-    lang: "{{ 'C.UTF-8' if (system_locale == 'auto' and c_utf_8) or system_locale == 'C.UTF-8' else 'en_US.UTF-8' }}"
+    __rar_lo_lang: "{{ 'C.UTF-8' if (system_locale == 'auto' and __rar_lo_c_utf_8) or system_locale == 'C.UTF-8' else 'en_US.UTF-8' }}"
   ansible.builtin.replace:
     path: /etc/locale.conf
     regexp: '^LANG=.*'
-    replace: 'LANG="{{ lang }}"'
-  register: locale_config
+    replace: 'LANG="{{ __rar_lo_lang }}"'
+  register: __rar_lo_locale_config
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: locale_config is changed
+  when: __rar_lo_locale_config is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
   when:
     - system_locale_reboot | bool
-    - locale_config is changed
+    - __rar_lo_locale_config is changed

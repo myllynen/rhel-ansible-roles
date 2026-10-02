@@ -21,7 +21,7 @@
     path: /etc/systemd/resolved.conf
     regexp: '^(#|)DNSSEC=.*'
     line: 'DNSSEC=no'
-  register: daemon_config
+  register: __rar_dc_daemon_config
   when: ansible_facts.distribution_major_version | int == 8
 
 - name: Enable systemd-resolved service
@@ -34,7 +34,7 @@
   ansible.builtin.service:
     name: systemd-resolved
     state: started
-  register: service_start
+  register: __rar_dc_service_start
   when: "'systemd-resolved.service' in ansible_facts.services"
 
 - name: Restart systemd-resolved to apply configuration changes
@@ -43,8 +43,8 @@
     state: restarted
   when:
     - "'systemd-resolved.service' in ansible_facts.services"
-    - service_start is not changed
-    - daemon_config is changed
+    - __rar_dc_service_start is not changed
+    - __rar_dc_daemon_config is changed
 
 - name: Update NetworkManager DNS cache configuration
   ansible.builtin.copy:
@@ -54,10 +54,10 @@
       rc-manager=symlink
     dest: /etc/NetworkManager/conf.d/95-dns-cache.conf
     mode: '0644'
-  register: nm_config
+  register: __rar_dc_nm_config
 
 - name: Reload NetworkManager to apply configuration changes
   ansible.builtin.service:
     name: NetworkManager
     state: reloaded
-  when: nm_config is changed
+  when: __rar_dc_nm_config is changed

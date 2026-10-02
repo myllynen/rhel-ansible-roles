@@ -5,7 +5,7 @@
     value: '|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
-  register: pattern_config
+  register: __rar_cd_pattern_config
 
 - name: Allow parallel coredumps
   ansible.posix.sysctl:
@@ -13,7 +13,7 @@
     value: '16'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
-  register: limit_config
+  register: __rar_cd_limit_config
 
 - name: Allow safe suid binary coredumps
   ansible.posix.sysctl:
@@ -21,18 +21,18 @@
     value: '2'
     sysctl_file: /etc/sysctl.d/50-coredump.conf
     sysctl_set: true
-  register: suid_config
+  register: __rar_cd_suid_config
 
 - name: Create coredump configuration directory
   ansible.builtin.file:
-    path: "{{ coredump_conf | dirname }}"
+    path: "{{ __rar_cd_coredump_conf | dirname }}"
     state: directory
     mode: '0755'
   when: ansible_facts.distribution_major_version | int >= 10
 
 - name: Initialize coredump configuration file
   ansible.builtin.lineinfile:
-    path: "{{ coredump_conf }}"
+    path: "{{ __rar_cd_coredump_conf }}"
     line: '[Coredump]'
     insertbefore: '^'
     create: true
@@ -41,14 +41,14 @@
 
 - name: Create system configuration directory
   ansible.builtin.file:
-    path: "{{ system_conf | dirname }}"
+    path: "{{ __rar_cd_system_conf | dirname }}"
     state: directory
     mode: '0755'
   when: ansible_facts.distribution_major_version | int >= 10
 
 - name: Initialize system configuration file
   ansible.builtin.lineinfile:
-    path: "{{ system_conf }}"
+    path: "{{ __rar_cd_system_conf }}"
     line: '[Manager]'
     insertbefore: '^'
     create: true
@@ -57,38 +57,38 @@
 
 - name: Update default coredump limit configuration
   ansible.builtin.lineinfile:
-    path: "{{ system_conf }}"
+    path: "{{ __rar_cd_system_conf }}"
     regexp: '^(#|)DefaultLimitCORE=.*'
     line: 'DefaultLimitCORE=infinity'
-  register: core_config
+  register: __rar_cd_core_config
 
 - name: Update coredump storage configuration
   ansible.builtin.lineinfile:
-    path: "{{ coredump_conf }}"
+    path: "{{ __rar_cd_coredump_conf }}"
     regexp: '^Storage=none'
     line: '#Storage=external'
-  register: storage_config
+  register: __rar_cd_storage_config
 
 - name: Update coredump process size configuration
   ansible.builtin.lineinfile:
-    path: "{{ coredump_conf }}"
+    path: "{{ __rar_cd_coredump_conf }}"
     regexp: '^ProcessSizeMax=0'
     line: 'ProcessSizeMax={{ system_coredump_process_size_max }}'
-  register: process_config
+  register: __rar_cd_process_config
 
 - name: Reload systemd to apply configuration changes
   ansible.builtin.systemd:
     daemon_reload: true
-  when: core_config is changed or
-        storage_config is changed or
-        process_config is changed
+  when: __rar_cd_core_config is changed or
+        __rar_cd_storage_config is changed or
+        __rar_cd_process_config is changed
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: pattern_config is changed or
-        limit_config is changed or
-        suid_config is changed or
-        core_config is changed or
-        storage_config is changed or
-        process_config is changed
+  when: __rar_cd_pattern_config is changed or
+        __rar_cd_limit_config is changed or
+        __rar_cd_suid_config is changed or
+        __rar_cd_core_config is changed or
+        __rar_cd_storage_config is changed or
+        __rar_cd_process_config is changed

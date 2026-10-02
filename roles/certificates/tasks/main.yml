@@ -12,17 +12,17 @@
     src: "{{ item }}"
     dest: /etc/pki/ca-trust/source/anchors/{{ item | basename }}
     mode: '0644'
-  register: anchor_files
+  register: __rar_ce_anchor_files
   loop: "{{ certificates_files_anchors | select }}"
 
 - name: Copy certificate blocklist files
   vars:
-    block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
+    __rar_ce_block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: /etc/pki/ca-trust/source/{{ block_dir }}/{{ item | basename }}
+    dest: /etc/pki/ca-trust/source/{{ __rar_ce_block_dir }}/{{ item | basename }}
     mode: '0644'
-  register: blocklist_files
+  register: __rar_ce_blocklist_files
   loop: "{{ certificates_files_blocklist | select }}"
 
 - name: Copy certificate extended format files
@@ -30,26 +30,26 @@
     src: "{{ item }}"
     dest: /etc/pki/ca-trust/source/{{ item | basename }}
     mode: '0644'
-  register: ext_files
+  register: __rar_ce_ext_files
   loop: "{{ certificates_files_ext_format | select }}"
 
 - name: Remove unrecognized certificate files
   vars:
-    block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
-    system_files:
+    __rar_ce_block_dir: "{{ 'blocklist' if ansible_facts.distribution_major_version | int >= 9 else 'blacklist' }}"
+    __rar_ce_system_files:
       - /etc/pki/ca-trust/source/README
       - /etc/pki/ca-trust/source/anchors
-      - /etc/pki/ca-trust/source/{{ block_dir }}
+      - /etc/pki/ca-trust/source/{{ __rar_ce_block_dir }}
       - /etc/pki/ca-trust/source/ca-bundle.legacy.crt
     files_remove:
       - /etc/pki/ca-trust/source/anchors/*
-      - /etc/pki/ca-trust/source/{{ block_dir }}/*
+      - /etc/pki/ca-trust/source/{{ __rar_ce_block_dir }}/*
       - /etc/pki/ca-trust/source/*
-    files_remove_exclude: "{{ system_files | list +
+    files_remove_exclude: "{{ __rar_ce_system_files | list +
                               certificates_files_known | select | list +
-                              anchor_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list +
-                              blocklist_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list +
-                              ext_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list }}"
+                              __rar_ce_anchor_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list +
+                              __rar_ce_blocklist_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list +
+                              __rar_ce_ext_files.results | default([], true) | map(attribute='invocation.module_args.dest') | list }}"
   ansible.builtin.include_role:
     name: files_remove
   when: certificates_exclusive | bool
@@ -57,5 +57,5 @@
 - name: Write extracted certificate configuration files
   ansible.builtin.command: update-ca-trust extract
   changed_when: true
-  when: (anchor_files is changed or blocklist_files is changed or ext_files is changed) or
+  when: (__rar_ce_anchor_files is changed or __rar_ce_blocklist_files is changed or __rar_ce_ext_files is changed) or
         (certificates_exclusive | bool and remove_files is changed)

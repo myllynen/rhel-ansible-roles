@@ -18,7 +18,7 @@
       IPCAllowedGroups=not_allowed
     dest: /etc/usbguard/usbguard-daemon.conf
     mode: '0600'
-  register: daemon_config_reject
+  register: __rar_ug_daemon_config_reject
   when: usbguard_setup_policy == 'reject'
 
 - name: Copy custom USBGuard configuration file
@@ -26,7 +26,7 @@
     src: "{{ usbguard_setup_config_file }}"
     dest: /etc/usbguard/usbguard-daemon.conf
     mode: '0600'
-  register: daemon_config_custom
+  register: __rar_ug_daemon_config_custom
   when:
     - usbguard_setup_policy == 'custom'
     - usbguard_setup_config_file is not none
@@ -37,7 +37,7 @@
     content: ''
     dest: /etc/usbguard/rules.conf
     mode: '0600'
-  register: rules_config_default
+  register: __rar_ug_rules_config_default
   when: usbguard_setup_rules_file is none or
         usbguard_setup_rules_file | length == 0
 
@@ -46,7 +46,7 @@
     src: "{{ usbguard_setup_rules_file }}"
     dest: /etc/usbguard/rules.d/zz-ansible.conf
     mode: '0600'
-  register: rules_config_custom
+  register: __rar_ug_rules_config_custom
   when:
     - usbguard_setup_policy == 'custom'
     - usbguard_setup_rules_file is not none
@@ -57,7 +57,7 @@
     src: "{{ usbguard_setup_ipc_access_file }}"
     dest: /etc/usbguard/IPCAccessControl.d/zz-ansible.conf
     mode: '0600'
-  register: ipc_access_custom
+  register: __rar_ug_ipc_access_custom
   when:
     - usbguard_setup_ipc_access_file is not none
     - usbguard_setup_ipc_access_file | length > 0
@@ -84,7 +84,7 @@
   ansible.builtin.service:
     name: usbguard
     state: started
-  register: service_start
+  register: __rar_ug_service_start
   when: "'usbguard' in ansible_facts.packages"
 
 - name: Restart usbguard to apply configuration changes
@@ -93,10 +93,10 @@
     state: restarted
   when:
     - "'usbguard' in ansible_facts.packages"
-    - service_start is not changed
-    - daemon_config_reject is changed or
-      daemon_config_custom is changed or
-      rules_config_default is changed or
-      rules_config_custom is changed or
-      ipc_access_custom is changed or
+    - __rar_ug_service_start is not changed
+    - __rar_ug_daemon_config_reject is changed or
+      __rar_ug_daemon_config_custom is changed or
+      __rar_ug_rules_config_default is changed or
+      __rar_ug_rules_config_custom is changed or
+      __rar_ug_ipc_access_custom is changed or
       (usbguard_setup_exclusive | bool and remove_files is changed)

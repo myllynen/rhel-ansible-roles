@@ -38,72 +38,72 @@
 
 - name: Configure system security profile
   vars:
-    ds_file: "{{ scap_compliance_content_file_path
-                 | default('/usr/share/xml/scap/ssg/content/ssg-rhel' +
-                            ansible_facts.distribution_major_version + '-ds.xml', true) }}"
-    stig_file: "{{ scap_compliance_report_dir + '/remediate-results-stig.xml' }}"
-    stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
-    tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
-    tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file | string, '', '') }}"
+    __rar_sc_ds_file: "{{ scap_compliance_content_file_path
+                       | default('/usr/share/xml/scap/ssg/content/ssg-rhel' +
+                                  ansible_facts.distribution_major_version + '-ds.xml', true) }}"
+    __rar_sc_stig_file: "{{ scap_compliance_report_dir + '/remediate-results-stig.xml' }}"
+    __rar_sc_stig_option: "{{ '--stig-viewer ' + __rar_sc_stig_file if 'stig' in scap_compliance_profile else '' }}"
+    __rar_sc_tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
+    __rar_sc_tailoring_option: "{{ __rar_sc_tailoring_file | ternary('--tailoring-file ' + __rar_sc_tailoring_file | string, '', '') }}"
   ansible.builtin.shell: >
     set -o pipefail &&
     oscap xccdf eval --remediate
     --profile xccdf_org.ssgproject.content_profile_{{ scap_compliance_profile }}
-    {{ tailoring_option }}
+    {{ __rar_sc_tailoring_option }}
     --results {{ scap_compliance_report_dir }}/remediate-results.xml
     --results-arf {{ scap_compliance_report_dir }}/remediate-results-arf.xml
     --report {{ scap_compliance_report_dir }}/remediate-report.html
-    {{ stig_option }}
-    {{ ds_file }} 2>&1
+    {{ __rar_sc_stig_option }}
+    {{ __rar_sc_ds_file }} 2>&1
     | tee {{ scap_compliance_report_dir }}/oscap-remediate-output.txt
     | grep -A 10000 "Starting Remediation"
     | tr -d '\r'
     | expand
-  register: remediate_status
-  failed_when: remediate_status.rc == 1
-  changed_when: "'fixed' in remediate_status.stdout"
+  register: __rar_sc_remediate_status
+  failed_when: __rar_sc_remediate_status.rc == 1
+  changed_when: "'fixed' in __rar_sc_remediate_status.stdout"
   when: scap_compliance_remediate | bool
 
 - name: Display remediation results
   ansible.builtin.debug:
-    msg: "{{ remediate_status.stdout_lines }}"
-  when: remediate_status is changed
+    msg: "{{ __rar_sc_remediate_status.stdout_lines }}"
+  when: __rar_sc_remediate_status is changed
 
 - name: Rebuild initramfs
   ansible.builtin.command: dracut -f --regenerate-all
   changed_when: true
-  when: remediate_status is changed
+  when: __rar_sc_remediate_status is changed
 
 - name: Reboot system
   ansible.builtin.reboot:
   when:
     - scap_compliance_remediate_reboot | bool
-    - remediate_status is changed
+    - __rar_sc_remediate_status is changed
 
 - name: Run system security profile compliance check
   vars:
-    ds_file: "{{ scap_compliance_content_file_path
-                 | default('/usr/share/xml/scap/ssg/content/ssg-rhel' +
-                            ansible_facts.distribution_major_version + '-ds.xml', true) }}"
-    stig_file: "{{ scap_compliance_report_dir + '/eval-results-stig.xml' }}"
-    stig_option: "{{ '--stig-viewer ' + stig_file if 'stig' in scap_compliance_profile else '' }}"
-    tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
-    tailoring_option: "{{ tailoring_file | ternary('--tailoring-file ' + tailoring_file | string, '', '') }}"
+    __rar_sc_ds_file: "{{ scap_compliance_content_file_path
+                       | default('/usr/share/xml/scap/ssg/content/ssg-rhel' +
+                                  ansible_facts.distribution_major_version + '-ds.xml', true) }}"
+    __rar_sc_stig_file: "{{ scap_compliance_report_dir + '/eval-results-stig.xml' }}"
+    __rar_sc_stig_option: "{{ '--stig-viewer ' + __rar_sc_stig_file if 'stig' in scap_compliance_profile else '' }}"
+    __rar_sc_tailoring_file: "{{ scap_compliance_tailoring_file_path }}"
+    __rar_sc_tailoring_option: "{{ __rar_sc_tailoring_file | ternary('--tailoring-file ' + __rar_sc_tailoring_file | string, '', '') }}"
   ansible.builtin.shell: >
     set -o pipefail &&
     oscap xccdf eval
     --profile xccdf_org.ssgproject.content_profile_{{ scap_compliance_profile }}
-    {{ tailoring_option }}
+    {{ __rar_sc_tailoring_option }}
     --results {{ scap_compliance_report_dir }}/eval-results.xml
     --results-arf {{ scap_compliance_report_dir }}/eval-results-arf.xml
     --report {{ scap_compliance_report_dir }}/eval-report.html
-    {{ stig_option }}
-    {{ ds_file }} 2>&1
+    {{ __rar_sc_stig_option }}
+    {{ __rar_sc_ds_file }} 2>&1
     | tee {{ scap_compliance_report_dir }}/oscap-eval-output.txt
     | tr -d '\r'
     | expand
-  register: eval_status
-  failed_when: eval_status.rc == 1
+  register: __rar_sc_eval_status
+  failed_when: __rar_sc_eval_status.rc == 1
   changed_when: false
 
 - name: Display compliance check result
@@ -111,7 +111,7 @@
     msg: >-
       Compliance check result for {{ inventory_hostname }}:
       {{ scap_compliance_profile }} -
-      {{ 'PASSED' if eval_status.rc == 0 else 'FAILED' }}
+      {{ 'PASSED' if __rar_sc_eval_status.rc == 0 else 'FAILED' }}
 
 - name: Find failed compliance check items
   ansible.builtin.shell: >
@@ -119,19 +119,19 @@
     grep -B 3 'fail$' {{ scap_compliance_report_dir }}/oscap-eval-output.txt
     | tr -d '\r'
     | expand
-  register: grep_result
+  register: __rar_sc_grep_result
   failed_when: false
   changed_when: false
-  when: eval_status.rc == 2
+  when: __rar_sc_eval_status.rc == 2
 
 - name: Display failed compliance check items
   ansible.builtin.debug:
-    msg: "{{ grep_result.stdout_lines }}"
-  when: eval_status.rc == 2
+    msg: "{{ __rar_sc_grep_result.stdout_lines }}"
+  when: __rar_sc_eval_status.rc == 2
 
 - name: Display compliance check complete results
   ansible.builtin.debug:
-    var: eval_status
+    var: __rar_sc_eval_status
   when: scap_compliance_check_result_show_all | bool
 
 - name: Fail on compliance check failure if requested
@@ -139,4 +139,4 @@
     msg: "{{ scap_compliance_profile }} compliance check failed."
   when:
     - not scap_compliance_check_fail_role_pass | bool
-    - eval_status.rc == 2
+    - __rar_sc_eval_status.rc == 2
