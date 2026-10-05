@@ -1,6 +1,6 @@
 # cron_setup role
 
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPLv3+](https://img.shields.io/badge/license-GPLv3%2B-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Please see the collection main page for a higher level description.
 
@@ -23,6 +23,7 @@ cron_setup_entries:
 #    state: absent
 
 # List of allowed crontab users in cron.allow
+# Empty list denies crontab(1) from non-root users
 # When set to null cron.allow will be removed
 cron_setup_allow_file: []
 

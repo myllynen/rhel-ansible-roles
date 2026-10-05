@@ -5,7 +5,7 @@ packages_install:
   - bind-utils
   - curl
   - dnf-plugins-core
-  #-git-core
+  #- git-core
   - man-pages
   #- mokutil
   #- mlocate

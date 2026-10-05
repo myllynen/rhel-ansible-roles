@@ -1,6 +1,6 @@
 # files_remove role
 
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPLv3+](https://img.shields.io/badge/license-GPLv3%2B-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Please see the collection main page for a higher level description.
 

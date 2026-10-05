@@ -1,6 +1,6 @@
 # packages_verify role
 
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPLv3+](https://img.shields.io/badge/license-GPLv3%2B-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Please see the collection main page for a higher level description.
 
@@ -21,14 +21,14 @@ packages_verify:
   - selinux-policy
 
 # Check for missing packages
-# Registers variable missing_packages
+# Registers variable: missing_packages
 packages_verify_check_missing: true
 
 # Fail role on missing packages
 packages_verify_fail_missing: false
 
 # Check for changed package
-# Registers variable verified_packages
+# Registers variable: verified_packages
 packages_verify_check_content: true
 
 # Fail role on changed packages

@@ -1,6 +1,6 @@
 # accounts_policy role
 
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPLv3+](https://img.shields.io/badge/license-GPLv3%2B-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Please see the collection main page for a higher level description.
 
@@ -87,7 +87,7 @@ system_auth_profile:
 # See the "authselect show 'profile'" output for details
 # E.g., with "minimal"/"local" use without-nullok with-pamaccess
 # With "custom/cis" the following parameters can be used:
-#   with-centrify with-mkhomedir with-pamaccess with-systemd
+#   with-centrify with-mkhomedir with-pamaccess with-systemd with-yescrypt
 system_auth_profile_parameters:
 
 # Optional PAM su configuration file template
