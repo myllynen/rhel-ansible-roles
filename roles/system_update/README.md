@@ -1,6 +1,6 @@
 # system_update role
 
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPLv3+](https://img.shields.io/badge/license-GPLv3%2B-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Please see the collection main page for a higher level description.
 
@@ -54,16 +54,16 @@ system_update_report_pdf: false
 system_update_report_pdf_dir: /tmp/.ansible.pdf
 
 # Preamble text to include in all generated PDFs
-# <HOST> will be replaced with inventory hostname
-# <OSREL> will be replaced with OS release name
-# <DATE> will be replaced with patching date/time
-# <REBOOT> will be indicate reboot, true or false
+# :HOST: will be replaced with inventory hostname
+# :OSREL: will be replaced with OS release name
+# :DATE: will be replaced with patching date/time
+# :REBOOT: will indicate reboot, true or false
 system_update_report_pdf_preamble: "
   System Update Report\n\n\n
-  Server: <HOST>\n
-  Patch date: <DATE>\n
-  OS version: <OSREL>\n
-  Server rebooted: <REBOOT>\n\n\n
+  Server: :HOST:\n
+  Patch date: :DATE:\n
+  OS version: :OSREL:\n
+  Server rebooted: :REBOOT:\n\n\n
   The following packages were updated:\n"
 </pre>
 

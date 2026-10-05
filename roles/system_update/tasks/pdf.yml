@@ -32,10 +32,10 @@
   ansible.builtin.shell: |
     set -o pipefail
     printf "{{ system_update_report_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ __rar_up_server_txt }}
-    sed -i -e 's,<HOST>,{{ inventory_hostname }},g' {{ __rar_up_server_txt }}
-    sed -i -e 's,<OSREL>,{{ __rar_up_os_release.content | b64decode | trim }},g' {{ __rar_up_server_txt }}
-    sed -i -e 's,<DATE>,{{ __rar_up_patch_time }},g' {{ __rar_up_server_txt }}
-    sed -i -e 's,<REBOOT>,{{ 'yes' if __rar_up_system_reboot.changed else 'no' }},g' {{ __rar_up_server_txt }}
+    sed -i -e 's,:HOST:,{{ inventory_hostname }},g' {{ __rar_up_server_txt }}
+    sed -i -e 's,:OSREL:,{{ __rar_up_os_release.content | b64decode | trim }},g' {{ __rar_up_server_txt }}
+    sed -i -e 's,:DATE:,{{ __rar_up_patch_time }},g' {{ __rar_up_server_txt }}
+    sed -i -e 's,:REBOOT:,{{ 'yes' if __rar_up_system_reboot.changed else 'no' }},g' {{ __rar_up_server_txt }}
     printf "\n{{ __rar_up_package_updates | join('\n') }}" >> {{ __rar_up_server_txt }}
     printf "\n\n\nThis report was automatically generated on {{ __rar_up_pdf_timestamp }}.\n" >> {{ __rar_up_server_txt }}
   register: __rar_up_command_output

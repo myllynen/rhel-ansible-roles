@@ -1,6 +1,6 @@
 # system_update_report_pre role
 
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPLv3+](https://img.shields.io/badge/license-GPLv3%2B-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Please see the collection main page for a higher level description.
 
@@ -47,12 +47,12 @@ system_update_report_pre_pdf: false
 system_update_report_pre_pdf_dir: /tmp/.ansible.pdf
 
 # Preamble text to include in all generated PDFs
-# <HOST> will be replaced with inventory hostname
-# <OSREL> will be replaced with OS release name
+# :HOST: will be replaced with inventory hostname
+# :OSREL: will be replaced with OS release name
 system_update_report_pre_pdf_preamble: "
   Upcoming System Update Report\n\n\n
-  Server: <HOST>\n
-  OS version: <OSREL>\n\n\n
+  Server: :HOST:\n
+  OS version: :OSREL:\n\n\n
   The following package updates will be installed:\n"
 </pre>
 

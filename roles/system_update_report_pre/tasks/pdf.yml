@@ -32,8 +32,8 @@
   ansible.builtin.shell: |
     set -o pipefail
     printf "{{ system_update_report_pre_pdf_preamble }}\n" | sed -e 's/^[[:space:]]*//g' > {{ __rar_rp_server_txt }}
-    sed -i -e 's,<HOST>,{{ inventory_hostname }},g' {{ __rar_rp_server_txt }}
-    sed -i -e 's,<OSREL>,{{ __rar_rp_os_release.content | b64decode | trim }},g' {{ __rar_rp_server_txt }}
+    sed -i -e 's,:HOST:,{{ inventory_hostname }},g' {{ __rar_rp_server_txt }}
+    sed -i -e 's,:OSREL:,{{ __rar_rp_os_release.content | b64decode | trim }},g' {{ __rar_rp_server_txt }}
     printf "\n{{ __rar_rp_package_updates | join('\n') }}" >> {{ __rar_rp_server_txt }}
     printf "\n\n\nThis report was automatically generated on {{ __rar_rp_pdf_timestamp }}.\n" >> {{ __rar_rp_server_txt }}
   register: __rar_rp_command_output
