@@ -3,6 +3,7 @@
   hosts: all
   become: true
   gather_facts: true
+  # serial: 1
   collections:
     - myllynen.rhel_ansible_roles
   vars:
@@ -18,23 +19,23 @@
       - keepalived
     files_copy:
       - src: keepalived-notify-haproxy
-        path: /usr/local/sbin/keepalived-notify-haproxy
+        dest: /usr/local/sbin/keepalived-notify-haproxy
         owner: root
         group: root
         mode: '0755'
     files_copy_templates:
       - src: haproxy-global.cfg.j2
-        path: /etc/haproxy/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
         owner: root
         group: root
         mode: '0644'
       - src: haproxy-app.cfg.j2
-        path: /etc/haproxy/conf.d/app.cfg
+        dest: /etc/haproxy/conf.d/app.cfg
         owner: root
         group: root
         mode: '0644'
       - src: keepalived.conf.j2
-        path: /etc/keepalived/keepalived.conf
+        dest: /etc/keepalived/keepalived.conf
         owner: root
         group: root
         mode: '0644'
