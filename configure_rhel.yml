@@ -152,7 +152,7 @@
     # See the "authselect show 'profile'" output for details
     # E.g., with "minimal"/"local" use without-nullok with-pamaccess
     # With "custom/cis" the following parameters can be used:
-    #   with-centrify with-mkhomedir with-pamaccess with-systemd
+    #   with-centrify with-mkhomedir with-pamaccess with-systemd with-yescrypt
     system_auth_profile_parameters:
 
     # Optional PAM su configuration file template
@@ -166,8 +166,8 @@
     # Optional auditd config file to copy
     # Role provided alternatives:
     # * auditd_rhel.conf       - RHEL default config
-    # * auditd_cis.conf        - CIS Level 2 - Server compliant config - RHEL 8 & 10
-    # * auditd_cis.conf_rhel9  - CIS Level 2 - Server compliant config - RHEL 9
+    # * auditd_cis.conf        - CIS Level 2 - Server compliant config - RHEL 9 & 10
+    # * auditd_cis.conf_rhel8  - CIS Level 2 - Server compliant config - RHEL 8
     audit_setup_config_file:
 
     # Optional audit rules file to copy
@@ -266,6 +266,7 @@
     #    state: absent
 
     # List of allowed crontab users in cron.allow
+    # Empty list denies crontab(1) from non-root users
     # When set to null cron.allow will be removed
     cron_setup_allow_file: []
 
@@ -470,6 +471,12 @@
     #
     # mount_setup
     #
+    # List of mounts to disable
+    # Uses ansible.posix.mount module
+    mount_setup_disable:
+    #  - path: /mnt/temp
+    #    state: unmounted
+
     # List of mounts to enable
     # Uses ansible.posix.mount module
     mount_setup_enable:
@@ -478,12 +485,6 @@
     #    fstype: nfs
     #    opts: _netdev,hard
     #    state: mounted
-
-    # List of mounts to disable
-    # Uses ansible.posix.mount module
-    mount_setup_disable:
-    #  - path: /mnt/temp
-    #    state: unmounted
 
     #
     # multipath_setup
@@ -531,7 +532,7 @@
     packages_remove_autoremove: false
 
     # Display results on output
-    packages_remove_display_results: true
+    packages_remove_display_results: false
 
     #
     # packages_verify
@@ -547,12 +548,14 @@
       - selinux-policy
 
     # Check for missing packages
+    # Registers variable: missing_packages
     packages_verify_check_missing: true
 
     # Fail role on missing packages
     packages_verify_fail_missing: false
 
     # Check for changed package
+    # Registers variable: verified_packages
     packages_verify_check_content: true
 
     # Fail role on changed packages
@@ -578,7 +581,6 @@
     # resolver_configuration
     #
     # Method for configuring resolver, /etc/resolv.conf
-    # Method for configuring resolver, /etc/resolv.conf
     # nm       - configure resolver with NetworkManager
     #            global options overriding connection
     #            profile files' configuration options
@@ -594,8 +596,8 @@
 
     # At least one nameserver must be specified
     resolver_nameservers:
-      - 1.1.1.1
-      - 8.8.8.8
+    #  - 1.1.1.1
+    #  - 8.8.8.8
 
     resolver_search_domains:
     #  - corp.local
@@ -778,9 +780,10 @@
     # or status to carry out or not the operation
     # Registers variables: {reload,restart}_services
     service_state_restart:
-    #  - name: pmcd.service
+    #  - pmcd.service
     #  - name: haproxy.service
     #    state: reloaded
+    #    require: running
 
     # Skip missing services/units instead of
     # failing when trying to enable/start them
@@ -981,16 +984,16 @@
     system_update_report_pdf_dir: /tmp/.ansible.pdf
 
     # Preamble text to include in all generated PDFs
-    # <HOST> will be replaced with inventory hostname
-    # <OSREL> will be replaced with OS release name
-    # <DATE> will be replaced with patching date/time
-    # <REBOOT> will be indicate reboot, true or false
+    # :HOST: will be replaced with inventory hostname
+    # :OSREL: will be replaced with OS release name
+    # :DATE: will be replaced with patching date/time
+    # :REBOOT: will indicate reboot, true or false
     system_update_report_pdf_preamble: "
       System Update Report\n\n\n
-      Server: <HOST>\n
-      Patch date: <DATE>\n
-      OS version: <OSREL>\n
-      Server rebooted: <REBOOT>\n\n\n
+      Server: :HOST:\n
+      Patch date: :DATE:\n
+      OS version: :OSREL:\n
+      Server rebooted: :REBOOT:\n\n\n
       The following packages were updated:\n"
 
     #
@@ -1033,12 +1036,12 @@
     system_update_report_pre_pdf_dir: /tmp/.ansible.pdf
 
     # Preamble text to include in all generated PDFs
-    # <HOST> will be replaced with inventory hostname
-    # <OSREL> will be replaced with OS release name
+    # :HOST: will be replaced with inventory hostname
+    # :OSREL: will be replaced with OS release name
     system_update_report_pre_pdf_preamble: "
       Upcoming System Update Report\n\n\n
-      Server: <HOST>\n
-      OS version: <OSREL>\n\n\n
+      Server: :HOST:\n
+      OS version: :OSREL:\n\n\n
       The following package updates will be installed:\n"
 
     #
@@ -1179,5 +1182,6 @@
     #- {role: splunk_forwarder, when: splunk_user_password_hash is defined}
     #- system_coredump
     #- scap_compliance
+    #- scap_satellite
     #- cron_setup
     - system_init
