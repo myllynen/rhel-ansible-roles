@@ -10,12 +10,12 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-packages_remove:
-  - gofer
-  - katello-agent
-  - puppet-agent
-  - rhn*
-  - telnet-server
+packages_remove: []
+#  - gofer
+#  - katello-agent
+#  - puppet-agent
+#  - rhn*
+#  - telnet-server
 
   #- biosdevname
   #- bluez

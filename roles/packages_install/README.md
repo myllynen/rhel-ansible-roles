@@ -10,32 +10,32 @@ Below are the role default values from defaults/main.yml:
 
 <pre>
 ---
-packages_install:
-  - acl
-  - bash-completion
-  - bind-utils
-  - curl
-  - dnf-plugins-core
-  #- git-core
-  - man-pages
-  #- mokutil
-  #- mlocate
-  - nano
-  - openssh-clients
-  #- perl-interpreter
-  - psmisc
-  - python3
-  - python3-libselinux
-  - policycoreutils-python-utils
-  #- rsync
-  #- sos
-  - tar
-  #- tmux
-  #- unzip
-  #- vim-enhanced
-  #- wget
-  - xz
-  - zstd
+packages_install: []
+#  - acl
+#  - bash-completion
+#  - bind-utils
+#  - curl
+#  - dnf-plugins-core
+#  #- git-core
+#  - man-pages
+#  #- mokutil
+#  #- mlocate
+#  - nano
+#  - openssh-clients
+#  #- perl-interpreter
+#  - psmisc
+#  - python3
+#  - python3-libselinux
+#  - policycoreutils-python-utils
+#  #- rsync
+#  #- sos
+#  - tar
+#  #- tmux
+#  #- unzip
+#  #- vim-enhanced
+#  #- wget
+#  - xz
+#  - zstd
 
 # List of dnf excludes
 packages_install_exclude:
