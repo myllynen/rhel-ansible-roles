@@ -1,0 +1,15 @@
+---
+argument_specs:
+  main:
+    short_description: Configure device-mapper-multipath
+    description: Install multipath packages and copy the given configuration and bindings files.
+    options:
+      multipath_setup_config_file:
+        description: Multipath config file to copy.
+        type: str
+      multipath_setup_bindings_file:
+        description: Multipath bindings file to copy.
+        type: str
+      multipath_setup_reboot:
+        description: Reboot system after changes, config file will be reloaded if no reboot.
+        type: bool

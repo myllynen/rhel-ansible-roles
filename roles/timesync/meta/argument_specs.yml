@@ -1,0 +1,11 @@
+---
+argument_specs:
+  main:
+    short_description: Configure time synchronization
+    description: >-
+      Wrapper for redhat.rhel_system_roles.timesync, flushes handlers after the system role run to update time immediately.
+    options:
+      timesync_ntp_servers:
+        description: List of NTP servers, each entry takes redhat.rhel_system_roles.timesync parameters, hostname is mandatory.
+        type: list
+        elements: dict

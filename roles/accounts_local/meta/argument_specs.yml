@@ -1,0 +1,158 @@
+---
+argument_specs:
+  main:
+    short_description: Manage local users and groups
+    description: Create and delete local users and groups, set passwords, supplementary groups, SSH keys, and sudo access.
+    options:
+      accounts_local_users_delete:
+        description: List of local users to delete, their home dirs will be removed.
+        type: list
+        elements: str
+      accounts_local_groups_delete:
+        description: List of local groups to delete.
+        type: list
+        elements: str
+      accounts_local_groups_create:
+        description: List of local groups to create, uses the ansible.builtin.group module.
+        type: list
+        elements: dict
+        options:
+          name:
+            description: Name of the group.
+            type: str
+            required: true
+          gid:
+            description: GID of the group.
+            type: int
+            required: true
+          local:
+            description: Force the use of local command alternatives.
+            type: bool
+          system:
+            description: Create a system group.
+            type: bool
+          non_unique:
+            description: Allow the group to have a non-unique GID.
+            type: bool
+      accounts_local_users_create:
+        description: List of local users to create, uses the ansible.builtin.user module.
+        type: list
+        elements: dict
+        options:
+          name:
+            description: Name of the user.
+            type: str
+            required: true
+          uid:
+            description: UID of the user.
+            type: int
+            required: true
+          password:
+            description: Password of the user, see accounts_local_password_encrypted.
+            type: str
+          group:
+            description: Primary group of the user.
+            type: str
+          umask:
+            description: Umask of the user.
+            type: str
+          comment:
+            description: GECOS field of the user.
+            type: str
+          create_home:
+            description: Create the home dir of the user.
+            type: bool
+          home:
+            description: Home dir of the user.
+            type: path
+          shell:
+            description: Login shell of the user.
+            type: path
+          expires:
+            description: Account expiry time as epoch seconds, -1 to remove expiry.
+            type: float
+          password_lock:
+            description: Lock the password of the user.
+            type: bool
+          password_expire_min:
+            description: Minimum days between password changes.
+            type: int
+          password_expire_max:
+            description: Maximum days between password changes.
+            type: int
+          force:
+            description: Force the operation, see the user module.
+            type: bool
+          local:
+            description: Force the use of local command alternatives.
+            type: bool
+          system:
+            description: Create a system account.
+            type: bool
+          skeleton:
+            description: Skeleton dir to use when creating the home dir.
+            type: path
+          non_unique:
+            description: Allow the user to have a non-unique UID.
+            type: bool
+          seuser:
+            description: SELinux user type of the user.
+            type: str
+          generate_ssh_key:
+            description: Generate an SSH key for the user.
+            type: bool
+          ssh_key_bits:
+            description: Number of bits in the generated SSH key.
+            type: int
+          ssh_key_comment:
+            description: Comment in the generated SSH key.
+            type: str
+          ssh_key_file:
+            description: Path of the generated SSH key, relative to the home dir.
+            type: path
+          ssh_key_passphrase:
+            description: Passphrase of the generated SSH key.
+            type: str
+          ssh_key_type:
+            description: Type of the generated SSH key.
+            type: str
+          authorized_keys:
+            description: List of SSH public keys to authorize for the user.
+            type: list
+            elements: str
+          authorized_keys_exclusive:
+            description: Remove authorized keys not listed in authorized_keys.
+            type: bool
+          sudo_allow_all:
+            description: Allow or not unlimited sudo for the user, this creates or removes /etc/sudoers.d/username.
+            type: bool
+          sudo_passwordless:
+            description: Require password or not for unlimited sudo.
+            type: bool
+      accounts_local_password_encrypted:
+        description: Use true if providing crypted values, false to encrypt cleartext passwords.
+        type: bool
+      accounts_local_password_salt_seed:
+        description: Seed for password_hash salt value.
+        type: str
+      accounts_local_no_log:
+        description: Value for no_log parameter when setting passwords.
+        type: bool
+      accounts_local_users_groups:
+        description: List of supplementary groups for users.
+        type: list
+        elements: dict
+        options:
+          name:
+            description: Name of the user.
+            type: str
+            required: true
+          groups:
+            description: List of supplementary groups for the user.
+            type: list
+            elements: str
+            required: true
+          append:
+            description: Append to the current groups, set to false to make groups explicit.
+            type: bool
+            required: true

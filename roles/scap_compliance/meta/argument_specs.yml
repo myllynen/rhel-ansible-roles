@@ -1,0 +1,39 @@
+---
+argument_specs:
+  main:
+    short_description: Check and remediate OpenSCAP compliance
+    description: Apply and check a RHEL provided OpenSCAP security profile with oscap(8).
+    options:
+      scap_compliance_profile:
+        description: >-
+          RHEL provided OpenSCAP security profile to apply and / or check, switching from one profile to another may not work and is
+          unsupported.
+        type: str
+      scap_compliance_content_file_path:
+        description: Optional remote content ds file to use, default is the RHEL RPM provided file.
+        type: path
+      scap_compliance_tailoring_file_template:
+        description: Optional custom tailoring template to use, copied from controller to remote, needs scap_compliance_tailoring_file_path.
+        type: str
+      scap_compliance_tailoring_file_path:
+        description: Optional tailoring file path on remote.
+        type: path
+      scap_compliance_package_state:
+        description: State of OpenSCAP packages on the target.
+        type: str
+        choices: [present, latest]
+      scap_compliance_report_dir:
+        description: Where to store oscap tool execution results, only the most recent results are stored.
+        type: path
+      scap_compliance_remediate:
+        description: Remediate compliance issues, reverting changes is not supported.
+        type: bool
+      scap_compliance_remediate_reboot:
+        description: Reboot system if remediation changed anything.
+        type: bool
+      scap_compliance_check_result_show_all:
+        description: Display complete results of compliance check, failed check items will always be displayed.
+        type: bool
+      scap_compliance_check_fail_role_pass:
+        description: Allow role to complete even if compliance check fails.
+        type: bool

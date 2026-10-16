@@ -1,0 +1,15 @@
+---
+argument_specs:
+  main:
+    short_description: Set the root password
+    description: Update the root password, does nothing if root_password is not set.
+    options:
+      root_password_encrypted:
+        description: Use true if providing crypted value, false to encrypt cleartext password.
+        type: bool
+      root_password_salt_seed:
+        description: Seed for password_hash salt value.
+        type: str
+      root_password:
+        description: Password for root, should come from vault.
+        type: str

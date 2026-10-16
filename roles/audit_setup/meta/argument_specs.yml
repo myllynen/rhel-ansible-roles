@@ -1,0 +1,23 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the audit daemon and audit rules
+    description: Install audit, apply optional auditd and audit rules configuration files, and handle locked rules.
+    options:
+      audit_setup_config_file:
+        description: Optional auditd config file to copy.
+        type: str
+      audit_setup_rules_file:
+        description: Optional audit rules file to copy.
+        type: str
+      audit_setup_update_lock:
+        description: Action with locked rules if rules changed.
+        type: str
+        choices: [fail, ignore, reboot]
+      audit_setup_exclusive:
+        description: Remove unrecognized audit rules files.
+        type: bool
+      audit_setup_files_known:
+        description: List of recognized audit rules files in addition to the role created zz-ansible.rules.
+        type: list
+        elements: path

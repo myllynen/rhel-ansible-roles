@@ -1,0 +1,7 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the system hostname
+    description: Set the hostname given in system_hostname in /etc/hostname with systemd.
+    # system_hostname is left undeclared, arg spec validation would
+    # template its default before the role has gathered the facts

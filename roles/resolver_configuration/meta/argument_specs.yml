@@ -1,0 +1,24 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the DNS resolver
+    description: Configure /etc/resolv.conf with NetworkManager or directly.
+    options:
+      resolver_configuration_method:
+        description: >-
+          How to configure /etc/resolv.conf, nm with NetworkManager global options, direct by writing the file directly, symlink by linking
+          it to the NM one, remove by removing this role's NM configurations, nothing to do nothing.
+        type: str
+        choices: [nm, direct, symlink, remove, nothing]
+      resolver_nameservers:
+        description: List of nameservers, at least one must be specified with the nm and direct methods.
+        type: list
+        elements: str
+      resolver_search_domains:
+        description: List of search domains.
+        type: list
+        elements: str
+      resolver_options:
+        description: List of resolver options.
+        type: list
+        elements: str

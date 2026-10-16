@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: Manage system CA trust store certificates
+    description: Copy certificate files to the system trust store, see update-ca-trust(8) for the source formats and subdirectories.
+    options:
+      certificates_files_anchors:
+        description: List of certificate files to be copied to /etc/pki/ca-trust/source/anchors/.
+        type: list
+        elements: str
+      certificates_files_blocklist:
+        description: List of certificate files to be copied to /etc/pki/ca-trust/source/blocklist/ (or blacklist on older RHEL versions).
+        type: list
+        elements: str
+      certificates_files_ext_format:
+        description: List of certificate files to be copied to /etc/pki/ca-trust/source/.
+        type: list
+        elements: str
+      certificates_exclusive:
+        description: Remove unrecognized certificate files.
+        type: bool
+      certificates_files_known:
+        description: List of additionally recognized cert files.
+        type: list
+        elements: path

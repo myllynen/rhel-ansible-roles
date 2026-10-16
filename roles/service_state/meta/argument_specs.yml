@@ -1,0 +1,32 @@
+---
+argument_specs:
+  main:
+    short_description: Manage service and unit states
+    description: Mask, unmask, disable, enable, reload, and restart systemd services and units, sshd is never masked or disabled.
+    options:
+      service_state_mask:
+        description: List of services/units to mask, registers the mask_services variable.
+        type: list
+        elements: str
+      service_state_unmask:
+        description: List of services/units to unmask, registers the unmask_services variable.
+        type: list
+        elements: str
+      service_state_disable:
+        description: List of services/units to disable and stop, registers the disable_services and stop_services variables.
+        type: list
+        elements: str
+      service_state_enable:
+        description: List of services/units to enable and start, registers the enable_services and start_services variables.
+        type: list
+        elements: str
+      service_state_restart:
+        description: >-
+          List of services to reload/restart, an entry is either a service name or a dict with the name key and the optional state
+          (reloaded or restarted, default restarted) and require (service state or status required to act) keys. Services started by this
+          role run are not restarted again. Registers the reload_services and restart_services variables.
+        type: list
+        elements: raw
+      service_state_skip_missing:
+        description: Skip missing services/units instead of failing when trying to enable/start them.
+        type: bool

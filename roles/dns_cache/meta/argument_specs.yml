@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: Configure local DNS caching
+    description: Enable or disable local DNS caching with dnsmasq, systemd-resolved, or nscd.
+    options:
+      dns_cache_enable:
+        description: Enable or disable DNS cache.
+        type: bool
+      dns_cache_component:
+        description: DNS caching component, dnsmasq recommended on RHEL 9 and earlier, systemd-resolved on RHEL 10 and later.
+        type: str
+        choices: [dnsmasq, systemd-resolved, nscd]
+      dns_cache_dnsmasq_ttl:
+        description: Minimum cache/local/negative TTL value for dnsmasq to use in case none is provided in upstream reply.
+        type: int
+      dns_cache_dnsmasq_local_domain:
+        description: Optional value for dnsmasq 'local' config option.
+        type: str
+      dns_cache_nm_dnsmasq_config_file:
+        description: NetworkManager dnsmasq configuration template to use instead of the role provided default one.
+        type: str
+      dns_cache_nscd_config_file:
+        description: nscd configuration template to use instead of the role provided default one.
+        type: str

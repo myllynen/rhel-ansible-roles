@@ -1,0 +1,21 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the system watchdog
+    description: Enable or disable the systemd watchdog, see systemd-system.conf(5) for info.
+    options:
+      watchdog_enable:
+        description: Enable or disable the system watchdog.
+        type: bool
+      watchdog_runtime_sec:
+        description: Value for the RuntimeWatchdogSec setting.
+        type: str
+      watchdog_reboot_sec:
+        description: Value for the RebootWatchdogSec setting (ShutdownWatchdogSec on RHEL 8), left untouched if unset.
+        type: str
+      watchdog_kexec_sec:
+        description: Value for the KExecWatchdogSec setting, left untouched if unset, supported on RHEL 9 and newer.
+        type: str
+      watchdog_device:
+        description: Value for the WatchdogDevice setting, left untouched if unset, supported on RHEL 9 and newer.
+        type: str

@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Configure system-wide coredumps
+    description: Enable or disable system-wide coredumps with systemd-coredump and related sysctl settings.
+    options:
+      system_coredump_enable:
+        description: Enable or disable system-wide coredumps.
+        type: bool
+      system_coredump_process_size_max:
+        description: System-wide ProcessSizeMax setting.
+        type: str

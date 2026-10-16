@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Configure SELinux booleans
+    description: Enable and disable SELinux booleans persistently, booleans listed in both lists are left enabled.
+    options:
+      sebooleans_disable:
+        description: List of SELinux booleans to disable, uses the ansible.posix.seboolean module.
+        type: list
+        elements: str
+      sebooleans_enable:
+        description: List of SELinux booleans to enable, uses the ansible.posix.seboolean module.
+        type: list
+        elements: str
+      sebooleans_skip_missing:
+        description: Skip missing SELinux boolean instead of failing when trying to configure them.
+        type: bool

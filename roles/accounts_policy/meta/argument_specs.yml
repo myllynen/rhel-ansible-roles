@@ -1,0 +1,78 @@
+---
+argument_specs:
+  main:
+    short_description: Configure accounts, login, password, PAM policies and profiles
+    description: All parameters are optional, unset ones are left untouched.
+    options:
+      useradd_defaults_file:
+        description: New user defaults file useradd template.
+        type: str
+      login_defs_config_file:
+        description: Shadow configuration file login.defs template.
+        type: str
+      login_access_config_file:
+        description: PAM login access control file access.conf template.
+        type: str
+      faillock_config_file:
+        description: PAM faillock configuration file faillock.conf template.
+        type: str
+      pwhistory_config_file:
+        description: PAM password history config file pwhistory.conf template.
+        type: str
+      pwquality_config_file:
+        description: PAM password quality config file pwquality.conf template.
+        type: str
+      limits_config_file:
+        description: User resource limits config file limits.conf template.
+        type: str
+      user_resource_limits:
+        description: User resource limits to configure in /etc/security/limits.d/95-ansible.conf.
+        type: list
+        elements: dict
+        options:
+          domain:
+            description: User, group, or wildcard the limit applies to.
+            type: str
+            required: true
+          type:
+            description: Type of the limit.
+            type: str
+            required: true
+            choices: [hard, soft, '-']
+          item:
+            description: Resource to limit.
+            type: str
+            required: true
+            choices:
+              - core
+              - data
+              - fsize
+              - memlock
+              - nofile
+              - rss
+              - stack
+              - cpu
+              - nproc
+              - as
+              - maxlogins
+              - maxsyslogins
+              - nonewprivs
+              - priority
+              - locks
+              - sigpending
+              - msgqueue
+              - nice
+              - rtprio
+          value:
+            description: Value of the limit.
+            type: raw
+            required: true
+      system_auth_profile:
+        description: System provided authselect profile to use, or a controller side path ending in "custom/name" to copy and use a custom profile.
+        type: str
+      system_auth_profile_parameters:
+        description: Profile parameters string for the "authselect select" command.
+        type: str
+      system_auth_pam_d_su_file:
+        description: Optional PAM su configuration file template.
+        type: str

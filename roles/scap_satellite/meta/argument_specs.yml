@@ -1,0 +1,64 @@
+---
+argument_specs:
+  main:
+    short_description: Run Satellite SCAP compliance scans
+    description: >-
+      Run foreman_scap_client with the given configuration, requires the managed host being registered to Satellite and Satellite/Capsule
+      being configured beforehand.
+    options:
+      scap_satellite_server:
+        description: Satellite/Capsule FQDN.
+        type: str
+      scap_satellite_port:
+        description: Satellite/Capsule port.
+        type: int
+      scap_satellite_timeout:
+        description: Satellite/Capsule timeout.
+        type: int
+      scap_satellite_policies:
+        description: Satellite Compliance Policies to scan.
+        type: list
+        elements: dict
+        options:
+          id:
+            description: Policy identifier as in Foreman.
+            type: int
+            required: true
+          profile:
+            description: Policy profile name.
+            type: str
+            required: true
+          tailoring_id:
+            description: Tailoring policy identifier as in Foreman.
+            type: int
+          tailoring_profile:
+            description: Tailoring profile name.
+            type: str
+      scap_satellite_refresh_policy_files:
+        description: Force refreshing policy files from the server, otherwise existing files will be used if present.
+        type: bool
+      scap_satellite_fetch_remote_resources:
+        description: Allow oscap to fetch remote SCAP resources.
+        type: bool
+      scap_satellite_package_state:
+        description: State of SCAP packages on the client.
+        type: str
+        choices: [present, latest]
+      scap_satellite_ciphers:
+        description: Optional ciphers used when negotiating connection with the SCAP server.
+        type: str
+      scap_satellite_http_proxy_server:
+        description: Optional HTTP proxy server for downloading remote resources.
+        type: str
+      scap_satellite_http_proxy_port:
+        description: Optional HTTP proxy port for downloading remote resources.
+        type: str
+      scap_satellite_ca_file:
+        description: Client CA file, defaults to the subscription manager CA file.
+        type: path
+      scap_satellite_host_certificate:
+        description: Client host certificate, defaults to the consumer certificate.
+        type: path
+      scap_satellite_host_private_key:
+        description: Client private key, defaults to the consumer private key.
+        type: path

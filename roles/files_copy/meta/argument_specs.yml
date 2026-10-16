@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    short_description: Copy files and render templates
+    description: Copy files and directories and render templates, registers the copy_files and copy_templates variables.
+    options:
+      files_copy:
+        description: List of files and directories to copy, each entry takes ansible.builtin.copy module parameters, dest is mandatory.
+        type: list
+        elements: dict
+      files_copy_templates:
+        description: List of templates to render, each entry takes ansible.builtin.template module parameters, src and dest are mandatory.
+        type: list
+        elements: dict

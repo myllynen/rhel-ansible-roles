@@ -1,0 +1,9 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the system timezone
+    description: Set the system timezone with the community.general.timezone module.
+    options:
+      timezone:
+        description: System timezone to use.
+        type: str

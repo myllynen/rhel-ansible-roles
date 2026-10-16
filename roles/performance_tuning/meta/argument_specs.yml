@@ -1,0 +1,7 @@
+---
+argument_specs:
+  main:
+    short_description: Configure performance tuning
+    description: Install and enable tuned and activate the profile given in tuned_profile.
+    # tuned_profile is left undeclared, arg spec validation would
+    # template its default before the role has gathered the facts

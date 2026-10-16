@@ -1,0 +1,20 @@
+---
+argument_specs:
+  main:
+    short_description: Remove packages
+    description: Remove the listed packages with dnf, packages listed in packages_install are never removed.
+    options:
+      packages_remove:
+        description: List of packages to remove, globbing is supported.
+        type: list
+        elements: str
+      packages_remove_exclude:
+        description: List of dnf excludes.
+        type: list
+        elements: str
+      packages_remove_autoremove:
+        description: Remove all "leaf" packages no longer required, see dnf module autoremove parameter description.
+        type: bool
+      packages_remove_display_results:
+        description: Display results on output.
+        type: bool

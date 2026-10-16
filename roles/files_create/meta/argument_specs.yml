@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    short_description: Create directories, files, and symlinks
+    description: >-
+      Files will be created empty, permissions on targets will be updated. Registers the create_directories, create_files, and create_links
+      variables.
+    options:
+      files_create:
+        description: >-
+          List of directories, files, and symlinks to create, each entry takes ansible.builtin.file module parameters, state and path are
+          mandatory, src also for symlinks.
+        type: list
+        elements: dict

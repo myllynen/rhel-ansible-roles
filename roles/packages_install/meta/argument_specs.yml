@@ -1,0 +1,20 @@
+---
+argument_specs:
+  main:
+    short_description: Install packages
+    description: Install the listed packages with dnf.
+    options:
+      packages_install:
+        description: List of packages to install.
+        type: list
+        elements: str
+      packages_install_exclude:
+        description: List of dnf excludes.
+        type: list
+        elements: str
+      packages_install_weak_deps:
+        description: Enable or disable dnf module 'install_weak_deps' parameter.
+        type: bool
+      packages_install_display_results:
+        description: Display results on output.
+        type: bool

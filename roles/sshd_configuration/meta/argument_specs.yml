@@ -1,0 +1,32 @@
+---
+argument_specs:
+  main:
+    short_description: Configure sshd
+    description: >-
+      Enable and disable sshd configuration options, in case /etc/ssh/sshd_config.d is present the enabled options are exclusively
+      configured in 0-ansible.conf.
+    options:
+      sshd_options:
+        description: >-
+          Mapping of sshd_config(5) keywords to values to enable or update, a value may be a list and a Match block is given as a
+          "Match criteria" key. ListenAddress and Match are supported on RHEL 9 and newer only.
+        type: dict
+      sshd_options_disable:
+        description: These options will be commented out from all sshd configuration files found on the target.
+        type: list
+        elements: str
+      sshd_sysconfig_file:
+        description: Optional file to copy as /etc/sysconfig/sshd, supported on RHEL 9 and newer only.
+        type: str
+      sshd_configuration_config_reset:
+        description: >-
+          Reset RPM provided sshd configuration files to RHEL defaults, supported on RHEL 9 and newer only, may cause idempotency issues
+          with option disabling.
+        type: bool
+      sshd_configuration_exclusive:
+        description: Remove unrecognized sshd configuration files, on systems without sshd_config.d does nothing.
+        type: bool
+      sshd_configuration_files_known:
+        description: List of recognized sshd configuration files in addition to the role created 0-ansible.conf.
+        type: list
+        elements: path

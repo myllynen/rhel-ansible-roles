@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: Reboot the system
+    description: Reboot the system according to the configured policy.
+    options:
+      system_reboot_policy:
+        description: Reboot policy, never to never reboot, when_needed to reboot if dnf needs-restarting says so, always to always reboot.
+        type: str
+        choices: [never, when_needed, always]

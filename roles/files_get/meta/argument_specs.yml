@@ -1,0 +1,13 @@
+---
+argument_specs:
+  main:
+    short_description: Get files over network
+    description: Download files to managed hosts, registers the get_files variable.
+    options:
+      files_get:
+        description: List of files to get over network, each entry takes ansible.builtin.get_url module parameters, url and dest are mandatory.
+        type: list
+        elements: dict
+      files_get_no_log:
+        description: Value for no_log parameter when getting files and using passwords, unset otherwise.
+        type: bool

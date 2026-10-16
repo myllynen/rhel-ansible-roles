@@ -1,0 +1,16 @@
+---
+argument_specs:
+  main:
+    short_description: Configure mounts
+    description: Enable and disable mounts, installs nfs-utils and cifs-utils as needed.
+    options:
+      mount_setup_disable:
+        description: >-
+          List of mounts to disable, each entry takes ansible.posix.mount module parameters, path is mandatory, entries also listed in
+          mount_setup_enable are skipped.
+        type: list
+        elements: dict
+      mount_setup_enable:
+        description: List of mounts to enable, each entry takes ansible.posix.mount module parameters, path and state are mandatory.
+        type: list
+        elements: dict

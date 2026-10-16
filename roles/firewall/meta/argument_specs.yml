@@ -1,0 +1,23 @@
+---
+argument_specs:
+  main:
+    short_description: Provide very basic firewall setup
+    description: Enable or disable firewalld and open ports and services, use system_roles.firewall for more complete setups.
+    options:
+      firewall_enable:
+        description: Enable or disable firewall, set to null to leave untouched.
+        type: bool
+      firewall_default_zone:
+        description: Firewall default zone to set and configure.
+        type: str
+      firewall_open_ports:
+        description: List of ports to open, in port/protocol format.
+        type: list
+        elements: str
+      firewall_open_services:
+        description: List of services to open.
+        type: list
+        elements: str
+      firewall_close_unconfigured:
+        description: Close unconfigured ports and services, the ssh service will not be closed by this role regardless of configuration.
+        type: bool

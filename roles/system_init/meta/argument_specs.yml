@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Perform minor cleanups after system initial installation
+    description: Runs only once per system, see the tasks for details. Using this role is by no means mandatory or required.
+    options:
+      system_init_final_actions:
+        description: >-
+          Actions to take after initialization, 'reboot' to reboot the system, 'syslog' to write a message to system log.
+        type: list
+        elements: str
+        choices: [reboot, syslog]

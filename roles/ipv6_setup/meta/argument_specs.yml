@@ -1,0 +1,15 @@
+---
+argument_specs:
+  main:
+    short_description: Enable or disable IPv6
+    description: Configure IPv6 with sysctl settings, the boot parameter to disable IPv6 will be removed.
+    options:
+      ipv6_setup_enable:
+        description: Enable or disable IPv6 using sysctl settings.
+        type: bool
+      ipv6_setup_loopback_persist:
+        description: Keep IPv6 on for the loopback device, has effect only when disabling IPv6.
+        type: bool
+      ipv6_setup_configure_nm:
+        description: Configure NetworkManager/IPv6 with this role, set to false when using system_roles.network to configure NM.
+        type: bool

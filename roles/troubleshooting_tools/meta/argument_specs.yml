@@ -1,0 +1,13 @@
+---
+argument_specs:
+  main:
+    short_description: Install troubleshooting tools
+    description: Install a set of commonly used troubleshooting tools and optionally enable PCP performance metrics.
+    options:
+      troubleshooting_tools:
+        description: List of troubleshooting tool packages to install.
+        type: list
+        elements: str
+      troubleshooting_tools_enable_perf_metrics:
+        description: Enable PCP performance metrics as needed, has effect only when pcp-system-tools is included in troubleshooting_tools.
+        type: bool

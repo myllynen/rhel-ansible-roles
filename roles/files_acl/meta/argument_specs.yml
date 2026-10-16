@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: Configure file and directory ACLs
+    description: Apply ACLs to paths, registers the acl_files variable.
+    options:
+      files_acl:
+        description: List of ACLs etc to apply to paths, each entry takes ansible.posix.acl module parameters, path is mandatory.
+        type: list
+        elements: dict

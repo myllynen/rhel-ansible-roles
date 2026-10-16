@@ -1,0 +1,44 @@
+---
+argument_specs:
+  main:
+    short_description: Join or leave an Active Directory domain
+    description: Configure Kerberos and SSSD and join or leave an AD domain with adcli.
+    options:
+      domain_ad_action:
+        description: Join or leave the AD domain.
+        type: str
+        choices: [join, leave]
+      domain_ad_domain:
+        description: AD domain to join or leave, role does nothing if unset.
+        type: str
+      domain_ad_admin_username:
+        description: AD domain administrator username, should come from vault.
+        type: str
+      domain_ad_admin_password:
+        description: AD domain administrator password, should come from vault.
+        type: str
+      domain_ad_join_computer_create:
+        description: Create the AD computer object when joining, set to false if computer objects are created separately, without adcli.
+        type: bool
+      domain_ad_leave_computer_delete:
+        description: Delete the AD computer object when leaving, set to false if computer objects are deleted separately, without adcli.
+        type: bool
+      domain_ad_leave_sssd_cache_delete:
+        description: Remove cached users and secrets when leaving.
+        type: bool
+      domain_ad_allow_groups:
+        description: List of AD groups allowed to log in.
+        type: list
+        elements: str
+      domain_ad_auth_config_update:
+        description: Enable or disable running authconfig/authselect, if false then setup by this role is not complete.
+        type: bool
+      domain_ad_auth_select_parameters:
+        description: Extra parameters for the "authselect select" command.
+        type: str
+      domain_ad_krb5_config_file:
+        description: krb5.conf template file to use if not using the role provided default file.
+        type: str
+      domain_ad_sssd_config_file:
+        description: sssd.conf template file to use if not using the role provided default file.
+        type: str

@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: Verify packages
+    description: Check that the listed packages are installed and unmodified, registers the missing_packages and verified_packages variables.
+    options:
+      packages_verify_enable:
+        description: Enable or disable package verification.
+        type: bool
+      packages_verify:
+        description: List of packages to verify, set to empty to verify all packages.
+        type: list
+        elements: str
+      packages_verify_check_missing:
+        description: Check for missing packages.
+        type: bool
+      packages_verify_fail_missing:
+        description: Fail role on missing packages.
+        type: bool
+      packages_verify_check_content:
+        description: Check for changed packages.
+        type: bool
+      packages_verify_fail_content:
+        description: Fail role on changed packages.
+        type: bool

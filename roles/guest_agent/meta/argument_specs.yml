@@ -1,0 +1,15 @@
+---
+argument_specs:
+  main:
+    short_description: Manage virtual machine guest agents
+    description: >-
+      Detect the virtualization platform and install and enable the correct guest agent, removing others. Recognized platforms are Azure,
+      KVM/QEMU, Nutanix AHV, and VMware.
+    options:
+      guest_agent_enable:
+        description: >-
+          Install or remove server VM guest agents, false uninstalls all agents, only agents from RHEL repositories are considered.
+        type: bool
+      guest_agent_remove_firmware:
+        description: Remove unneeded firmware packages on VMs, VMs with device passthrough may need these.
+        type: bool

@@ -1,0 +1,19 @@
+---
+argument_specs:
+  main:
+    short_description: Configure IMA/EVM
+    description: Enable or disable kernel integrity subsystem IMA/EVM, applicable RHEL versions are RHEL 9.7 and newer.
+    options:
+      ima_evm_setup_enable:
+        description: Enable or disable IMA/EVM, set to null to leave the current setup untouched.
+        type: bool
+      ima_evm_setup_policy_config_file:
+        description: Path to the IMA policy configuration file to use, this must be a signed policy file on the target.
+        type: path
+      ima_evm_setup_verify_policy:
+        description: >-
+          Verify the new IMA policy on the target, this appends it to the current policy so the combined policy is in use until reboot.
+        type: bool
+      ima_evm_setup_reboot:
+        description: Reboot system after configuring IMA, reboot is required to complete disabling IMA.
+        type: bool

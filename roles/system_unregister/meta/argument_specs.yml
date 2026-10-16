@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: Unregister the system
+    description: Unconditionally unregister the system from Red Hat Insights and Red Hat Subscription Management, takes no parameters.

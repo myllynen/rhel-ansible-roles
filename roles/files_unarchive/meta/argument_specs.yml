@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: Unarchive files
+    description: Unpack archives on managed hosts, registers the unarchive_files variable.
+    options:
+      files_unarchive:
+        description: List of files to unarchive, each entry takes ansible.builtin.unarchive module parameters, src and dest are mandatory.
+        type: list
+        elements: dict

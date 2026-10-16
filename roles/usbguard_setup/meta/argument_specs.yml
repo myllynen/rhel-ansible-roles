@@ -1,0 +1,29 @@
+---
+argument_specs:
+  main:
+    short_description: Configure USBGuard
+    description: >-
+      Apply a USB device policy with USBGuard. To completely disable the USB subsystem use the usbcore.nousb boot parameter, also see
+      usbcore.authorized_default.
+    options:
+      usbguard_setup_policy:
+        description: >-
+          Policy to apply to USB devices, reject to block all devices, custom for custom configuration, allow to disable USBGuard.
+        type: str
+        choices: [reject, custom, allow]
+      usbguard_setup_config_file:
+        description: Custom USBGuard configuration file, used with the custom policy.
+        type: str
+      usbguard_setup_rules_file:
+        description: Custom USBGuard rules file template to use, used with the custom policy.
+        type: str
+      usbguard_setup_ipc_access_file:
+        description: Custom USBGuard IPC access control template to use.
+        type: str
+      usbguard_setup_exclusive:
+        description: Remove unrecognized rules and IPC access control files.
+        type: bool
+      usbguard_setup_files_known:
+        description: List of recognized rules and IPC files in addition to the role created ones.
+        type: list
+        elements: path

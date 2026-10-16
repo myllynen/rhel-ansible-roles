@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the system keyboard and console font
+    description: Set the console keymap and font in /etc/vconsole.conf.
+    options:
+      system_keyboard:
+        description: System keymap to use.
+        type: str
+      system_font:
+        description: System console font to use.
+        type: str

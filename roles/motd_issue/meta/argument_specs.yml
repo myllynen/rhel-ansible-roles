@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Configure motd and issue files
+    description: Render the given templates as /etc/motd and /etc/issue banners.
+    options:
+      motd_template:
+        description: motd template to use.
+        type: str
+      issue_template:
+        description: issue template to use.
+        type: str

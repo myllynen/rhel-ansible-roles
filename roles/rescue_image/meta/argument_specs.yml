@@ -1,0 +1,9 @@
+---
+argument_specs:
+  main:
+    short_description: Enable or disable rescue images
+    description: Install or remove dracut-config-rescue, rescue images will be created on next kernel install.
+    options:
+      rescue_image_enable:
+        description: Enable or disable rescue image.
+        type: bool

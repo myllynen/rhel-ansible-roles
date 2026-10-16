@@ -1,0 +1,14 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the system locale
+    description: Set LANG in /etc/locale.conf and install the needed langpacks.
+    options:
+      system_locale:
+        description: >-
+          System locale to use, C.UTF-8 requires RHEL 9 or newer, en_US.UTF-8 works on all versions, auto picks between the two.
+        type: str
+        choices: [C.UTF-8, en_US.UTF-8, auto]
+      system_locale_reboot:
+        description: Reboot system after changes.
+        type: bool

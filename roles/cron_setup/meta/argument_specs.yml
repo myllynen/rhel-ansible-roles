@@ -1,0 +1,70 @@
+---
+argument_specs:
+  main:
+    short_description: Configure cron entries and cron access
+    description: Install cronie, manage crontab entries, and manage the cron.allow and cron.deny files.
+    options:
+      cron_setup_entries:
+        description: List of crontab entries to update, uses the ansible.builtin.cron module.
+        type: list
+        elements: dict
+        options:
+          name:
+            description: Description of the crontab entry.
+            type: str
+            required: true
+          state:
+            description: Create or remove the crontab entry.
+            type: str
+            choices: [present, absent]
+          job:
+            description: Command to execute or, with env, the value of the environment variable.
+            type: str
+          env:
+            description: Manage an environment variable instead of a job.
+            type: bool
+          user:
+            description: User whose crontab is modified.
+            type: str
+          cron_file:
+            description: File in /etc/cron.d to use instead of an individual crontab.
+            type: str
+          minute:
+            description: Minute the job should run at.
+            type: str
+          hour:
+            description: Hour the job should run at.
+            type: str
+          day:
+            description: Day of the month the job should run at.
+            type: str
+          month:
+            description: Month of the year the job should run at.
+            type: str
+          weekday:
+            description: Day of the week the job should run at.
+            type: str
+          special_time:
+            description: Special time specification nickname.
+            type: str
+            choices: [annually, daily, hourly, monthly, reboot, weekly, yearly]
+          insertbefore:
+            description: Insert the environment variable before the given one.
+            type: str
+          insertafter:
+            description: Insert the environment variable after the given one.
+            type: str
+          disabled:
+            description: Create the crontab entry commented out.
+            type: bool
+          backup:
+            description: Backup the crontab before editing it.
+            type: bool
+      cron_setup_allow_file:
+        description: List of allowed crontab users in cron.allow, empty list denies crontab(1) from non-root users, null removes cron.allow.
+        type: list
+        elements: str
+      cron_setup_deny_file:
+        description: List of denied crontab users in cron.deny, null removes cron.deny.
+        type: list
+        elements: str

@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Remove files and directories
+    description: Remove files and directories, globbing is supported for the last path element. Registers the remove_files variable.
+    options:
+      files_remove:
+        description: List of files and directories to remove, directories will be removed recursively.
+        type: list
+        elements: str
+      files_remove_recursive:
+        description: Use recursive find for the given patterns, /etc/*.old will also remove /etc/x/y.old.
+        type: bool
+      files_remove_exclude:
+        description: List of items to exclude from removal, globbing is not supported.
+        type: list
+        elements: str

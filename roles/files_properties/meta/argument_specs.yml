@@ -1,0 +1,12 @@
+---
+argument_specs:
+  main:
+    short_description: Configure file and directory properties
+    description: Apply ownership, permissions, and other properties to paths, registers the properties_files variable.
+    options:
+      files_properties:
+        description: >-
+          List of properties to apply to paths, each entry takes ansible.builtin.file module parameters, path is mandatory, entries with
+          state absent are skipped.
+        type: list
+        elements: dict

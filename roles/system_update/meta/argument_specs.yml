@@ -1,0 +1,89 @@
+---
+argument_specs:
+  main:
+    short_description: Update all packages
+    description: Update all packages, reboot according to the configured policy, and optionally display and email a report of the updated packages.
+    options:
+      system_update_reboot_policy:
+        description: >-
+          Reboot policy after applying updates, never to never reboot, when_needed to reboot if dnf needs-restarting says so, when_updated
+          to reboot if updates were installed, always to always reboot.
+        type: str
+        choices: [never, when_needed, when_updated, always]
+      system_update_display_updates:
+        description: Display list of updated packages on output.
+        type: bool
+      system_update_email_report:
+        description: Send an email report of updated packages.
+        type: bool
+      system_update_email_parameters:
+        description: Parameters for the community.general.mail module.
+        type: dict
+        options:
+          subject:
+            description: Subject of the email.
+            type: str
+            required: true
+          sender:
+            description: Sender of the email.
+            type: str
+            required: true
+          to:
+            description: Recipients of the email.
+            type: list
+            elements: str
+            required: true
+          host:
+            description: Mail server to connect to.
+            type: str
+          port:
+            description: Mail server port to connect to.
+            type: int
+          secure:
+            description: Connection security mode.
+            type: str
+            choices: [always, never, starttls, try]
+          timeout:
+            description: Connection timeout in seconds.
+            type: int
+          ehlohost:
+            description: Hostname to use in the EHLO/HELO command.
+            type: str
+          username:
+            description: Username for the mail server.
+            type: str
+          password:
+            description: Password for the mail server, should come from vault.
+            type: str
+          charset:
+            description: Character set of the email.
+            type: str
+          headers:
+            description: List of additional headers of the email.
+            type: list
+            elements: str
+          subtype:
+            description: Minor MIME type of the email body.
+            type: str
+            choices: [html, plain]
+          cc:
+            description: Copy recipients of the email.
+            type: list
+            elements: str
+          bcc:
+            description: Blind copy recipients of the email.
+            type: list
+            elements: str
+      system_update_report_pdf:
+        description: >-
+          Attach PDF version of the report to the email, generated on the control host with the enscript and ghostscript packages which
+          must be installed separately.
+        type: bool
+      system_update_report_pdf_dir:
+        description: Local directory to use for generating PDF files.
+        type: path
+      system_update_report_pdf_preamble:
+        description: >-
+          Preamble text to include in all generated PDFs, :HOST:, :OSREL:, :DATE:, and :REBOOT: are replaced with inventory hostname, OS
+          release name, patching date/time, and whether the system was rebooted.
+        type: str

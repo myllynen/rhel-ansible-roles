@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure Splunk Universal Forwarder
+    description: Create the splunk user, install the forwarder package, and configure it against the given deployment server.
+    options:
+      splunk_deployment_server:
+        description: Splunk deployment server to use.
+        type: str
+      splunk_deployment_server_port:
+        description: Splunk deployment server port.
+        type: int
+      splunk_deployment_server_check:
+        description: Check deployment server connection and state before configuring.
+        type: bool
+      splunk_user_uid:
+        description: >-
+          Local 'splunk' user UID, a local user is created if no local/remote user exists, set to undefined/none to create system account.
+        type: int
+      splunk_user_password_hash:
+        description: Password hash for the local 'splunk' user, should come from vault.
+        type: str
+      splunk_phonehome_secs:
+        description: Splunk phone home interval in seconds.
+        type: int
+      splunk_forwarder_package_state:
+        description: State of the Splunk Forwarder package.
+        type: str
+        choices: [present, latest]
+      splunk_deployment_config_file:
+        description: Deployment configuration template to use if not using the role provided default.
+        type: str
+      splunk_user_config_file:
+        description: User configuration template to use if not using the role provided default.
+        type: str

@@ -1,0 +1,24 @@
+---
+argument_specs:
+  main:
+    short_description: Configure kernel boot parameters and boot loader
+    description: Enable and disable kernel boot parameters, set boot loader timeout and password.
+    options:
+      boot_parameters_enable:
+        description: List of kernel boot parameters to enable.
+        type: list
+        elements: str
+      boot_parameters_disable:
+        description: List of kernel boot parameters to disable.
+        type: list
+        elements: str
+      boot_parameters_timeout:
+        description: Boot loader timeout in seconds, values below one are ignored.
+        type: int
+      boot_parameters_password:
+        description: >-
+          Password protecting boot parameters, should be a PBKDF2 hash, if unset current configuration is not touched, empty removes it.
+        type: str
+      boot_parameters_reboot:
+        description: Reboot system after parameter changes.
+        type: bool

@@ -1,0 +1,9 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the system shell profile
+    description: Render the given template as /etc/profile.d/zz-ansible.sh.
+    options:
+      shell_profile_file:
+        description: Shell profile template to use.
+        type: str

@@ -1,0 +1,26 @@
+---
+argument_specs:
+  main:
+    short_description: Apply basic security hardening
+    description: Verify Secure Boot and FIPS mode, configure kernel lockdown, SELinux state, crypto policy, and SCP protocol.
+    options:
+      secure_boot_verify:
+        description: Verify Secure Boot, fails if UEFI Secure Boot is not enabled.
+        type: bool
+      fips_mode_verify:
+        description: Verify FIPS enabled, fails if FIPS mode is not enabled.
+        type: bool
+      kernel_lockdown:
+        description: Kernel lockdown mode, enabling lockdown will prevent using kdump. Supported RHEL versions are RHEL 9 and newer.
+        type: str
+        choices: [disabled, integrity, confidentiality]
+      selinux:
+        description: SELinux state.
+        type: str
+        choices: [enforcing, permissive, disabled]
+      crypto_policy:
+        description: System-wide crypto policy, FIPS mode must be enabled during installation.
+        type: str
+      scp_protocol_enable:
+        description: Enable or disable SCP protocol (not scp(1)).
+        type: bool

@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: Fetch files from managed hosts
+    description: Fetch files and directories to the control host, registers the fetch_files variable.
+    options:
+      files_fetch:
+        description: List of files and directories to fetch, each entry takes ansible.builtin.fetch module parameters, src and dest are mandatory.
+        type: list
+        elements: dict
