@@ -102,7 +102,8 @@
   ansible.builtin.reboot:
   when:
     - "'reboot' in system_init_final_actions"
-    - inventory_hostname != 'localhost'
+    - ansible_host != '127.0.0.1'
+    - ansible_host != 'localhost'
 
 # Use removes: to only run on registered systems
 - name: Update RHSM system facts
