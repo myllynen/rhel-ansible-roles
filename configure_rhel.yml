@@ -367,7 +367,9 @@
     etc_hosts_omit_entries: none
 
     #
-    # files_{acl,copy,create,fetch,get,remove,properties,unarchive} - omitted here for brevity
+    # files_{acl,copy,create,fetch,get,remove,properties,unarchive}
+    #
+    # Defaults omitted here for brevity, see the roles for details
     #
 
     #
@@ -500,10 +502,12 @@
     multipath_setup_reboot: true
 
     #
-    # packages_install - default list omitted here for brevity
+    # packages_install
     #
-    #packages_install:
-    #  -
+    packages_install: []
+    #  # - git-core
+    #  - nano
+    #  - zstd
 
     # List of dnf excludes
     #packages_install_exclude:
@@ -516,10 +520,10 @@
     packages_install_display_results: false
 
     #
-    # packages_remove - default list omitted here for brevity
+    # packages_remove
     #
-    #packages_remove:
-    #  -
+    packages_remove: []
+    #  - telnet-server
 
     # List of dnf excludes
     packages_remove_exclude:
@@ -1073,7 +1077,8 @@
     #
     # Install a set of commonly used troubleshooting tools
     #troubleshooting_tools:
-    #  -
+    #  - bind-utils
+    #  - ...
 
     # Enable PCP performance metrics as needed
     troubleshooting_tools_enable_perf_metrics: true
